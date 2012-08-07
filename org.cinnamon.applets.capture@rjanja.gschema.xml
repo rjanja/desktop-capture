@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="cinnamon">
+  <schema path="/org/cinnamon/applets/capture@rjanja/" id="org.cinnamon.applets.capture@rjanja">
+     <key type="as" name="keybinding">
+      <default><![CDATA[['<Super>Print']]]></default>
+      <summary>Keybinding</summary>
+      <description>A key binding to trigger the desktop capture applet</description>
+    </key>
+     <key type="b" name="include-cursor">
+      <default>true</default>
+      <summary>Whether to include mouse cursor in screenshot</summary>
+      <description></description>
+    </key>
+    <key type="b" name="open-after">
+      <default>true</default>
+      <summary>Whether to open the screenshot</summary>
+      <description></description>
+    </key>
+    <key type="i" name="delay-seconds">
+      <default>0</default>
+      <summary>How many seconds to wait before taking a screenshot</summary>
+      <description></description>
+    </key>
+    <key type="s" name="camera-program">
+      <default>'gnome-screenshot'</default>
+      <summary>Preferred screen capture program</summary>
+      <description></description>
+    </key>
+    <key type="s" name="recorder-program">
+      <default>''</default>
+      <summary>Preferred screen recorder program</summary>
+      <description></description>
+    </key>
+    <key type="i" name="framerate">
+      <default>7</default>
+      <summary>Framerate for screen recorder</summary>
+      <description>Increasing the number of frames per second (FPS) will require more processing power.</description>
+    </key>
+    <key type="s" name="recorder-save-dir">
+      <default>''</default>
+      <summary>Save location for screen recordings</summary>
+      <description>Desktop Capture applet will try to use this location for saving its recordings.</description>
+    </key>
+    <key type="s" name="camera-save-dir">
+      <default>''</default>
+      <summary>Save location for screen grabs</summary>
+      <description>When possible (allowed by apps) this location will be used for saving screen captures.</description>
+    </key>
+    <key type="s" name="camera-save-prefix">
+      <default>'screenshot-%TYPE-%Y-%M-%D-%H%I%S'</default>
+      <summary>Filename format for screen grabs</summary>
+      <description></description>
+    </key>
+    <key type="s" name="recorder-save-prefix">
+      <default>'screencast-%Y-%M-%D-%H%I%S'</default>
+      <summary>Filename format for screen recordings</summary>
+      <description></description>
+    </key>
+    <key type="b" name="capture-window-as-area">
+      <default>false</default>
+      <summary>Whether to use area selection for window captures</summary>
+      <description></description>
+    </key>
+    <key type="b" name="include-window-frame">
+      <default>true</default>
+      <summary>Whether to include the window frame and titlebar in window captures</summary>
+      <description></description>
+    </key>
+    <key type="b" name="include-styles">
+      <default>false</default>
+      <summary>Whether to include CSS selection styles in Cinnamon UI screenshots</summary>
+      <description></description>
+    </key>
+    <key type="b" name="use-camera-flash">
+      <default>true</default>
+      <summary>Whether to show a bright flash over the capture area</summary>
+      <description></description>
+    </key>
+    <key type="b" name="show-capture-timer">
+      <default>true</default>
+      <summary>Whether to show the timer on the screen</summary>
+      <description></description>
+    </key>
+    <key type="b" name="play-shutter-sound">
+      <default>true</default>
+      <summary>Whether to play the shutter sound as the capture is made</summary>
+      <description></description>
+    </key>
+    <key type="b" name="play-timer-interval-sound">
+      <default>true</default>
+      <summary>Whether to play the timer interval sound as the timer counts down</summary>
+      <description></description>
+    </key>
+    <key type="b" name="mod-activates-timer">
+      <default>false</default>
+      <summary>Whether to only activate timer when Shift key is held</summary>
+      <description></description>
+    </key>
+    <key type="b" name="copy-to-clipboard">
+      <default>false</default>
+      <summary>Whether to copy path/filename of screenshots to clipboard after capture</summary>
+      <description></description>
+    </key>
+    <key type="b" name="send-notification">
+      <default>true</default>
+      <summary>Whether to send a notification to desktop after capture</summary>
+      <description></description>
+    </key>
+    <key type="i" name="last-selected-page">
+      <default>0</default>
+      <summary>Last selected page (tab index) of settings application</summary>
+      <description></description>
+    </key>
+    <key type="i" name="last-selected-subpage">
+      <default>0</default>
+      <summary>Last selected sub-page (tab index) of settings application</summary>
+      <description></description>
+    </key>
+  </schema>
+</schemalist>
