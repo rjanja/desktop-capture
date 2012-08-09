@@ -17,6 +17,10 @@ My favorite capture software has always been Shutter, but when I found it wouldn
 
 ![Applet settings](https://raw.github.com/rjanja/desktop-capture/master/img/cinnamon-screenshot-settings.png?login=rjanja&token=d3758a887e24592e1fdc1163782facd0 "Applet settings")
 
+### Installation<a name="installing">&nbsp;</a>
+* Check out source with git, then run `./install-schema.sh`, move `capture@rjanja` folder into `~/.local/share/cinnamon/applets/`, restart Cinnamon and add applet normally
+* To use the built-in Cinnamon Screenshot, a patch must first be applied to Cinnamon: [linuxmint/Cinnamon#1016](https://github.com/linuxmint/Cinnamon/pull/1016)
+
 ### Still to come<a name="wishlist">&nbsp;</a>
 * Automatic upload to imgur
 * Improved area selection tool
