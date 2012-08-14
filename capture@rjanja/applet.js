@@ -386,6 +386,8 @@ MyApplet.prototype = {
          this._crFrameRate = null;
          this._crFileExtension = null;
          this._crPipeline = null;
+         this._redoMenuItem = null;
+         this.lastCapture = null;
 
          // Load up our settings
          this._settings = getSettings(KEY_SCREENSHOT_SCHEMA);
@@ -483,6 +485,11 @@ MyApplet.prototype = {
             this.menu.addAction(this.indent(_("Screen")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.SCREEN, e);
             }));
+            this._redoMenuItem = this.menu.addAction(this.indent(_("Redo last")), Lang.bind(this, this.redo_cinnamon_camera));
+            
+            if (this.lastCapture === null) {
+               this._redoMenuItem.actor.hide();
+            }
          }
          else {
 
@@ -656,13 +663,54 @@ MyApplet.prototype = {
       return (num < 10 ? '0' + num : num);
    },
 
+   redo_cinnamon_camera: function(event) {
+      if (this.lastCapture) {
+         this.lastCapture.options.filename = this.get_camera_filename(this.lastCapture.selectionType);
+
+         global.log("last capture type was " + this.lastCapture.selectionType);
+         let camera = new Screenshot.ScreenshotHelper(null, null, this.lastCapture.options);
+
+         switch (this.lastCapture.selectionType) {
+            case Screenshot.SelectionType.WINDOW:
+               camera.screenshotWindow(
+                  this.lastCapture.window,
+                  this.lastCapture.options);
+               break;
+            case Screenshot.SelectionType.AREA:
+               camera.screenshotArea(
+                  this.lastCapture.x,
+                  this.lastCapture.y,
+                  this.lastCapture.width,
+                  this.lastCapture.height,
+                  this.lastCapture.options);
+               break;
+            case Screenshot.SelectionType.CINNAMON:
+               camera.screenshotCinnamon(
+                  this.lastCapture.actor,
+                  this.lastCapture.stageX,
+                  this.lastCapture.stageY,
+                  this.lastCapture.options);
+               break;
+         }
+      }
+   },
+
+   cinnamon_camera_complete: function(screenshot) {
+      global.log("capture complete!");
+      this.lastCapture = screenshot;
+      if (this.lastCapture.selectionType != Screenshot.SelectionType.SCREEN) {
+         this._redoMenuItem.actor.show();
+      }
+      else {
+         this._redoMenuItem.actor.hide();
+      }
+   },
+
    run_cinnamon_camera: function(type, event) {
       let enableTimer = this._modActivatesTimer ? this.getModifier(Clutter.Shift_L) : this._delay > 0;
 
-      new Screenshot.ScreenshotHelper(type,
-         function(){
-            global.log('Callback done!');
-         }, { 
+      new Screenshot.ScreenshotHelper(type, Lang.bind(this, this.cinnamon_camera_complete),
+         { 
             includeCursor: this._includeCursor,
             useFlash: this._useCameraFlash,
             includeFrame: this._includeWindowFrame,
@@ -811,6 +859,8 @@ MyApplet.prototype = {
       else {
          global.log("Not supported: " + fnType);
       }
+
+      return "";
    },
 
    get_custom_camera_command: function (custom) {
@@ -935,9 +985,11 @@ MyApplet.prototype = {
       {
          global.log(e);
       }
+
+      return true;
    },
 
-   TryExec: function(cmd, success, failure) {
+   TryExec: function(cmd, onSuccess, onFailure) {
       let [success, pid, in_fd, out_fd, err_fd] = GLib.spawn_async_with_pipes(
          null,
          cmd,
@@ -946,7 +998,7 @@ MyApplet.prototype = {
          null);
 
       let out_reader = new Gio.DataInputStream({ base_stream: new Gio.UnixInputStream({fd: out_fd}) });
-      if (success  &&  pid != 0)
+      if (success && pid != 0)
       {
          // Wait for answer
          global.log("created process, pid=" + pid);
@@ -960,13 +1012,13 @@ MyApplet.prototype = {
                   global.log(size);
                   buf += line;
                }
-               success(buf);
+               typeof onSuccess == 'function' && onSuccess(buf);
             });
       }
       else
       {
          global.log("failed process creation");
-         typeof failure == 'function' && failure();
+         typeof onFailure == 'function' && onFailure();
       }
 
       return true;

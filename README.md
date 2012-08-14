@@ -22,9 +22,20 @@ My favorite capture software has always been Shutter, but when I found it wouldn
 * To use the built-in Cinnamon Screenshot, a patch must first be applied to Cinnamon: [linuxmint/Cinnamon#1016](https://github.com/linuxmint/Cinnamon/pull/1016)
 * To correct the position where the Cinnamon Recorder indicator is placed, a separate patch can be applied: [linuxmint/Cinnamon#1015](https://github.com/linuxmint/Cinnamon/pull/1015)
 
+### Selection modes - advanced usage<a name="usage">&nbsp;</a>
+* ##### Area
+    * Use directional keys (up, left, down, right) to move selection
+    * Hold shift while using directional keys to resize selection
+    * Press ENTER to complete capture
+
+* ##### Cinnamon UI
+    * Move your mouse cursor over an actor
+    * Use mousewheel scroll up/down to traverse hierarchy through reactive actors
+    * Hold shift while clicking to activate an actor
+    * Click (without holding shift) to complete capture
+
 ### Still to come<a name="wishlist">&nbsp;</a>
 * Automatic upload to imgur
-* Improved area selection tool
 * Instructions overlay
 * Pre- and post-capture dialogs (interactive mode)
 
@@ -40,6 +51,6 @@ For recorder/screencast programs, there is no similar list of "supported" featur
 ### Thanks
 * The Linux Mint development team and contributors for all of their efforts!
 * infektedpc, who developed the very first screenshot applet for Cinnamon (as a teenager!)
-* Ben Scholzen, author of Shell's Area Screenshot extension, from which area selection and timer have been integrated.
+* Ben Scholzen, author of Shell's Area Screenshot extension, from which area selection and timer have been integrated and improved upon.
 * The author(s) of Shell's capture backend.
 * GNOME for all their work adding some really great features we can all enjoy, despite some misguided attempts to remove features we still use.

@@ -101,6 +101,7 @@ ScreenshotHelper.prototype = {
       this._capturedEventId = null;
       this._selectionType = selectionType;
       this._callback = callback;
+      this._modifiers = {};
       this._timeout  = 0;
       this._params = {
          filename: '',
@@ -141,6 +142,17 @@ ScreenshotHelper.prototype = {
       }
    },
 
+   getModifier: function(symbol) {
+      //global.log('getModifier ' + symbol);
+      global.log(this._modifiers[symbol]);
+      return this._modifiers[symbol] || false;
+   },
+
+   setModifier: function(symbol, value) {
+      //global.log('setModifier ' + symbol + (value ? ' TRUE ' : ' false'));
+      this._modifiers[symbol] = value;
+   },
+
    captureTimer: function(options, onFinished, onInterval) {
       if (options.useTimer && options.timerDuration > 0) {
          this._setTimer(options.timerDuration);
@@ -157,7 +169,7 @@ ScreenshotHelper.prototype = {
 
             if (this._timeout > 0) {
                let timeoutText = '';
-               if (this._timeout == 1) {
+               if (this._timeout == 1 && Math.floor(Math.random()*101) == 100) {
                   timeoutText = '\u2764';
                }
                else {
@@ -266,14 +278,23 @@ ScreenshotHelper.prototype = {
       this._pointerTarget = null;
       this._borderPaintTarget = null;
       this._borderPaintId = null;
+      this._screenWidth = global.screen_width;
+      this._screenHeight = global.screen_height;
 
       this.container = new Cinnamon.GenericContainer({
          name: 'frame-container',
-         reactive: true,
+         reactive: false,
          visible: true,
          x: 0,
          y: 0
       });
+
+      /*this.container = new St.Group({
+         reactive: true,
+         style_class: 'area-selection-container',
+         x_align: St.Align.START,
+         y_align: St.Align.START
+      });*/
 
       Main.uiGroup.add_actor(this.container);
 
@@ -281,21 +302,28 @@ ScreenshotHelper.prototype = {
          return;
       }
 
+      this.initializeShadow();
+      //this.drawShadows(0, 0, 0, 0);
+
       let eventHandler = new St.BoxLayout({
          name: 'LookingGlassDialog',
          vertical: false,
          reactive: true
       });
 
-      this._eventHandler = eventHandler;
-      this.container.add_actor(eventHandler);
+      //this._eventHandler = eventHandler;
+      //this.container.add_actor(eventHandler);
       this._displayText = new St.Label();
-      eventHandler.add(this._displayText, { expand: true });
+      //eventHandler.add(this._displayText, { expand: true });
 
       this.captureTimer(this._params, Lang.bind(this, Lang.bind(this, function() {
          global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
          this._capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
       })));
+
+
+      
+      //this.shadowContainer.raise(this.container);
 
       //this._lightbox = new Lightbox.Lightbox(Main.uiGroup, { fadeTime: 0.5 });
       //this._lightbox.show();
@@ -341,7 +369,7 @@ ScreenshotHelper.prototype = {
          if (this.uiContainer) {
             this.clearActorOutline();
          }
-         global.t = this._target;
+         //global.t = this._target;
          this.showActorOutline(this._target, stageX, stageY);
 
          /*if (this._borderPaintTarget != null) {
@@ -359,19 +387,23 @@ ScreenshotHelper.prototype = {
    selectArea: function() {
       this._modal = true;
       this._mouseDown = false;
+      this._isMoving = false;
+      this._isResizing = false;
+      this._resizeActor = null;
       this._timeout = 0;
       this._xStart = -1;
       this._yStart = -1;
       this._xEnd = -1;
       this._yEnd = -1;
+      this._selectionMade = false;
+      this._screenWidth = global.screen_width;
+      this._screenHeight = global.screen_height;
 
-      this.container = new Cinnamon.GenericContainer({
-         name: 'frame-container',
-         style_class: 'area-selection',
-         visible: true,
+      this.container = new St.Group({
          reactive: true,
-         x: -10,
-         y: -10
+         style_class: 'area-selection-container',
+         x_align: St.Align.START,
+         y_align: St.Align.START
       });
 
       Main.uiGroup.add_actor(this.container);
@@ -380,10 +412,98 @@ ScreenshotHelper.prototype = {
          return;
       }
 
+      this.border1 = new St.Bin({ 
+         style_class: 'border-h',
+         x_fill: true,
+         y_fill: false,
+         y_align: St.Align.START
+      });
+      this.border2 = new St.Bin({ 
+         style_class: 'border-h',
+         x_fill: true,
+         y_fill: false,
+         y_align: St.Align.END
+      });
+      this.border3 = new St.Bin({ 
+         style_class: 'border-v',
+         x_fill: false,
+         y_fill: true,
+         x_align: St.Align.START,
+         y_align: St.Align.START
+      });
+      this.border4 = new St.Bin({ 
+         style_class: 'border-v',
+         x_fill: false,
+         y_fill: true,
+         x_align: St.Align.END,
+         y_align: St.Align.START
+      });
+
+      this.container.add_actor(this.border1, {expand: false, x_fill: false});
+      this.container.add_actor(this.border2, {expand: false, x_fill: false});
+      this.container.add_actor(this.border3, {expand: false, x_fill: false});
+      this.container.add_actor(this.border4, {expand: false, x_fill: false});
+
+      this.handle1 = new St.Bin({ style_class: 'handle', name: 'handleNw', reactive: true });
+      this.handle2 = new St.Bin({ style_class: 'handle', name: 'handleN', reactive: true });
+      this.handle3 = new St.Bin({ style_class: 'handle', name: 'handleNe', reactive: true });
+      this.handle4 = new St.Bin({ style_class: 'handle', name: 'handleW', reactive: true });
+      this.handle5 = new St.Bin({ style_class: 'handle', name: 'handleE', reactive: true });
+      this.handle6 = new St.Bin({ style_class: 'handle', name: 'handleSw', reactive: true });
+      this.handle7 = new St.Bin({ style_class: 'handle', name: 'handleS', reactive: true });
+      this.handle8 = new St.Bin({ style_class: 'handle', name: 'handleSe', reactive: true });
+
+      this.container.add_actor(this.handle1);
+      this.container.add_actor(this.handle2);
+      this.container.add_actor(this.handle3);
+      this.container.add_actor(this.handle4);
+      this.container.add_actor(this.handle5);
+      this.container.add_actor(this.handle6);
+      this.container.add_actor(this.handle7);
+      this.container.add_actor(this.handle8);
+
+      this.initializeShadow();
+      this.drawShadows(0, 0, 0, 0);
+
       global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
 
       this._capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
 
+   },
+
+   initializeShadow: function() {
+      this.shadowContainer = new St.Group({
+         reactive: false,
+         style_class: 'shadow-container'
+      });
+      
+      Main.uiGroup.add_actor(this.shadowContainer);
+
+      this.coverLeft = new St.Bin({
+         style_class: 'cover',
+         x_fill: true,
+         y_fill: true
+      });
+      this.coverRight = new St.Bin({
+         style_class: 'cover',
+         x_fill: true,
+         y_fill: true
+      });
+      this.coverTop = new St.Bin({
+         style_class: 'cover',
+         x_fill: true,
+         y_fill: true
+      });
+      this.coverBottom = new St.Bin({
+         style_class: 'cover',
+         x_fill: true,
+         y_fill: true
+      });
+      
+      this.shadowContainer.add_actor(this.coverLeft);
+      this.shadowContainer.add_actor(this.coverRight);
+      this.shadowContainer.add_actor(this.coverTop);
+      this.shadowContainer.add_actor(this.coverBottom);
    },
 
    selectWindow: function() {
@@ -462,15 +582,15 @@ ScreenshotHelper.prototype = {
    screenshotScreen: function(options) {
       global.log('screenshotScreen()');
 
-      let options = this.getParams(options);
-      let filename = this.getFilename(options);
+      let opts = this.getParams(options);
+      let filename = this.getFilename(opts);
 
       let screenshot = new Cinnamon.Screenshot();
-      screenshot.screenshot (options.includeCursor, filename,
+      screenshot.screenshot (opts.includeCursor, filename,
          Lang.bind(this, function() {
             this.runCallback({
                file: filename,
-               options: options
+               options: opts
             });
          }));
 
@@ -480,6 +600,12 @@ ScreenshotHelper.prototype = {
    screenshotCinnamon: function(actor, stageX, stageY, options) {
       global.log('screenshotCinnamon() [actor,stageX,stageY]');
 
+      if (actor.get_paint_visibility() === false) {
+         global.log('Actor is not visible. Cancelling screenshot to prevent empty output.');
+         this.reset();
+         return false;
+      }
+      
       // Reset after a short delay so we don't activate the actor we
       // have clicked.
       let timeoutId = Mainloop.timeout_add(200, Lang.bind(this, function() {
@@ -488,14 +614,14 @@ ScreenshotHelper.prototype = {
          return false;
       }));
 
-      let options = this.getParams(options);
-      let filename = this.getFilename(options);
+      let opts = this.getParams(options);
+      let filename = this.getFilename(opts);
 
       // If we don't use a short timer here, we end up capturing any
       // CSS styles we're applying to the selection. So use a short timer,
       // and make it into an option.
       let captureTimer = 200;
-      if (options.includeStyles)
+      if (opts.includeStyles)
          captureTimer = 0;
 
       let captureTimeoutId = Mainloop.timeout_add(captureTimer, Lang.bind(this, function() {
@@ -506,7 +632,7 @@ ScreenshotHelper.prototype = {
 
          // Call capture back-end.
          let screenshot = new Cinnamon.Screenshot();
-         screenshot.screenshot_area (options.includeCursor, x, y, width, height, filename,
+         screenshot.screenshot_area (opts.includeCursor, x, y, width, height, filename,
             Lang.bind(this, function() {
                this.runCallback({
                   stageX: stageX,
@@ -517,7 +643,7 @@ ScreenshotHelper.prototype = {
                   width: width,
                   height: height,
                   file: filename,
-                  options: options
+                  options: opts
                });
             }));
       }));
@@ -529,13 +655,13 @@ ScreenshotHelper.prototype = {
       global.log('screenshotArea(' + x + ', ' + y + ', ' + width + ', ' + height + ') [x,y,w,h]');
       this.reset();
 
-      let options = this.getParams(options);
-      let filename = this.getFilename(options);
+      let opts = this.getParams(options);
+      let filename = this.getFilename(opts);
 
       // Call capture back-end.
       let screenshot = new Cinnamon.Screenshot();
-      this.captureTimer(options, Lang.bind(this, function() {
-         screenshot.screenshot_area (options.includeCursor, x, y, width, height, filename,
+      this.captureTimer(opts, Lang.bind(this, function() {
+         screenshot.screenshot_area (opts.includeCursor, x, y, width, height, filename,
             Lang.bind(this, function() {
                this.runCallback({
                   x: x,
@@ -543,7 +669,7 @@ ScreenshotHelper.prototype = {
                   width: width,
                   height: height,
                   file: filename,
-                  options: options
+                  options: opts
                });
             }));
       }));
@@ -578,26 +704,26 @@ ScreenshotHelper.prototype = {
       global.log('screenshotWindow(..) [frame, cursor, flash, filename]');
       this.reset();
 
-      let options = this.getParams(options);
-      let filename = this.getFilename(options);
+      let opts = this.getParams(options);
+      let filename = this.getFilename(opts);
 
       let screenshot = new Cinnamon.Screenshot();
 
-      this.captureTimer(options, Lang.bind(this, function() {
-         if (options.windowAsArea) {
-            screenshot.screenshot_area (options.includeCursor, x, y, width, height, filename,
+      this.captureTimer(opts, Lang.bind(this, function() {
+         if (opts.windowAsArea) {
+            screenshot.screenshot_area (opts.includeCursor, x, y, width, height, filename,
                Lang.bind(this, function() {
                   this.runCallback({
                      window: window, x: x, y: y, width: width, height: height,
-                     file: filename, options: options });
+                     file: filename, options: opts });
                }));
          }
          else {
-            screenshot.screenshot_window (options.includeFrame, options.includeCursor, filename,
+            screenshot.screenshot_window (opts.includeFrame, opts.includeCursor, filename,
                Lang.bind(this, function() {
                   this.runCallback({
                      window: window, x: x, y: y, width: width, height: height,
-                     file: filename, options: options });
+                     file: filename, options: opts });
                }));
          }
       }), Lang.bind(this, function() {
@@ -609,8 +735,9 @@ ScreenshotHelper.prototype = {
    },
 
    runCallback: function(screenshot) {
+      screenshot.selectionType = this._selectionType;
+
       let fileCapture = Gio.file_new_for_path(screenshot.file);
-      global.f = fileCapture;
       screenshot.outputFilename = fileCapture.get_basename();
       screenshot.outputDirectory = fileCapture.get_parent().get_path();
 
@@ -660,7 +787,7 @@ ScreenshotHelper.prototype = {
                Util.spawn(['gvfs-open', screenshot.outputDirectory]);
             }
 
-            global.log("clicked on notification!");
+            //global.log("clicked on notification!");
       }));
 
       source.notify(notification);
@@ -668,7 +795,7 @@ ScreenshotHelper.prototype = {
    },
 
    abort: function() {
-      global.log('abort()');
+      //global.log('abort()');
       this.reset();
 
       return true;
@@ -690,8 +817,15 @@ ScreenshotHelper.prototype = {
             this._borderPaintTarget.disconnect(this._borderPaintId);
          }
 
-         this._eventHandler.destroy();
+         if (this._eventHandler) {
+            this._eventHandler.destroy();
+         }
          this._eventHandler = null;
+      }
+      
+      if (this.shadowContainer) {
+         Main.uiGroup.remove_actor(this.shadowContainer);
+         this.shadowContainer.destroy();
       }
 
       if (this._timer) {
@@ -713,8 +847,10 @@ ScreenshotHelper.prototype = {
 
       this._modal = false;
 
-      Main.uiGroup.remove_actor(this.container);
-      this.container.destroy();
+      if (this.container) {
+         Main.uiGroup.remove_actor(this.container);
+         this.container.destroy();
+      }
 
       if (this._capturedEventId) {
          global.stage.disconnect(this._capturedEventId);
@@ -722,13 +858,161 @@ ScreenshotHelper.prototype = {
       }
    },
 
+   drawBorders: function(width, height) {
+      this.border1.set_clip(0, 0, width, 1);
+      this.border2.set_clip(0, 0, width, 1);
+      this.border3.set_clip(0, 0, 1, height);
+      this.border4.set_clip(0, 0, 1, height);
+
+      this.border1.set_position(0, 0);
+      this.border1.set_size(width, 1);
+
+      this.border2.set_position(0, height-1);
+      this.border2.set_size(width, 1);
+
+      this.border3.set_position(0, 0);
+      this.border3.set_size(1, height);
+
+      this.border4.set_position(width-1, 0);
+      this.border4.set_size(1, height);
+
+      let handleSize = 10;
+
+      this.handle1.set_position(0, 0);
+      this.handle1.set_size(handleSize, handleSize);
+      this.handle2.set_position(width/2-(handleSize/2), 0);
+      this.handle2.set_size(handleSize, handleSize);
+      this.handle3.set_position(width - handleSize, 0);
+      this.handle3.set_size(handleSize, handleSize);
+      this.handle4.set_position(0, height/2-(handleSize/2));
+      this.handle4.set_size(handleSize, handleSize);
+      this.handle5.set_position(width - handleSize, height/2-(handleSize/2));
+      this.handle5.set_size(handleSize, handleSize);
+      this.handle6.set_position(0, height - handleSize);
+      this.handle6.set_size(handleSize, handleSize);
+      this.handle7.set_position(width/2-(handleSize/2), height - handleSize);
+      this.handle7.set_size(handleSize, handleSize);
+      this.handle8.set_position(width - handleSize, height - handleSize);
+      this.handle8.set_size(handleSize, handleSize);
+   },
+
+   drawShadows: function(x, y, width, height) {
+      this.coverLeft.set_position(0, 0);
+      this.coverLeft.set_size(x, this._screenHeight);
+
+      this.coverRight.set_position(x+width, 0);
+      this.coverRight.set_size(this._screenWidth - (x+width), this._screenHeight);
+
+      this.coverTop.set_position(x, 0);
+      this.coverTop.set_size(width, y);
+
+      this.coverBottom.set_position(x, y+height);
+      this.coverBottom.set_size(width, (this._screenHeight - (y+height)));
+   },
+
+   redrawAreaSelection: function(x, y) {
+      let width = Math.abs(this._xEnd - this._xStart);
+      let height = Math.abs(this._yEnd - this._yStart);
+
+      // Constrain selection area to screen dimensions
+      if (x+width > this._screenWidth) x = this._screenWidth - width;
+      if (y+height > this._screenHeight) y = this._screenHeight - height;
+
+      this.container.set_position(x, y);
+      this.container.set_size(width, height);
+
+      this.drawBorders(width, height);
+      this.drawShadows(x, y, width, height);
+   },
+
    _onCapturedEvent: function(actor, event) {
       let type = event.type();
 
       if (type == Clutter.EventType.KEY_PRESS) {
-         if (event.get_key_symbol() == Clutter.Escape) {
-            global.log("ABORT!!");
+         let sym = event.get_key_symbol();
+         if (sym == Clutter.Escape) {
+            global.log("Aborting screenshot.");
             this.abort();
+            return true;
+         }
+         else if (sym == Clutter.Shift_L) {
+            this.setModifier(sym, true);
+            return true;
+         }
+         else if (this._selectionType == SelectionType.AREA) {
+            if (this._selectionMade && (sym == Clutter.KEY_Return || sym == Clutter.KEY_KP_Enter)) {
+               let [x,y] = this.container.get_position();
+               let [w,h] = this.container.get_size();
+               global.log("Selection area is "+x+","+y+" - " + w + " x " + h);
+               this.screenshotArea(x, y, w, h);
+               return true;
+            }
+            else if (this._selectionMade) {
+               let isMovementKey = (sym == Clutter.KEY_Up 
+                   || sym == Clutter.KEY_Down || sym == Clutter.KEY_Left 
+                   || sym == Clutter.KEY_Right);
+
+               if (isMovementKey) {
+                  if (this.getModifier(Clutter.Shift_L)) {
+                     // Resize selection
+                     switch (sym) {
+                        case Clutter.KEY_Up:
+                           this._yEnd -= 1;
+                           break;
+                        case Clutter.KEY_Down:
+                           this._yEnd += 1;
+                           break;
+                        case Clutter.KEY_Left:
+                           this._xEnd -= 1;
+                           break;
+                        case Clutter.KEY_Right:
+                           this._xEnd += 1;
+                           break;
+                     }
+                  }
+                  else {
+                     // Move selection
+                     switch (sym) {
+                        case Clutter.KEY_Up:
+                           if (this._yStart > 1) {
+                              this._yStart -= 1;
+                              this._yEnd -= 1;
+                           }
+                           break;
+                        case Clutter.KEY_Down:
+                           if (this._yEnd < this._screenHeight) {
+                              this._yStart += 1;
+                              this._yEnd += 1;
+                           }
+                           break;
+                        case Clutter.KEY_Left:
+                           if (this._xStart > 1) {
+                              this._xStart -= 1;
+                              this._xEnd -= 1;
+                           }
+                           break;
+                        case Clutter.KEY_Right:
+                           if (this._xEnd < this._screenWidth) {
+                              this._xStart += 1;
+                              this._xEnd += 1;
+                           }
+                           break;
+                     }
+                  }
+
+                  let x = Math.min(this._xEnd, this._xStart);
+                  let y = Math.min(this._yEnd, this._yStart);
+                  this.redrawAreaSelection(x, y);
+                  return true;
+               }
+            }
+         }
+      }
+      else if (type == Clutter.EventType.KEY_RELEASE) {
+         let sym = event.get_key_symbol();
+         if (sym == Clutter.Shift_L)
+         {
+            this.setModifier(sym, false);
          }
       }
       else if (type == Clutter.EventType.BUTTON_PRESS) {
@@ -738,19 +1022,60 @@ ScreenshotHelper.prototype = {
 
          let [xMouse, yMouse, mask] = global.get_pointer();
 
-         this._mouseDown = true;
-         this._xStart = xMouse;
-         this._yStart = yMouse;
-         this._xEnd = xMouse;
-         this._yEnd = yMouse;
+         if (event.get_source() == this.container) {
+            //global.log("Clicked on container");
+            this._isMoving = true;
+            this._mouseDown = true;
+            this._xMouse = xMouse;
+            this._yMouse = yMouse;
+         }
+         else if (event.get_source().style_class == 'handle') {
+            this._isResizing = true;
+            this._mouseDown = true;
+            this._resizeActor = event.get_source();
+            //global.log('Resizing using handle ' + this._resizeActor.name);
+            return true;
+         }
+         else {
+            this._isMoving = false;
+            this._mouseDown = true;
+            this._xStart = xMouse;
+            this._yStart = yMouse;
+            this._xEnd = xMouse;
+            this._yEnd = yMouse;
+         }
+
+         if (this._selectionMade) {
+            //global.log("Selection made");
+            return true;
+         }
 
          if (this._selectionType == SelectionType.AREA) {
             this.container.set_position(this._xStart, this._yStart);
+            this.container.set_size(1, 1);
          }
          else if (this._selectionType == SelectionType.CINNAMON) {
-            if (this._target) {
+            if (this.getModifier(Clutter.Shift_L))
+            {
+               if (this._capturedEventId) {
+                  global.stage.disconnect(this._capturedEventId);
+                  this._capturedEventId = null;
+                  global.unset_cursor();
+
+                  let timeoutId = Mainloop.timeout_add(100, Lang.bind(this, function() {
+                     global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
+                     this._capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
+                     return false;
+                  }));
+               }
+
+               return false;
+            }
+            else if (this._target) {
                let [stageX, stageY] = event.get_coords();
                this.screenshotCinnamon(this._target, stageX, stageY);
+               //this.reset();
+               return true;
             }
             return true;
          }
@@ -830,16 +1155,62 @@ ScreenshotHelper.prototype = {
             let [xMouse, yMouse, mask] = global.get_pointer();
 
             if (xMouse != this._xStart || yMouse != this._yStart) {
-              this._xEnd = xMouse;
-              this._yEnd = yMouse;
+               let x, y;
+               if (this._isMoving) {
+                  //global.log("Moving..");
+                  x = Math.min(this._xStart, this._xEnd) - (this._xMouse - xMouse);
+                  y = Math.min(this._yStart, this._yEnd) - (this._yMouse - yMouse);
 
-              let x = Math.min(this._xEnd, this._xStart);
-              let y = Math.min(this._yEnd, this._yStart);
-              let width = Math.abs(this._xEnd - this._xStart);
-              let height = Math.abs(this._yEnd - this._yStart);
+                  // Constrain selection area to screen dimensions
+                  if (x < 0) x = 0;
+                  if (y < 0) y = 0;
+               }
+               else if (this._isResizing) {
+                  //global.log("Resizing..");
+                  let dragName = this._resizeActor.name;
+                  if (dragName == 'handleN') {
+                     global.log("north handle");
+                     this._yStart = yMouse;
+                  }
+                  else if (dragName == 'handleS') {
+                     this._yEnd = yMouse;
+                  }
+                  else if (dragName == 'handleW') {
+                     this._xStart = xMouse;
+                  }
+                  else if (dragName == 'handleE') {
+                     this._xEnd = xMouse;
+                  }
+                  else if (dragName == 'handleNw') {
+                     this._xStart = xMouse;
+                     this._yStart = yMouse;
+                  }
+                  else if (dragName == 'handleNe') {
+                     this._xEnd = xMouse;
+                     this._yStart = yMouse;
+                  }
+                  else if (dragName == 'handleSw') {
+                     this._xStart = xMouse;
+                     this._yEnd = yMouse;
+                  }
+                  else if (dragName == 'handleSe') {
+                     this._xEnd = xMouse;
+                     this._yEnd = yMouse;
+                  }
 
-              this.container.set_position(x, y);
-              this.container.set_size(width, height);
+                  x = Math.min(this._xEnd, this._xStart);
+                  y = Math.min(this._yEnd, this._yStart);
+
+               }
+               else {
+                  //global.log("Sizing..");
+                  this._xEnd = xMouse;
+                  this._yEnd = yMouse;
+                  x = Math.min(this._xEnd, this._xStart);
+                  y = Math.min(this._yEnd, this._yStart);
+               }
+               
+               this.redrawAreaSelection(x, y);
             }
          } else if (type == Clutter.EventType.BUTTON_RELEASE) {
             if (event.get_button() != 1) {
@@ -856,8 +1227,27 @@ ScreenshotHelper.prototype = {
                let width = Math.abs(this._xEnd - this._xStart);
                let height = Math.abs(this._yEnd - this._yStart);
 
+               if (this._isMoving) {
+                  this._isMoving = false;
+                  this._yMouse = 0;
+                  this._xMouse = 0;
+                  //global.log("Release xStart= " + this._xStart + ", yStart= " + this._yStart);
+               }
+               else if (this._isResizing) {
+                  this._isResizing = false;
+                  this._resizeActor = null;
+               }
+
+               [this._xStart, this._yStart] = this.container.get_position();
+               [this._xEnd, this._yEnd] = [this._xStart + width, this._yStart + height];
+               
+               this._mouseDown = false;
+               
+               //global.log("Area is drawn.");
+               this._selectionMade = true;
+
                //if (this._xEnd == -1 || this._yEnd == -1 || (width < 5 && height < 5)) {
-                  this.screenshotArea(x, y, width, height);
+                  //this.screenshotArea(x, y, width, height);
                //}
                return true;
             }
@@ -918,6 +1308,7 @@ ScreenshotHelper.prototype = {
 
       this.uiContainer = new St.Group({
          reactive: false,
+         //visible: false,
          x: x,
          y: y,
          width: width,
@@ -926,6 +1317,8 @@ ScreenshotHelper.prototype = {
       });
 
       Main.uiGroup.add_actor(this.uiContainer);
+
+      this.drawShadows(x, y, width, height);
    },
 
    clearWindowOutline: function() {

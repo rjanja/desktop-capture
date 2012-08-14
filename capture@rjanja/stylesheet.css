@@ -65,6 +65,16 @@
     border-radius: 40px;
 }
 
+.border-h {
+   border-image: url("h.png") 0 2560 0 0;
+}
+.border-v {
+   border-image: url("v.png") 0 0 2560 0;
+}
+.cover {
+   background-color: rgba(0, 0, 0, 0.5);
+}
+
 /*.delay-chooser {
     spacing: .4em;
     color: inherit;
