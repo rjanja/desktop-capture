@@ -22,6 +22,23 @@ const Lang = imports.lang;
 const St = imports.gi.St;
 const Gio = imports.gi.Gio;
 
+// Modal
+const ModalDialog = imports.ui.modalDialog;
+const Pango = imports.gi.Pango;
+const _DIALOG_ICON_SIZE = 32;
+const PopupMenu = imports.ui.popupMenu;
+const CheckBox = imports.ui.checkBox;
+const RadioButton = imports.ui.radioButton;
+let _captureDialog = null;
+let _previewDialog = null;
+let _imgurDialog = null;
+
+// Uploading
+const Soup = imports.gi.Soup
+const IMGUR_CRED = "85a61980ca1cc59f329ee172245ace84";
+let session = new Soup.SessionAsync();
+Soup.Session.prototype.add_feature.call(session, new Soup.ProxyResolverDefault());
+
 const MessageTray = imports.ui.messageTray;
 
 const SelectionType = {
@@ -30,7 +47,8 @@ const SelectionType = {
    DESKTOP: 2,         /* @todo */
    WINDOW: 3,
    AREA: 4,
-   CINNAMON: 5
+   CINNAMON: 5,
+   INTERACTIVE: 6
 }
 
 const SOUND_ID = 0;
@@ -41,7 +59,528 @@ const SelectionTypeStr = {
    2: "desktop",
    3: "window",
    4: "area",
-   5: "cinnamon"
+   5: "cinnamon",
+   6: "interactive"
+}
+
+
+function ImgurDialog(upload) {
+   if (_imgurDialog == null) {
+      this._init(upload);
+      _imgurDialog = null;
+   }
+   else {
+      _imgurDialog._upload = upload;
+   }
+
+   return _imgurDialog;
+}
+
+ImgurDialog.prototype = {
+   __proto__: ModalDialog.ModalDialog.prototype,
+
+   _init: function(upload) {
+      this._selectedText = "";
+      this._upload = upload;
+
+      ModalDialog.ModalDialog.prototype._init.call(this, { styleClass: 'imgur-dialog' });
+      this.connect('destroy',
+                  Lang.bind(this, this._onDestroy));
+      this.connect('opened',
+                  Lang.bind(this, this._onOpened));
+
+      this.contentLayout.destroy_all_children();
+
+      this.setButtons(
+         [
+          { label:  _("Cancel"),
+            action: Lang.bind(this, this._onCloseButtonPressed)
+          },
+          { label:  _("Open in browser"),
+            action: Lang.bind(this, this.openInBrowser)
+          },
+          { label:  _("Copy to clipboard"),
+            action: Lang.bind(this, this.copyToClipboard)
+          }
+         ]);
+
+      let message = _("Imgur Upload Successful!");
+      this._descriptionLabel = new St.Label({ text: message, style_class: 'imgur-dialog-title' });
+      
+      this.contentLayout.add(this._descriptionLabel,
+                            { y_fill:  true,
+                              y_align: St.Align.START });
+
+      let instructions = _("Select a link to copy to clipboard or open in browser.");
+      this._subLabel = new St.Label({ text: instructions, style_class: 'imgur-dialog-instructions' });
+      this.contentLayout.add(this._subLabel, { y_fill: true, y_align: St.Align.START });
+
+      this.radioGroup = new RadioButton.RadioButtonGroup("imgurLink");
+      this.radioGroup.addButton('original', _("Original image") + " " + upload.links.original);
+      this.radioGroup.addButton('imgur_page', _("Imgur page") + " " + upload.links.imgur_page);
+      this.radioGroup.addButton('delete_page', _("Delete page") + " " + upload.links.delete_page);
+      this.radioGroup.addButton('small_square', _("Small square") + " " + upload.links.small_square);
+      this.radioGroup.setActive('large_thumbnail', _("Large thumbnail") + " " + upload.links.large_thumbnail);
+      this.radioGroup.connect("notify::radio-changed", Lang.bind(this, function() {
+         this._selectedLink = this.radioGroup.getActive();
+         this._selectedText = this._upload.links[this._selectedLink];
+      }));
+      this.radioGroup.setActive('original');
+      this.contentLayout.add(this.radioGroup.actor);
+   },
+
+   copyToClipboard: function(button, event) {
+      if (this._selectedText != "") {
+         St.Clipboard.get_default().set_text(this._selectedText);
+         global.cancel_theme_sound(SOUND_ID);
+         global.play_theme_sound(SOUND_ID, 'bell');
+         this.close();
+      }
+      return true;
+   },
+
+   openInBrowser: function(button, event) {
+      if (this._selectedText != "") {
+         this.close();
+         Main.Util.spawnCommandLine('xdg-open ' + this._selectedText);
+      }
+      return true;
+   },
+
+   addButton: function(label, action) {
+      let button = new St.Button({ style_class: 'modal-dialog-button',
+                        reactive:    true,
+                        can_focus:   true,
+                        label:       label });
+      this.copyLayout.add(button, {
+          expand: true,
+          x_fill: false,
+          y_fill: false,
+          x_align: St.Align.MIDDLE,
+          y_align: St.Align.MIDDLE
+      });
+      button.connect('clicked', action);
+
+      return button;
+   },
+
+   _onCloseButtonPressed: function(button, event) {
+      this.close(global.get_current_time());
+   },
+
+   _onOpened: function() {
+
+   },
+
+   _onDestroy: function() {
+      
+   },
+
+   close: function() {
+      ModalDialog.ModalDialog.prototype.close.call(this);
+   },
+
+   cancel: function() {
+      this.close(global.get_current_time());
+   }
+}
+
+function PreviewDialog(helper, screenshot) {
+   if (_previewDialog == null) {
+       this._init(helper, screenshot);
+       _previewDialog = this;
+   }
+
+   return _previewDialog;
+}
+
+PreviewDialog.prototype = {
+   __proto__: ModalDialog.ModalDialog.prototype,
+
+   _init: function(helper, screenshot) {
+      this._selectionType = null;
+      this.helper = helper;
+      this._useTimer = null;
+      this._timerDuration = null;
+      this._includeFrame = null;
+      this._includeCursor = null;
+      
+      ModalDialog.ModalDialog.prototype._init.call(this, { styleClass: 'capture-dialog' });
+
+      this.connect('destroy',
+                  Lang.bind(this, this._onDestroy));
+      this.connect('opened',
+                  Lang.bind(this, this._onOpened));
+   },
+
+   showPreview: function(screenshot) {
+      this.contentLayout.destroy_all_children();
+      this._screenshot = screenshot;
+
+      global.log("Preview init!");
+
+      let captureType = screenshot.selectionTypeVerbose.charAt(0).toUpperCase()
+        + screenshot.selectionTypeVerbose.slice(1);
+
+      let message = captureType + " " + _("Capture");
+      this._descriptionLabel = new St.Label({ text: message, style_class: 'capture-dialog-title' });
+      
+      this.contentLayout.add(this._descriptionLabel,
+                            { y_fill:  true,
+                              y_align: St.Align.START });
+
+      let titleContentLayout = new St.BoxLayout({ style_class: 'tmp', vertical: false });
+      this.contentLayout.add(titleContentLayout,
+                            { style_class: 'tmp', x_fill: true,
+                              y_fill: false });
+
+      this.setInitialKeyFocus(titleContentLayout);
+
+      this.setButtons(
+         [
+          { label:  _("Redo"),
+            action: Lang.bind(this, this._onRedoButtonPressed)
+          },
+          { label: _("Upload.."),
+            action: Lang.bind(this, this._onUploadButtonPressed)
+          },
+          { label: _("Copy to clipboard"),
+            action: Lang.bind(this, this._onCopyButtonPressed)
+          },
+          { label: _("Open directory"),
+            action: Lang.bind(this, this._onOpenDirectoryButtonPressed)
+          },
+          { label: _("Open file"),
+            action: Lang.bind(this, this._onOpenFileButtonPressed)
+          },
+          { label: _("Close"),
+            action: Lang.bind(this, this._onCloseButtonPressed),
+            key:    Clutter.Escape
+          }
+         ]);
+
+      let image = St.TextureCache.get_default().load_uri_async(
+         GLib.filename_to_uri(screenshot.file, null),
+         600, 240);
+
+      this._previewBin = new St.Bin({ style_class: 'image-preview' });
+      this._previewBin.child = image;
+      this._previewBin.show();
+
+      this.previewLayout = new St.BoxLayout();
+      this.contentLayout.add(this.previewLayout, {
+         x_align: St.Align.START,
+         y_align: St.Align.START
+      });
+
+      this.previewLayout.add(this._previewBin, { 
+         x_align: St.Align.START,
+         y_align: St.Align.START,
+         x_fill: false,
+         y_fill: false });
+
+      this._filenameLabel = new St.Label({ text: screenshot.outputFilename, style_class: 'image-filename' });
+      this.contentLayout.add(this._filenameLabel,
+                            { y_fill:  true,
+                              y_align: St.Align.START });
+
+      if (screenshot['width'] != undefined) {
+         this._dimensionsLabel = new St.Label({ text: "" + screenshot.width + " \u00D7 " + screenshot.height, 
+             style_class: 'image-dimensions' });
+         this.contentLayout.add(this._dimensionsLabel,
+                               { y_fill:  true,
+                                 y_align: St.Align.START });
+      }
+
+      this.previewDetailsLayout = new St.BoxLayout({ vertical: true });
+      this.previewLayout.add(this.previewDetailsLayout, {
+         x_align: St.Align.START,
+         y_align: St.Align.START });
+
+      this.open();
+   },
+
+   _onRedoButtonPressed: function(button, event) {
+      this.helper.setOptions(this._screenshot.options);
+      let timeoutId = Mainloop.timeout_add(300, Lang.bind(this, function() {
+         Mainloop.source_remove(timeoutId);
+         this.helper.runCaptureMode(this._screenshot.selectionType);
+         return false;
+      }));
+      
+      this._onCloseButtonPressed(button, event);
+   },
+
+   _onUploadButtonPressed: function(button, event) {
+      this.helper.uploadToImgur(this._screenshot.file, Lang.bind(this, function(result, json) {
+         if (result) {
+            let dialog = new ImgurDialog(json.upload);
+            dialog.open(global.get_current_time());
+         }
+      }));
+   },
+
+   _onOpenFileButtonPressed: function(button, event) {
+      Main.Util.spawnCommandLine('xdg-open '+this._screenshot.file);
+      this._onCloseButtonPressed(button, event);
+   },
+
+   _onOpenDirectoryButtonPressed: function(button, event) {
+      Main.Util.spawnCommandLine('xdg-open '+this._screenshot.outputDirectory);
+      this._onCloseButtonPressed(button, event);
+   },
+
+   _onCopyButtonPressed: function(button, event) {
+      // As of 2012-08-25, St.Clipboard only allows copying UTF-8 text
+      // and will not handle binary contents. So unlike GNOME-Screenshot,
+      // we will only copy the path and filename.
+      St.Clipboard.get_default().set_text(this._screenshot.file);
+      this._onCloseButtonPressed(button, event);
+   },
+
+   _onCloseButtonPressed: function(button, event) {
+      this.close(global.get_current_time());
+   },
+
+   _onOpened: function() {
+
+   },
+
+   _onDestroy: function() {
+      
+   },
+
+   close: function() {
+      ModalDialog.ModalDialog.prototype.close.call(this);
+   },
+
+   cancel: function() {
+      this.close(global.get_current_time());
+   }
+
+}
+
+function CaptureDialog(helper) {
+   if (_captureDialog == null) {
+       this._init(helper);
+       _captureDialog = this;
+   }
+
+   return _captureDialog;
+}
+
+CaptureDialog.prototype = {
+   __proto__: ModalDialog.ModalDialog.prototype,
+
+   _init: function(helper) {
+      this._selectionType = null;
+      this.helper = helper;
+      this._useTimer = null;
+      this._timerDuration = null;
+      this._includeFrame = null;
+      this._includeCursor = null;
+      this._lastMode = null;
+
+      ModalDialog.ModalDialog.prototype._init.call(this, { styleClass: 'capture-dialog' });
+
+      this.connect('destroy',
+                  Lang.bind(this, this._onDestroy));
+      this.connect('opened',
+                  Lang.bind(this, this._onOpened));
+
+      let message = _("Take Screenshot");
+      this._descriptionLabel = new St.Label({ text: message, style_class: 'capture-dialog-title' });
+
+      this.contentLayout.add(this._descriptionLabel,
+                            { y_fill:  true,
+                              y_align: St.Align.START });
+
+      let titleContentLayout = new St.BoxLayout({ style_class: 'tmp', vertical: false });
+      this.contentLayout.add(titleContentLayout,
+                            { style_class: 'tmp', x_fill: true,
+                              y_fill: false });
+
+      this.setInitialKeyFocus(titleContentLayout);
+
+      this._iconBin = new St.Bin({ width: 50 });
+      titleContentLayout.add(this._iconBin,
+         { width: 50, x_fill: true,
+           y_fill:  false,
+           x_align: St.Align.START,
+           y_align: St.Align.START });
+
+      this.setButtons(
+         [{ label: _("Cancel"),
+            action: Lang.bind(this, this._onButtonPressed),
+            key:    Clutter.Escape
+          },
+          { label:  _("Capture"),
+            action: Lang.bind(this, this._onCaptureButtonPressed)
+          }]);
+
+      
+      this._setIconFromName('camera-photo', 'login-dialog-user-list-item-icon');
+
+      this.radioGroup = new RadioButton.RadioButtonGroup("captureMode");
+      this.radioGroup.addButton(SelectionType.SCREEN, "Grab the whole screen");
+      this.radioGroup.addButton(SelectionType.WINDOW, "Grab a window");
+      this.radioGroup.addButton(SelectionType.CINNAMON, "Grab a UI element");
+      this.radioGroup.addButton(SelectionType.AREA, "Select area to grab");
+      this.radioGroup.connect("notify::radio-changed", Lang.bind(this, function() {
+         this._lastMode = this._selectionType = this.radioGroup.getActive();
+      }));
+
+      if (this._lastMode !== null) {
+         this.radioGroup.setActive(this._lastMode);
+      }
+      else {
+         this.radioGroup.setActive(SelectionType.AREA);
+      }
+      
+      titleContentLayout.add(this.radioGroup.actor);
+
+      this._optionsLabel = new St.Label({ text: "Options", style_class: 'capture-dialog-subtitle' });
+      this.contentLayout.add(this._optionsLabel, { expand: true, x_align: St.Align.START });
+
+      let optionsHContentLayout = new St.BoxLayout({ style_class: 'tmp' });
+      optionsHContentLayout.add(new St.Bin({ width: 50 }),
+                           { width: 50, x_fill: true,
+                             y_fill:  false,
+                             x_align: St.Align.START,
+                             y_align: St.Align.START });
+      this.contentLayout.add(optionsHContentLayout);
+
+      let optionsVContentLayout = new St.BoxLayout({ vertical: true });
+      optionsHContentLayout.add(optionsVContentLayout);
+
+      let timerGroup = new St.BoxLayout({ style_class: 'tmp' });
+
+      this.cbTimer = new CheckBox.CheckBox("Use capture timer", { x_fill: true, y_fill: false, y_align: St.Align.END });
+      timerGroup.add(this.cbTimer.actor, { fill: true, x_fill: true, expand: true, 
+         x_align: St.Align.START, y_align: St.Align.END });
+
+      let timerMenu = new PopupMenu.PopupComboMenu();
+      this._timerCombo = new PopupMenu.PopupComboBoxMenuItem({ style_class: 'tmp2 popup-combo' });
+      timerMenu.addMenuItem(this._timerCombo);
+
+      let item;
+      item = new PopupMenu.PopupMenuItem(_("1 sec"));
+      this._timerCombo.addMenuItem(item);
+      item = new PopupMenu.PopupMenuItem(_("3 sec"));
+      this._timerCombo.addMenuItem(item);
+      item = new PopupMenu.PopupMenuItem(_("5 sec"));
+      this._timerCombo.addMenuItem(item);
+      this._timerCombo.setSensitive(true);
+      this._timerCombo.setActiveItem(0);
+      this._timerCombo.connect('active-item-changed', Lang.bind(this, this._onTimerChanged));
+
+      timerGroup.add(timerMenu.actor, { expand: true, x_align: St.Align.START, y_align: St.Align.END, x_fill: false });
+      optionsVContentLayout.add(timerGroup, {  });
+
+      let cursorGroup = new St.BoxLayout();
+      let cursorLabel = new St.Label({ style_class: 'option-label', text: "Include cursor" });
+
+      this.cbCursor = new CheckBox.CheckBox("Include cursor");
+      cursorGroup.add(this.cbCursor.actor, { expand: true, x_fill: true });
+      optionsVContentLayout.add(cursorGroup, { x_fill: true, x_align: St.Align.END });
+
+      let frameGroup = new St.BoxLayout();
+      this.cbFrame = new CheckBox.CheckBox("Include window frame");
+      frameGroup.add(this.cbFrame.actor, { expand: true, x_fill: true });
+      optionsVContentLayout.add(frameGroup, { x_fill: true, x_align: St.Align.END });
+
+      this.cbFrame.actor.connect("clicked", Lang.bind(this, this._onCheckboxClicked, "_includeFrame"));
+      this.cbCursor.actor.connect("clicked", Lang.bind(this, this._onCheckboxClicked, "_includeCursor"));
+      this.cbTimer.actor.connect("clicked", Lang.bind(this, this._onCheckboxClicked, "_useTimer"));
+   },
+
+   _onCheckboxClicked: function(actor, x, optionName) {
+      this[optionName] = actor.checked === true;
+   },
+
+   _onTimerChanged: function(e, v) {
+      if (v == 2) this._timerDuration = 5;
+      else if (v == 1) this._timerDuration = 3;
+      else this._timerDuration = 1;
+   },
+
+   _onButtonPressed: function(button, event) {
+      this.close(global.get_current_time());
+   },
+
+   _onCaptureButtonPressed: function(button, event) {
+      this.close(global.get_current_time());
+      this.helper.setOptions({
+         includeFrame: this._includeFrame,
+         includeCursor: this._includeCursor,
+         useTimer: this._useTimer,
+         timerDuration: this._timerDuration
+      })
+      let timeoutId = Mainloop.timeout_add(100, Lang.bind(this, function() {
+         Mainloop.source_remove(timeoutId);
+         this.helper.runCaptureMode(this._selectionType);
+         return false;
+      }));
+      
+   },
+
+    _onDestroy: function() {
+        
+    },
+
+    _updateButtons: function() {
+
+    },
+
+    _setIconFromFile: function(iconFile, styleClass) {
+        if (styleClass)
+            this._iconBin.set_style_class_name(styleClass);
+        this._iconBin.set_style(null);
+
+        this._iconBin.child = null;
+        if (iconFile) {
+            this._iconBin.show();
+            this._iconBin.set_style('background-image: url("' + iconFile + '");');
+        } else {
+            this._iconBin.hide();
+        }
+    },
+
+    _setIconFromName: function(iconName, styleClass) {
+        if (styleClass)
+            this._iconBin.set_style_class_name(styleClass);
+        this._iconBin.set_style(null);
+
+        if (iconName != null) {
+            let textureCache = St.TextureCache.get_default();
+            let icon = textureCache.load_icon_name(this._iconBin.get_theme_node(),
+                                                   iconName,
+                                                   St.IconType.SYMBOLIC,
+                                                   _DIALOG_ICON_SIZE);
+
+            this._iconBin.child = icon;
+            this._iconBin.show();
+        } else {
+            this._iconBin.child = null;
+            this._iconBin.hide();
+        }
+    },
+
+    close: function() {
+        ModalDialog.ModalDialog.prototype.close.call(this);
+    },
+
+    cancel: function() {
+        this.close(global.get_current_time());
+    },
+
+   _confirm: function(signal) {
+      this._fadeOutDialog();
+   },
+
+   _onOpened: function() {
+
+   }
 }
 
 function ScreenshotNotification(source, dispatchOp) {
@@ -103,6 +642,8 @@ ScreenshotHelper.prototype = {
       this._callback = callback;
       this._modifiers = {};
       this._timeout  = 0;
+      this._interactive = false;
+      this.previewDialog = null;
       this._params = {
          filename: '',
          useFlash: true,
@@ -117,34 +658,50 @@ ScreenshotHelper.prototype = {
          timerDuration: 3,
          soundTimerInterval: 'dialog-warning',
          soundShutter: 'camera-shutter',
-         sendNotification: true
+         sendNotification: true,
+         uploadToImgur: false
       };
 
-      if (params != undefined) {
-         this._params = Params.parse(params, this._params);
-      }
-
+      this.setOptions(params);
+      
       global.log("Initializing screenshot tool");
 
       this._xfixesCursor = Cinnamon.XFixesCursor.get_for_stage(global.stage);
 
-      if (selectionType == SelectionType.WINDOW) {
+      if (selectionType !== null) {
+         this.runCaptureMode(selectionType);
+      }
+   },
+
+   setOptions: function(params) {
+      if (params != undefined) {
+         this._params = Params.parse(params, this._params);
+      }
+   },
+
+   runCaptureMode: function(mode) {
+      this._selectionType = mode;
+
+      if (mode == SelectionType.WINDOW) {
          this.selectWindow();
       }
-      else if (selectionType == SelectionType.AREA) {
+      else if (mode == SelectionType.AREA) {
          this.selectArea();
       }
-      else if (selectionType == SelectionType.CINNAMON) {
+      else if (mode == SelectionType.CINNAMON) {
          this.selectCinnamon();
       }
-      else if (selectionType == SelectionType.SCREEN) {
+      else if (mode == SelectionType.SCREEN) {
          this.selectScreen();
+      }
+      else if (mode == SelectionType.INTERACTIVE) {
+         this._interactive = true;
+         this.selectInteractive();
       }
    },
 
    getModifier: function(symbol) {
       //global.log('getModifier ' + symbol);
-      global.log(this._modifiers[symbol]);
       return this._modifiers[symbol] || false;
    },
 
@@ -181,7 +738,7 @@ ScreenshotHelper.prototype = {
                if (options.playTimerSound)
                   global.play_theme_sound(0, options.soundTimerInterval);
 
-                 this._fadeOutTimer();
+               this._fadeOutTimer();
             } else {
                //if (options.playShutterSound)
                //   global.play_theme_sound(0, options.soundShutter);
@@ -268,6 +825,18 @@ ScreenshotHelper.prototype = {
       flashspot.fire();
    },
 
+   selectInteractive: function() {
+      let dialog = new CaptureDialog(this);
+      dialog.open(global.get_current_time());
+   },
+
+   postInteractive: function(capture) {
+      if (this.previewDialog == null) {
+         this.previewDialog = new PreviewDialog(this, capture);
+      }
+      this.previewDialog.showPreview(capture);
+   },
+
    selectScreen: function() {
       this.screenshotScreen();
    },
@@ -289,13 +858,6 @@ ScreenshotHelper.prototype = {
          y: 0
       });
 
-      /*this.container = new St.Group({
-         reactive: true,
-         style_class: 'area-selection-container',
-         x_align: St.Align.START,
-         y_align: St.Align.START
-      });*/
-
       Main.uiGroup.add_actor(this.container);
 
       if (!Main.pushModal(this.container)) {
@@ -303,7 +865,6 @@ ScreenshotHelper.prototype = {
       }
 
       this.initializeShadow();
-      //this.drawShadows(0, 0, 0, 0);
 
       let eventHandler = new St.BoxLayout({
          name: 'LookingGlassDialog',
@@ -311,33 +872,10 @@ ScreenshotHelper.prototype = {
          reactive: true
       });
 
-      //this._eventHandler = eventHandler;
-      //this.container.add_actor(eventHandler);
-      this._displayText = new St.Label();
-      //eventHandler.add(this._displayText, { expand: true });
-
       this.captureTimer(this._params, Lang.bind(this, Lang.bind(this, function() {
          global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
          this._capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
       })));
-
-
-      
-      //this.shadowContainer.raise(this.container);
-
-      //this._lightbox = new Lightbox.Lightbox(Main.uiGroup, { fadeTime: 0.5 });
-      //this._lightbox.show();
-      //this._lightbox.highlight(this.uiContainer);
-
-      //let inspector = new LookingGlass.Inspector();
-      //inspector.connect('target', Lang.bind(this, this.screenshotCinnamon));
-
-      /*this.container = new Cinnamon.GenericContainer({
-         width: 0,
-         height: 0
-      });
-
-      container.connect('allocate', Lang.bind(this, this._allocateForCinnamon));*/
    },
 
    _updateCinnamon: function(event) {
@@ -348,35 +886,16 @@ ScreenshotHelper.prototype = {
 
       if (target != this._pointerTarget) {
          this._target = target;
-         /*if (this._lightbox) {
-            this._lightbox.hide();
-            this._lightbox.destroy();
-         }
-         this._lightbox = new Lightbox.Lightbox(this._target, { fadeTime: 0.5 });
-         this._lightbox.show();
-         if (this._lightbox) {
-            //this._lightbox.highlight(this._target);
-         }*/
       }
 
       this._pointerTarget = target;
-
-      let position = '[inspect x: ' + stageX + ' y: ' + stageY + ']';
-      this._displayText.text = '';
-      this._displayText.text = position + ' ' + this._target;
 
       if (this._borderPaintTarget != this._target) {
          if (this.uiContainer) {
             this.clearActorOutline();
          }
-         //global.t = this._target;
-         this.showActorOutline(this._target, stageX, stageY);
 
-         /*if (this._borderPaintTarget != null) {
-            this._borderPaintTarget.disconnect(this._borderPaintId);
-         }
-         this._borderPaintTarget = this._target;
-         this._borderPaintId = addBorderPaintHook(this._target);*/
+         this.showActorOutline(this._target, stageX, stageY);
       }
    },
 
@@ -507,6 +1026,7 @@ ScreenshotHelper.prototype = {
    },
 
    selectWindow: function() {
+      global.log("selectWindow");
       this._modal = true;
       this._mouseDown = false;
       this._outlineBackground = null;
@@ -532,12 +1052,6 @@ ScreenshotHelper.prototype = {
       global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
 
       this._capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
-
-      /*let timeoutId = Mainloop.timeout_add(10000, Lang.bind(this, function() {
-         this.abort();
-         Mainloop.source_remove(timeoutId);
-         return false;
-      }));*/
    },
 
    getDefaultFilename: function() {
@@ -554,7 +1068,37 @@ ScreenshotHelper.prototype = {
          + '.png';
 
       return filename;
+   },
 
+   getFilename: function(options) {
+      if (options['filename'] == '') {
+         return this.getDefaultFilename();
+      }
+      else if (options['filename'].indexOf('%') != -1) {
+         let date = new Date();
+         return str_replace(
+            ['%Y',
+            '%M',
+            '%D',
+            '%H',
+            '%I',
+            '%S',
+            '%m',
+            '%TYPE'],
+            [date.getFullYear(),
+            this._padNum(date.getMonth() + 1),
+            this._padNum(date.getDate()),
+            this._padNum(date.getHours()),
+            this._padNum(date.getMinutes()),
+            this._padNum(date.getSeconds()),
+            this._padNum(date.getMilliseconds()),
+            this.getSelectionTypeStr(this._selectionType)
+            ],
+            options['filename']);
+      }
+      else {
+         return options['filename'];
+      }
    },
 
    _padNum: function(num) {
@@ -570,13 +1114,6 @@ ScreenshotHelper.prototype = {
          return Params.parse(this._params, options);
 
       return this._params;
-   },
-
-   getFilename: function(options) {
-      if (options['filename'])
-         return options.filename;
-      else
-         return this.getDefaultFilename();
    },
 
    screenshotScreen: function(options) {
@@ -736,14 +1273,11 @@ ScreenshotHelper.prototype = {
 
    runCallback: function(screenshot) {
       screenshot.selectionType = this._selectionType;
+      screenshot.selectionTypeVerbose = this.getSelectionTypeStr(this._selectionType);
 
       let fileCapture = Gio.file_new_for_path(screenshot.file);
       screenshot.outputFilename = fileCapture.get_basename();
       screenshot.outputDirectory = fileCapture.get_parent().get_path();
-
-      if (this._callback) {
-         this._callback(screenshot);
-      }
 
       if (screenshot.options.useFlash) {
          if (this._selectionType == SelectionType.WINDOW
@@ -757,8 +1291,8 @@ ScreenshotHelper.prototype = {
          }
       }
 
-      if (screenshot.options.copyToClipboard) {
-         St.Clipboard.get_default().set_text(screenshot.file);
+      if (this._callback) {
+         this._callback(screenshot);
       }
 
       if (screenshot.options.playShutterSound) {
@@ -766,31 +1300,59 @@ ScreenshotHelper.prototype = {
          global.play_theme_sound(SOUND_ID, 'camera-shutter');
       }
 
-      let source = new Source('capture-rjanja', this, screenshot);
-      Main.messageTray.add(source);
-      let notification = new ScreenshotNotification(source,
-         'Screenshot captured!', null,
-         { customContent: true, bodyMarkup: true });
+      if (this._interactive) {
+         let timeoutId = Mainloop.timeout_add(300, Lang.bind(this, function() {
+            Mainloop.source_remove(timeoutId);
+            this.postInteractive(screenshot);
+            return false;
+         }));
+      }
+      else {
+         if (screenshot.options.uploadToImgur) {
+            this.uploadToImgur(screenshot.file, function(success, json) {
+               if (success)
+               {
+                  if (screenshot.options.copyToClipboard) {
+                     St.Clipboard.get_default().set_text(json.links.original);
+                  }
+                  global.cancel_theme_sound(SOUND_ID);
+                  global.play_theme_sound(SOUND_ID, 'bell');
+               }
+            });
+         }
+         else if (screenshot.options.copyToClipboard) {
+            St.Clipboard.get_default().set_text(screenshot.file);
+            global.cancel_theme_sound(SOUND_ID);
+            global.play_theme_sound(SOUND_ID, 'bell');
+         }
 
-      notification.setResident(true);
-      notification.addBody("<b>" + screenshot.outputFilename + "</b> saved to " + screenshot.outputDirectory, true);
-      notification.connect('action-invoked',
-         Lang.bind(this, function() { global.log('action-invoked'); }));
+         if (screenshot.options.sendNotification) {
+            let source = new Source('capture-rjanja', this, screenshot);
+            Main.messageTray.add(source);
+            let notification = new ScreenshotNotification(source,
+               'Screenshot captured!', null,
+               { customContent: true, bodyMarkup: true });
 
-      notification.connect('clicked', Lang.bind(this,
-         function() {
-            try {
-               Gio.app_info_launch_default_for_uri('file://' + screenshot.outputDirectory,
-                  global.create_app_launch_context());
-            }
-            catch (e) {
-               Util.spawn(['gvfs-open', screenshot.outputDirectory]);
-            }
+            notification.setResident(true);
+            notification.addBody("<b>" + screenshot.outputFilename + "</b> saved to " + screenshot.outputDirectory, true);
+            notification.connect('action-invoked',
+               Lang.bind(this, function() { global.log('action-invoked'); }));
 
-            //global.log("clicked on notification!");
-      }));
+            notification.connect('clicked', Lang.bind(this,
+               function() {
+                  try {
+                     Gio.app_info_launch_default_for_uri('file://' + screenshot.outputDirectory,
+                        global.create_app_launch_context());
+                  }
+                  catch (e) {
+                     Util.spawn(['gvfs-open', screenshot.outputDirectory]);
+                  }
+            }));
 
-      source.notify(notification);
+            source.notify(notification);
+         }
+      }
+      
       return true;
    },
 
@@ -1023,7 +1585,6 @@ ScreenshotHelper.prototype = {
          let [xMouse, yMouse, mask] = global.get_pointer();
 
          if (event.get_source() == this.container) {
-            //global.log("Clicked on container");
             this._isMoving = true;
             this._mouseDown = true;
             this._xMouse = xMouse;
@@ -1033,7 +1594,6 @@ ScreenshotHelper.prototype = {
             this._isResizing = true;
             this._mouseDown = true;
             this._resizeActor = event.get_source();
-            //global.log('Resizing using handle ' + this._resizeActor.name);
             return true;
          }
          else {
@@ -1046,7 +1606,6 @@ ScreenshotHelper.prototype = {
          }
 
          if (this._selectionMade) {
-            //global.log("Selection made");
             return true;
          }
 
@@ -1157,7 +1716,6 @@ ScreenshotHelper.prototype = {
             if (xMouse != this._xStart || yMouse != this._yStart) {
                let x, y;
                if (this._isMoving) {
-                  //global.log("Moving..");
                   x = Math.min(this._xStart, this._xEnd) - (this._xMouse - xMouse);
                   y = Math.min(this._yStart, this._yEnd) - (this._yMouse - yMouse);
 
@@ -1166,10 +1724,8 @@ ScreenshotHelper.prototype = {
                   if (y < 0) y = 0;
                }
                else if (this._isResizing) {
-                  //global.log("Resizing..");
                   let dragName = this._resizeActor.name;
                   if (dragName == 'handleN') {
-                     global.log("north handle");
                      this._yStart = yMouse;
                   }
                   else if (dragName == 'handleS') {
@@ -1203,7 +1759,6 @@ ScreenshotHelper.prototype = {
 
                }
                else {
-                  //global.log("Sizing..");
                   this._xEnd = xMouse;
                   this._yEnd = yMouse;
                   x = Math.min(this._xEnd, this._xStart);
@@ -1231,7 +1786,6 @@ ScreenshotHelper.prototype = {
                   this._isMoving = false;
                   this._yMouse = 0;
                   this._xMouse = 0;
-                  //global.log("Release xStart= " + this._xStart + ", yStart= " + this._yStart);
                }
                else if (this._isResizing) {
                   this._isResizing = false;
@@ -1243,7 +1797,6 @@ ScreenshotHelper.prototype = {
                
                this._mouseDown = false;
                
-               //global.log("Area is drawn.");
                this._selectionMade = true;
 
                //if (this._xEnd == -1 || this._yEnd == -1 || (width < 5 && height < 5)) {
@@ -1442,7 +1995,7 @@ ScreenshotHelper.prototype = {
          y_align: St.Align.END
       });
 
-      let sizeInfo = or.width + ' \u00D7 '+or.height;
+      let sizeInfo = or.width + ' \u00D7 ' + or.height;
       let title = new St.Label({ text: metaWindow.get_title(), style_class: 'overlay-test-label' });
       let subtitle = new St.Label({ text: sizeInfo, style_class: 'overlay-size-label' })
 
@@ -1469,5 +2022,116 @@ ScreenshotHelper.prototype = {
 
       return true;
 
+   },
+
+   uploadToImgur: function(filename, callback) {
+      let f = Gio.file_new_for_path(filename);
+      let dir = f.get_parent().get_path();
+      let imgLogFile = Gio.file_new_for_path(dir + '/imgur.log');
+      let imgLog = imgLogFile.append_to(0, null);
+
+      f.load_contents_async(null, function(f, res) {
+         let contents;
+         try {
+            contents = f.load_contents_finish(res)[1];
+         } catch (e) {
+            log("*** ERROR: " + e.message);
+            callback(false, null);
+         }
+         
+         let buffer = new Soup.Buffer.new(contents, contents.length);
+         let multiPart = new Soup.Multipart.new(Soup.FORM_MIME_TYPE_MULTIPART);
+         multiPart.append_form_string('key', IMGUR_CRED);
+         multiPart.append_form_file('image', filename, 'image/png', buffer);
+
+         var message = Soup.form_request_new_from_multipart(
+            'http://api.imgur.com/2/upload.json', multiPart);
+         session.queue_message(message, function(session, response) {
+            if (response.status_code !== 200) {
+               global.log("Error during upload: response code " + response.status_code
+                  + ": " + response.reason_phrase + " - " + response.response_body.data);
+               
+               callback(false, null);
+
+               return true;
+            }
+
+            try {
+               var imgur = JSON.parse(response.response_body.data);
+               let imgurLinksText = 't=' + Main.formatTime(new Date(new Date().getTime()))
+                 + ': ' + imgur.upload.links.imgur_page + ' ' 
+                 + imgur.upload.links.delete_page + '\n';
+
+               imgLog.write(imgurLinksText, null);
+               callback(true, imgur.upload);
+            }
+            catch (e) {
+               global.logError("Imgur seems to be down. Error was:");
+               global.logError(e);
+               callback(false, null);
+            }
+
+            return true;
+         });
+
+         return true;
+      }, null);
+      
+      return true;
    }
+}
+
+
+function str_replace (search, replace, subject, count) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   improved by: Gabriel Paderni
+    // +   improved by: Philip Peterson
+    // +   improved by: Simon Willison (http://simonwillison.net)
+    // +    revised by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
+    // +   bugfixed by: Anton Ongson
+    // +      input by: Onno Marsman
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +    tweaked by: Onno Marsman
+    // +      input by: Brett Zamir (http://brett-zamir.me)
+    // +   bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   input by: Oleg Eremeev
+    // +   improved by: Brett Zamir (http://brett-zamir.me)
+    // +   bugfixed by: Oleg Eremeev
+    // %          note 1: The count parameter must be passed as a string in order
+    // %          note 1:  to find a global variable in which the result will be given
+    // *     example 1: str_replace(' ', '.', 'Kevin van Zonneveld');
+    // *     returns 1: 'Kevin.van.Zonneveld'
+    // *     example 2: str_replace(['{name}', 'l'], ['hello', 'm'], '{name}, lars');
+    // *     returns 2: 'hemmo, mars'
+    var i = 0,
+        j = 0,
+        temp = '',
+        repl = '',
+        sl = 0,
+        fl = 0,
+        f = [].concat(search),
+        r = [].concat(replace),
+        s = subject,
+        ra = Object.prototype.toString.call(r) === '[object Array]',
+        sa = Object.prototype.toString.call(s) === '[object Array]';
+    s = [].concat(s);
+    if (count) {
+        this.window[count] = 0;
+    }
+
+    for (i = 0, sl = s.length; i < sl; i++) {
+        if (s[i] === '') {
+            continue;
+        }
+        for (j = 0, fl = f.length; j < fl; j++) {
+            temp = s[i] + '';
+            repl = ra ? (r[j] !== undefined ? r[j] : '') : r[0];
+            s[i] = (temp).split(f[j]).join(repl);
+            if (count && s[i] !== temp) {
+                this.window[count] += (temp.length - s[i].length) / f[j].length;
+            }
+        }
+    }
+    return sa ? s : s[0];
 }

@@ -75,6 +75,26 @@
    background-color: rgba(0, 0, 0, 0.5);
 }
 
+.capture-dialog-title {
+   padding-bottom: 10px;
+   font-size: 1.2em;
+}
+.capture-dialog-subtitle {
+   padding: 5px 5px 5px 0;
+}
+
+.tmp {
+   width: 400px;
+   /*border: 1px solid red;*/
+   text-align: right;
+}
+.option-label {
+   padding-top: 10px;
+   padding-right: 5px;
+   font-weight: normal;
+   
+}
+
 /*.delay-chooser {
     spacing: .4em;
     color: inherit;

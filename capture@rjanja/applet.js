@@ -48,38 +48,7 @@ const KEY_RECORDER_FRAMERATE = "framerate";
 const KEY_RECORDER_FILE_EXTENSION = "file-extension";
 const KEY_RECORDER_PIPELINE = "pipeline";
 
-
-function ConfirmDialog(){
-   this._init();
-}
-
-function StubbornSliderMenuItem() {
-    this._init.apply(this, arguments);
-}
-
-StubbornSliderMenuItem.prototype = {
-    __proto__: PopupSliderMenuItem.prototype,
-
-    _init: function(value) {
-        PopupBaseMenuItem.prototype._init.call(this, { activate: false });
-
-        this.actor.connect('key-press-event', Lang.bind(this, this._onKeyPressEvent));
-
-        if (isNaN(value))
-            // Avoid spreading NaNs around
-            throw TypeError('The slider value must be a number');
-        this._value = Math.max(Math.min(value, 1), 0);
-
-        this._slider = new St.DrawingArea({ style_class: 'popup-slider-menu-item' });
-        this.addActor(this._slider, { expand: true, span: -1 });
-        this._slider.connect('repaint', Lang.bind(this, this._sliderRepaint));
-        this.actor.connect('button-press-event', Lang.bind(this, this._startDragging));
-        this.actor.connect('scroll-event', Lang.bind(this, this._onScrollEvent));
-
-        this._releaseId = this._motionId = 0;
-        this._dragging = false;
-    },
-};
+const IMGUR_CRED = "85a61980ca1cc59f329ee172245ace84";
 
 function StubbornSwitchMenuItem() {
     this._init.apply(this, arguments);
@@ -485,6 +454,9 @@ MyApplet.prototype = {
             this.menu.addAction(this.indent(_("Screen")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.SCREEN, e);
             }));
+            this.menu.addAction(this.indent(_("Interactive")), Lang.bind(this, function(e) {
+               return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
+            }));
             this._redoMenuItem = this.menu.addAction(this.indent(_("Redo last")), Lang.bind(this, this.redo_cinnamon_camera));
             
             if (this.lastCapture === null) {
@@ -636,27 +608,32 @@ MyApplet.prototype = {
    },
 
    get_camera_filename: function(type) {
-      let date = new Date();
-      return this._cameraSaveDir + '/' + 
-       str_replace(
-         ['%Y',
-         '%M',
-         '%D',
-         '%H',
-         '%I',
-         '%S',
-         '%m',
-         '%TYPE'],
-         [date.getFullYear(),
-         this._padNum(date.getMonth() + 1),
-         this._padNum(date.getDate()),
-         this._padNum(date.getHours()),
-         this._padNum(date.getMinutes()),
-         this._padNum(date.getSeconds()),
-         this._padNum(date.getMilliseconds()),
-         Screenshot.SelectionTypeStr[type]
-         ],
-         this._cameraSavePrefix) + '.png';
+      if (this._cameraProgram == 'cinnamon') {
+         return this._cameraSaveDir + '/' + this._cameraSavePrefix + '.png';
+      }
+      else {
+         let date = new Date();
+         return this._cameraSaveDir + '/' + 
+          str_replace(
+            ['%Y',
+            '%M',
+            '%D',
+            '%H',
+            '%I',
+            '%S',
+            '%m',
+            '%TYPE'],
+            [date.getFullYear(),
+            this._padNum(date.getMonth() + 1),
+            this._padNum(date.getDate()),
+            this._padNum(date.getHours()),
+            this._padNum(date.getMinutes()),
+            this._padNum(date.getSeconds()),
+            this._padNum(date.getMilliseconds()),
+            Screenshot.SelectionTypeStr[type]
+            ],
+            this._cameraSavePrefix) + '.png';
+      }
    },
 
    _padNum: function(num) {
@@ -667,7 +644,6 @@ MyApplet.prototype = {
       if (this.lastCapture) {
          this.lastCapture.options.filename = this.get_camera_filename(this.lastCapture.selectionType);
 
-         global.log("last capture type was " + this.lastCapture.selectionType);
          let camera = new Screenshot.ScreenshotHelper(null, null, this.lastCapture.options);
 
          switch (this.lastCapture.selectionType) {
@@ -696,7 +672,6 @@ MyApplet.prototype = {
    },
 
    cinnamon_camera_complete: function(screenshot) {
-      global.log("capture complete!");
       this.lastCapture = screenshot;
       if (this.lastCapture.selectionType != Screenshot.SelectionType.SCREEN) {
          this._redoMenuItem.actor.show();
@@ -1001,11 +976,11 @@ MyApplet.prototype = {
       if (success && pid != 0)
       {
          // Wait for answer
-         global.log("created process, pid=" + pid);
+         global.log("Created process, pid=" + pid);
          GLib.child_watch_add( GLib.PRIORITY_DEFAULT, pid,
             function(pid,status) {
                GLib.spawn_close_pid(pid);
-               global.log("process completed, status=" + status);
+               global.log("Process completed, status=" + status);
                let [line, size, buf] = [null, 0, ""];
                while (([line, size] = out_reader.read_line(null)) != null && line != null) {
                   global.log(line);
@@ -1017,7 +992,7 @@ MyApplet.prototype = {
       }
       else
       {
-         global.log("failed process creation");
+         global.log("Failed process creation");
          typeof onFailure == 'function' && onFailure();
       }
 
