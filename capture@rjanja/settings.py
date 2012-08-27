@@ -21,6 +21,7 @@ except Exception, detail:
 from gettext import gettext as _
 
 support_file = os.path.dirname(os.path.abspath(__file__)) + "/support.json"
+settings_file = os.path.dirname(os.path.abspath(__file__)) + "/settings.json"
 
 def which(program):
     import os
@@ -46,13 +47,33 @@ def load_support():
     
     return support
 
+def load_settings():
+    f = open(settings_file, 'r')
+    settings = json.loads(f.read(), object_pairs_hook=collections.OrderedDict)
+    f.close()
+    
+    return settings
+
+def get_settings_key(key):
+    return settings[key]
+
+def set_settings_key(key, value):
+    settings[key] = value
+    save_settings()
+    return True
+
+def save_settings():
+    f = open(settings_file, 'w')
+    f.write(json.dumps(settings, sort_keys=False, indent=3))
+    f.close()
+
 class MyWindow(Gtk.Window):
     def camera_changed(self, widget):
         tree_iter = widget.get_active_iter()
         if tree_iter != None:
             model = widget.get_model()
             value = model[tree_iter][1]
-            settings.set_string('camera-program', value)
+            set_settings_key('camera-program', value)
             self.cameraApp = value
             if value == "cinnamon":
               self.set_camera_tab(True)
@@ -65,7 +86,7 @@ class MyWindow(Gtk.Window):
         if tree_iter != None:
             model = widget.get_model()
             value = model[tree_iter][1]
-            settings.set_string('recorder-program', value)
+            set_settings_key('recorder-program', value)
             self.recorderApp = value
             if value == "cinnamon":
               self.pipeline_input.set_sensitive(True)
@@ -86,13 +107,13 @@ class MyWindow(Gtk.Window):
     def camera_save_dir_changed(self, widget):
         save_dir = widget.get_filename()
         if save_dir != self.cameraSaveDir:
-           settings.set_string('camera-save-dir', save_dir)
+           set_settings_key('camera-save-dir', save_dir)
            self.cameraSaveDir = save_dir
 
     def recorder_save_dir_changed(self, widget):
         save_dir = widget.get_filename()
         if save_dir != self.recorderSaveDir:
-           settings.set_string('recorder-save-dir', save_dir)
+           set_settings_key('recorder-save-dir', save_dir)
            self.recorderSaveDir = save_dir
 
     def set_camera_tab(self, status=False):
@@ -112,15 +133,15 @@ class MyWindow(Gtk.Window):
            return True
 
     def notebook_page_changed(self, notebook, page, page_num):
-        settings.set_int('last-selected-page', page_num)
+        set_settings_key('last-selected-page', page_num)
 
     def notebook_subpage_changed(self, notebook, page, page_num):
-        settings.set_int('last-selected-subpage', page_num)
+        set_settings_key('last-selected-subpage', page_num)
 
     def checkbox_toggled(self, button):
         buttonId = Gtk.Buildable.get_name(button)
         settingsKey = self.checkboxMap[buttonId]
-        settings.set_boolean(settingsKey, button.get_active())
+        set_settings_key(settingsKey, button.get_active())
 
     def __init__(self):
         self.builder = Gtk.Builder()
@@ -146,14 +167,14 @@ class MyWindow(Gtk.Window):
         self.notebookCamera.connect("switch-page", self.notebook_subpage_changed)
 
         # Get current application choices from settings
-        self.cameraApp = settings.get_string('camera-program')
-        self.recorderApp = settings.get_string('recorder-program')
+        self.cameraApp = get_settings_key('camera-program')
+        self.recorderApp = get_settings_key('recorder-program')
         fps = crSettings.get_int('framerate')
         pipeline = crSettings.get_string('pipeline')
-        self.cameraSaveDir = settings.get_string('camera-save-dir')
-        self.recorderSaveDir = settings.get_string('recorder-save-dir')
-        self.cameraSavePrefix = settings.get_string('camera-save-prefix')
-        self.recorderSavePrefix = settings.get_string('recorder-save-prefix')
+        self.cameraSaveDir = get_settings_key('camera-save-dir')
+        self.recorderSaveDir = get_settings_key('recorder-save-dir')
+        self.cameraSavePrefix = get_settings_key('camera-save-prefix')
+        self.recorderSavePrefix = get_settings_key('recorder-save-prefix')
 
         self.camera_save_name.set_text(self.cameraSavePrefix)
         self.recorder_save_name.set_text(self.recorderSavePrefix)
@@ -173,13 +194,13 @@ class MyWindow(Gtk.Window):
         }
 
         for x in self.checkboxMap:
-            currentSetting = settings.get_boolean(self.checkboxMap[x])
+            currentSetting = get_settings_key(self.checkboxMap[x])
             self.checkboxes[x] = self.builder.get_object(x)
             self.checkboxes[x].set_active(currentSetting)
             self.checkboxes[x].connect("toggled", self.checkbox_toggled)
 
-        lastPage = settings.get_int('last-selected-page')
-        lastSubPage = settings.get_int('last-selected-subpage')
+        lastPage = get_settings_key('last-selected-page')
+        lastSubPage = get_settings_key('last-selected-subpage')
 
         self.fps_spin.set_value(fps)
         self.fps_spin.connect('changed', self.fps_changed)
@@ -251,7 +272,7 @@ class MyWindow(Gtk.Window):
         self.window.show()
 
 if __name__ == "__main__":
-    settings = Gio.Settings.new('org.cinnamon.applets.capture@rjanja')
+    settings = load_settings()
     crSettings = Gio.Settings.new('org.gnome.shell.recorder')
     support = load_support()
 

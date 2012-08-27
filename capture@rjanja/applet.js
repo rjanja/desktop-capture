@@ -30,13 +30,7 @@ const Capture = imports.ui.appletManager.applets["capture@rjanja"];
 const Screenshot = Capture.screenshot;
 const AppletDir = imports.ui.appletManager.appletMeta["capture@rjanja"].path;
 const SUPPORT_FILE = AppletDir + '/support.json';
-
-const KEY_SCREENSHOT_SCHEMA = "org.cinnamon.applets.capture@rjanja"
-const KEY_INCLUDE_CURSOR = "include-cursor";
-const KEY_OPEN_AFTER = "open-after";
-const KEY_DELAY_SECONDS = "delay-seconds";
-const KEY_CAMERA_PROGRAM = "camera-program";
-const KEY_RECORDER_PROGRAM = "recorder-program";
+const SETTINGS_FILE = AppletDir + '/settings.json';
 
 const CAMERA_PROGRAM_GNOME = 'gnome-screenshot';
 const KEY_GNOME_SCREENSHOT_SCHEMA = "org.gnome.gnome-screenshot"
@@ -252,55 +246,76 @@ function MyApplet(orientation) {
 MyApplet.prototype = {
    __proto__: Applet.IconApplet.prototype,
 
-   _settingsChanged: function (settings, key) {
-        if (this._settings.get_boolean(KEY_INCLUDE_CURSOR)) {
-            this._includeCursor = true;
-        }
-        if (this._settings.get_boolean(KEY_OPEN_AFTER)) {
-            this._openAfter = true;
-        }
+   _jSettingsChanged: function() {
+      this._modifiers = {};
+      let oldCamera = this._cameraProgram;
+      let oldRecorder = this._recorderProgram;
 
-        this._modifiers = {};
-        this._delay = this._settings.get_int(KEY_DELAY_SECONDS);
+      let settingsFile = GLib.build_filenamev([SETTINGS_FILE]);
+      try {
+         this._settings = JSON.parse(Cinnamon.get_file_contents_utf8_sync(settingsFile));
+      }
+      catch (e) {
+         global.logError("Could not parse Desktop Capture's settings.json!")
+         global.logError(e);
+         return true;
+      }
 
-        let oldCamera = this._cameraProgram;
-        let oldRecorder = this._recorderProgram;
-        this._cameraProgram = this._settings.get_string(KEY_CAMERA_PROGRAM);
-        this._recorderProgram = this._settings.get_string(KEY_RECORDER_PROGRAM);
+      this._includeCursor = this._settings['include-cursor'];
+      this._openAfter = this._settings['open-after'];
+      this._delay = this._settings['delay-seconds'];
+      this._cameraProgram = this._settings['camera-program'];
+      this._recorderProgram = this._settings['recorder-program'];
 
-        this._cameraSaveDir = this._settings.get_string('camera-save-dir');
-        this._recorderSaveDir = this._settings.get_string('recorder-save-dir');
-        this._cameraSavePrefix = this._settings.get_string('camera-save-prefix');
-        this._recorderSavePrefix = this._settings.get_string('recorder-save-prefix');
-        this._windowAsArea = this._settings.get_boolean('capture-window-as-area');
-        this._includeWindowFrame = this._settings.get_boolean('include-window-frame');
-        this._useCameraFlash = this._settings.get_boolean('use-camera-flash');
-        this._showCaptureTimer = this._settings.get_boolean('show-capture-timer');
-        this._playShutterSound = this._settings.get_boolean('play-shutter-sound');
-        this._playIntervalSound = this._settings.get_boolean('play-timer-interval-sound');
-        this._copyToClipboard = this._settings.get_boolean('copy-to-clipboard');
-        this._sendNotification = this._settings.get_boolean('send-notification');
-        this._includeStyles = this._settings.get_boolean('include-styles');
-        this._modActivatesTimer = this._settings.get_boolean('mod-activates-timer');
+      this._cameraSaveDir = this._settings['camera-save-dir'];
+      if (this._cameraSaveDir == "" || this._cameraSaveDir === null) {
+         this._cameraSaveDir = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES);
+      }
 
-        if (this._cameraProgram == 'none')
-        {
-            this._cameraProgram = null;
-        }
+      this._recorderSaveDir = this._settings['recorder-save-dir'];
+      if (this._recorderSaveDir == "" || this._recorderSaveDir === null) {
+         this._recorderSaveDir = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_VIDEOS);
+      }
 
-        if (this._recorderProgram == 'none')
-        {
-            this._recorderProgram = null;
-        }
+      this._cameraSavePrefix = this._settings['camera-save-prefix'];
+      this._recorderSavePrefix = this._settings['recorder-save-prefix'];
+      this._windowAsArea = this._settings['capture-window-as-area'];
+      this._includeWindowFrame = this._settings['include-window-frame'];
+      this._useCameraFlash = this._settings['use-camera-flash'];
+      this._showCaptureTimer = this._settings['show-capture-timer'];
+      this._playShutterSound = this._settings['play-shutter-sound'];
+      this._playIntervalSound = this._settings['play-timer-interval-sound'];
+      this._copyToClipboard = this._settings['copy-to-clipboard'];
+      this._sendNotification = this._settings['send-notification'];
+      this._includeStyles = this._settings['include-styles'];
+      this._modActivatesTimer = this._settings['mod-activates-timer'];
 
-        // Were we called due to a settings change, or by init?
-        if (settings != null) {
-            if (oldCamera != this._cameraProgram || oldRecorder != this._recorderProgram)
-            {
-                this.draw_menu();
-            }
-        }
-    },
+      if (this._cameraProgram == 'none')
+      {
+         this._cameraProgram = null;
+      }
+
+      if (this._recorderProgram == 'none')
+      {
+         this._recorderProgram = null;
+      }
+
+      // Were we called due to a settings change, or by init?
+      if (oldCamera != this._cameraProgram || oldRecorder != this._recorderProgram)
+      {
+          this.draw_menu();
+      }
+   },
+
+   setSettingsKey: function (key, value) {
+      this._settings[key] = value;
+      this.writeSettings();
+   },
+
+   writeSettings: function() {
+      let filedata = JSON.stringify(this._settings, null, "   ");
+      GLib.file_set_contents(SETTINGS_FILE, filedata, filedata.length);
+   },
 
    getModifier: function(symbol) {
       global.log('getModifier ' + symbol);
@@ -359,9 +374,10 @@ MyApplet.prototype = {
          this.lastCapture = null;
 
          // Load up our settings
-         this._settings = getSettings(KEY_SCREENSHOT_SCHEMA);
-         this._settings.connect('changed', Lang.bind(this, this._settingsChanged));
-         this._settingsChanged();
+         this._settingsFile = Gio.file_new_for_path(SETTINGS_FILE);
+         this._monitor = this._settingsFile.monitor(Gio.FileMonitorFlags.NONE, null);
+         this._monitor.connect('changed', Lang.bind(this, this._jSettingsChanged));
+         this._jSettingsChanged();
 
          // GNOME Screenshot settings, we only write cursor option,
          // don't need to read anything from it.
@@ -533,7 +549,8 @@ MyApplet.prototype = {
          let optionSwitch = new StubbornSwitchMenuItem(this.indent(_("Include cursor")), this._includeCursor, { style_class: 'bin' });
          optionSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
             this._includeCursor = v;
-            this._settings.set_boolean(KEY_INCLUDE_CURSOR, v);
+            this.setSettingsKey('include-cursor', v);
+            
             if (this.get_camera_program() == CAMERA_PROGRAM_GNOME) {
                // We can't pass a cursor option to gnome-screenshot,
                // so we modify its settings instead.
@@ -559,7 +576,7 @@ MyApplet.prototype = {
                this._delay = v;
             }
 
-            this._settings.set_int(KEY_DELAY_SECONDS, parseInt(this._delay));
+            this.setSettingsKey('delay-seconds', parseInt(this._delay));
 
             if (this.get_camera_program() == CAMERA_PROGRAM_GNOME) {
                // We can't pass a delay option to gnome-screenshot,
