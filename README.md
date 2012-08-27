@@ -10,7 +10,8 @@ This project started because I wanted a simple way to choose and switch between 
 My favorite capture software has always been Shutter, but when I found it wouldn't behave with Cinnamon I decided to write an Cinnamon-specific screenshot class and integrate it into Desktop Capture. So while <i>Cinnamon Screenshot</i> comes with this applet, you are free to use any capture software you like. Shutter will continue to be supported because it is still a great tool.
 
 ### Features<a name="features">&nbsp;</a>
-* Built-in capture tool: Full screen, Window, Area, and Cinnamon UI capture modes. More to come.
+* Built-in capture tool: Full screen, Window, Area, Cinnamon UI, Interactive capture modes. More capture modes to come. 
+* Built-in uploading to Imgur.com when doing an Interactive capture.
 * Also compatible with GNOME-Screenshot, Shutter, xwd and most other capture tools that have command line interfaces.
 * Options for changing most configuration settings; further customisations are possible via JSON support file - add custom capture entries to compose a menu that works for you. Additional options for controlling screen recorder (frames per second and GStreamer pipeline).
 * Timer delay with optional onscreen countdown and interval sound.
@@ -18,7 +19,7 @@ My favorite capture software has always been Shutter, but when I found it wouldn
 ![Applet settings](https://raw.github.com/rjanja/desktop-capture/master/img/cinnamon-screenshot-settings.png?login=rjanja&token=d3758a887e24592e1fdc1163782facd0 "Applet settings")
 
 ### Installation<a name="installing">&nbsp;</a>
-* Check out source with git, then run `./install-schema.sh`, move `capture@rjanja` folder into `~/.local/share/cinnamon/applets/`, restart Cinnamon and add applet normally
+* Check out source with git, move `capture@rjanja` folder into `~/.local/share/cinnamon/applets/`, restart Cinnamon and add applet normally
 * To use the built-in Cinnamon Screenshot, a patch must first be applied to Cinnamon: [linuxmint/Cinnamon#1016](https://github.com/linuxmint/Cinnamon/pull/1016)
 * To correct the position where the Cinnamon Recorder indicator is placed, a separate patch can be applied: [linuxmint/Cinnamon#1015](https://github.com/linuxmint/Cinnamon/pull/1015)
 
@@ -35,9 +36,8 @@ My favorite capture software has always been Shutter, but when I found it wouldn
     * Click (without holding shift) to complete capture
 
 ### Still to come<a name="wishlist">&nbsp;</a>
-* Automatic upload to imgur
+* Imgur upload options (waiting on account access API)
 * Instructions overlay
-* Pre- and post-capture dialogs (interactive mode)
 
 ### Adding program support<a name="extending">&nbsp;</a>
 A number of program-specific options can be set for your preferred capture program by manually editing the `support.json` file. New programs can be added by creating a new block, just remember not to use trailing commas on the last elements and do not try to add comments as they seem to break the parser.
