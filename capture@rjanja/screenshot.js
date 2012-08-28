@@ -312,9 +312,9 @@ PreviewDialog.prototype = {
    },
 
    _onUploadButtonPressed: function(button, event) {
-      this.helper.uploadToImgur(this._screenshot.file, Lang.bind(this, function(result, json) {
+      this.helper.uploadToImgur(this._screenshot.file, Lang.bind(this, function(result, upload) {
          if (result) {
-            let dialog = new ImgurDialog(json.upload);
+            let dialog = new ImgurDialog(upload);
             dialog.open(global.get_current_time());
          }
       }));
@@ -659,7 +659,7 @@ ScreenshotHelper.prototype = {
          soundTimerInterval: 'dialog-warning',
          soundShutter: 'camera-shutter',
          sendNotification: true,
-         uploadToImgur: false
+         uploadToImgur: true
       };
 
       this.setOptions(params);
@@ -2061,16 +2061,16 @@ ScreenshotHelper.prototype = {
                let imgurLinksText = 't=' + Main.formatTime(new Date(new Date().getTime()))
                  + ': ' + imgur.upload.links.imgur_page + ' ' 
                  + imgur.upload.links.delete_page + '\n';
-
                imgLog.write(imgurLinksText, null);
-               callback(true, imgur.upload);
             }
             catch (e) {
                global.logError("Imgur seems to be down. Error was:");
                global.logError(e);
                callback(false, null);
+               return true;
             }
 
+            callback(true, imgur.upload);
             return true;
          });
 
