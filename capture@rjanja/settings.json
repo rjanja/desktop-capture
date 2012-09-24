@@ -1,5 +1,5 @@
 {
-   "camera-program": "cinnamon",
+   "camera-program": "gnome-screenshot",
    "recorder-program": "cinnamon",
    "include-cursor": true,
    "open-after": false,
