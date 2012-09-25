@@ -121,7 +121,7 @@ ImgurDialog.prototype = {
       this.radioGroup.addButton('delete_page', _("Delete page") + " " + upload.links.delete_page);
       this.radioGroup.addButton('small_square', _("Small square") + " " + upload.links.small_square);
       this.radioGroup.setActive('large_thumbnail', _("Large thumbnail") + " " + upload.links.large_thumbnail);
-      this.radioGroup.connect("notify::radio-changed", Lang.bind(this, function() {
+      this.radioGroup.connect("radio-changed", Lang.bind(this, function() {
          this._selectedLink = this.radioGroup.getActive();
          this._selectedText = this._upload.links[this._selectedLink];
       }));
