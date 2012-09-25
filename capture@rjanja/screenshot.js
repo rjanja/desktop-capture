@@ -426,7 +426,7 @@ CaptureDialog.prototype = {
       this.radioGroup.addButton(SelectionType.WINDOW, "Grab a window");
       this.radioGroup.addButton(SelectionType.CINNAMON, "Grab a UI element");
       this.radioGroup.addButton(SelectionType.AREA, "Select area to grab");
-      this.radioGroup.connect("notify::radio-changed", Lang.bind(this, function() {
+      this.radioGroup.connect("radio-changed", Lang.bind(this, function() {
          this._lastMode = this._selectionType = this.radioGroup.getActive();
       }));
 
