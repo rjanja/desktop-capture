@@ -303,7 +303,10 @@ MyApplet.prototype = {
       // Were we called due to a settings change, or by init?
       if (oldCamera != this._cameraProgram || oldRecorder != this._recorderProgram)
       {
-          this.draw_menu();
+         if (this._programSupport['camera'] !== undefined)
+         {
+            this.draw_menu();
+         }
       }
    },
 

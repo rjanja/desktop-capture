@@ -273,7 +273,7 @@ class MyWindow(Gtk.Window):
 
 if __name__ == "__main__":
     settings = load_settings()
-    crSettings = Gio.Settings.new('org.gnome.shell.recorder')
+    crSettings = Gio.Settings.new('org.cinnamon.recorder')
     support = load_support()
 
     MyWindow()
