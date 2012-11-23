@@ -116,6 +116,16 @@ class MyWindow(Gtk.Window):
            set_settings_key('recorder-save-dir', save_dir)
            self.recorderSaveDir = save_dir
 
+    def camera_save_name_changed(self, widget):
+        save_prefix = widget.get_text()
+        set_settings_key('camera-save-prefix', save_prefix)
+        self.cameraSavePrefix = save_prefix
+
+    def recorder_save_name_changed(self, widget):
+        save_prefix = widget.get_text()
+        set_settings_key('recorder-save-prefix', save_prefix)
+        self.recorderSavePrefix = save_prefix
+
     def set_camera_tab(self, status=False):
         page = self.builder.get_object('boxPage2')
         page.set_sensitive(status)
@@ -213,6 +223,9 @@ class MyWindow(Gtk.Window):
         
         self.recorder_save_dir.set_current_folder(self.recorderSaveDir)
         self.recorder_save_dir.connect('current-folder-changed', self.recorder_save_dir_changed)
+
+        self.camera_save_name.connect('changed', self.camera_save_name_changed)
+        self.recorder_save_name.connect('changed', self.recorder_save_name_changed)
 
         # Load camera options into combobox
         self.camera_list_store = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
