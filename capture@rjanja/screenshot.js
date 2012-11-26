@@ -1647,7 +1647,7 @@ ScreenshotHelper.prototype = {
             let [_w, _h] = w.get_size();
             let [_x, _y] = w.get_position();
 
-            return (w.visible && _x <= x && _x+_w >= x && _y <= y && _y+_h >= y);
+            return (w['get_meta_window'] && w.visible && _x <= x && _x+_w >= x && _y <= y && _y+_h >= y);
          });
 
          // Sort windows by layer
@@ -1665,10 +1665,11 @@ ScreenshotHelper.prototype = {
                  return 'Unknown Cinnamon container';
          });
 
-         let currentWindow = windows[0];
-
-         this._windowSelected = windows[0];
-         this.showWindowOutline(this._windowSelected);
+         if (windows.length > 0) {
+            let currentWindow = windows[0];
+            this._windowSelected = windows[0];
+            this.showWindowOutline(this._windowSelected);
+         }
 
          return true;
 

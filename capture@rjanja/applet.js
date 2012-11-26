@@ -157,6 +157,7 @@ MyAppletPopupMenu.prototype = {
         this.addMenuItem(menuItem);
         menuItem.connect('activate', Lang.bind(this, function (menuItem, event) {
             callback(event);
+            return false;
         }));
 
         return menuItem;
