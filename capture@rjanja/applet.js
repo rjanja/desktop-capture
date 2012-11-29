@@ -309,6 +309,8 @@ MyApplet.prototype = {
             this.draw_menu();
          }
       }
+
+      return false;
    },
 
    setSettingsKey: function (key, value) {
@@ -338,6 +340,8 @@ MyApplet.prototype = {
       {
          this.setModifier(symbol, false);
       }
+
+      return false;
    },
 
     _onMenuKeyPress: function(actor, event) {
@@ -347,6 +351,8 @@ MyApplet.prototype = {
       {
          this.setModifier(symbol, true);
       }
+
+      return false;
    },
 
     _crSettingsChanged: function(settings, key) {
@@ -354,10 +360,10 @@ MyApplet.prototype = {
         {
            this.cRecorder = new Cinnamon.Recorder({ stage: global.stage });
         }
-        global.cr = this.cRecorder;
         this._crFrameRate = this._crSettings.get_int(KEY_RECORDER_FRAMERATE);
         this._crFileExtension = this._crSettings.get_string(KEY_RECORDER_FILE_EXTENSION);
         this._crPipeline = this._crSettings.get_string(KEY_RECORDER_PIPELINE);
+        return false;
     },
 
    _init: function(orientation) {
@@ -950,7 +956,6 @@ MyApplet.prototype = {
             }
          }
       }
-      global.p = programs;
 
       programs.forEach(Lang.bind(this, this._detect_program));
 
