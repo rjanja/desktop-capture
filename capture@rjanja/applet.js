@@ -290,6 +290,7 @@ MyApplet.prototype = {
       this._sendNotification = this._settings['send-notification'];
       this._includeStyles = this._settings['include-styles'];
       this._modActivatesTimer = this._settings['mod-activates-timer'];
+      this._uploadToImgur = this._settings['upload-to-imgur'];
 
       if (this._cameraProgram == 'none')
       {
@@ -726,7 +727,8 @@ MyApplet.prototype = {
             soundTimerInterval: 'dialog-warning',
             soundShutter: 'camera-shutter',
             sendNotification: this._sendNotification,
-            filename: this.get_camera_filename(type)
+            filename: this.get_camera_filename(type),
+            uploadToImgur: this._uploadToImgur
          });
       return true;
    },

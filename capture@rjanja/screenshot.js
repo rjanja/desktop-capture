@@ -659,7 +659,7 @@ ScreenshotHelper.prototype = {
          soundTimerInterval: 'dialog-warning',
          soundShutter: 'camera-shutter',
          sendNotification: true,
-         uploadToImgur: true
+         uploadToImgur: false
       };
 
       this.setOptions(params);
