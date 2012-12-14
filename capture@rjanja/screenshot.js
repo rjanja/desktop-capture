@@ -771,14 +771,14 @@ ScreenshotHelper.prototype = {
 
             Main.uiGroup.add_actor(this._timer);
 
-            let monitor = global.screen.get_primary_monitor();
-            let geom = global.screen.get_monitor_geometry(monitor);
-            let [monitorWidth, monitorHeight] = [geom.width, geom.height];
-
+            let monitorWidth = Main.layoutManager.primaryMonitor.width;
+            let monitorHeight = Main.layoutManager.primaryMonitor.height;
+            
             this._timer.set_position(
-              (monitorWidth / 2) - (this._timer.width / 2),
-              (monitorHeight / 2) - (this._timer.height / 2)
+              (monitorWidth / 2 + Main.layoutManager.primaryMonitor.x),
+              (monitorHeight / 2 + Main.layoutManager.primaryMonitor.y)
             );
+
             this._timer.set_anchor_point_from_gravity(Clutter.Gravity.CENTER);
          }
 
@@ -838,7 +838,9 @@ ScreenshotHelper.prototype = {
    },
 
    selectScreen: function() {
-      this.screenshotScreen();
+      this.captureTimer(this._params, Lang.bind(this, Lang.bind(this, function() {
+         this.screenshotScreen();
+      })));
    },
 
    selectCinnamon: function() {
