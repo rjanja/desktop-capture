@@ -20,5 +20,6 @@
    "include-styles": false,
    "mod-activates-timer": true,
    "last-selected-page": 1,
-   "last-selected-subpage": 0
+   "last-selected-subpage": 0,
+   "use-symbolic-icon": false
 }

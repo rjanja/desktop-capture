@@ -44,19 +44,19 @@ const MessageTray = imports.ui.messageTray;
 const SelectionType = {
    ALL_WORKSPACES: 0,  /* @todo */
    SCREEN: 1,
-   DESKTOP: 2,         /* @todo */
+   MONITOR: 2,
    WINDOW: 3,
    AREA: 4,
    CINNAMON: 5,
    INTERACTIVE: 6
 }
 
-const SOUND_ID = 0;
+const SOUND_ID = 1;
 
 const SelectionTypeStr = {
    0: "workspaces",
    1: "screen",
-   2: "desktop",
+   2: "monitor",
    3: "window",
    4: "area",
    5: "cinnamon",
@@ -132,8 +132,8 @@ ImgurDialog.prototype = {
    copyToClipboard: function(button, event) {
       if (this._selectedText != "") {
          St.Clipboard.get_default().set_text(this._selectedText);
-         global.cancel_theme_sound(SOUND_ID);
-         global.play_theme_sound(SOUND_ID, 'bell');
+         //global.cancel_theme_sound(SOUND_ID);
+         //global.play_theme_sound(SOUND_ID, 'bell');
          this.close();
       }
       return true;
@@ -659,7 +659,9 @@ ScreenshotHelper.prototype = {
          soundTimerInterval: 'dialog-warning',
          soundShutter: 'camera-shutter',
          sendNotification: true,
-         uploadToImgur: false
+         uploadToImgur: false,
+         useIndex: null,
+         openAfter: false
       };
 
       this.setOptions(params);
@@ -697,6 +699,9 @@ ScreenshotHelper.prototype = {
       else if (mode == SelectionType.INTERACTIVE) {
          this._interactive = true;
          this.selectInteractive();
+      }
+      else if (mode == SelectionType.MONITOR) {
+         this.selectMonitor();
       }
    },
 
@@ -771,12 +776,19 @@ ScreenshotHelper.prototype = {
 
             Main.uiGroup.add_actor(this._timer);
 
-            let monitorWidth = Main.layoutManager.primaryMonitor.width;
-            let monitorHeight = Main.layoutManager.primaryMonitor.height;
+            let monitor;
+            if (this._params.useIndex != null) {
+               monitor = Main.layoutManager.monitors[this._params.useIndex];
+            }
+            else {
+               monitor = Main.layoutManager.primaryMonitor;
+            }
+
+            global.log(monitor);
             
             this._timer.set_position(
-              (monitorWidth / 2 + Main.layoutManager.primaryMonitor.x),
-              (monitorHeight / 2 + Main.layoutManager.primaryMonitor.y)
+              (monitor.width / 2 + monitor.x),
+              (monitor.height / 2 + monitor.y)
             );
 
             this._timer.set_anchor_point_from_gravity(Clutter.Gravity.CENTER);
@@ -820,6 +832,7 @@ ScreenshotHelper.prototype = {
    },
 
    flash: function(x, y, width, height) {
+      global.log('flash x:'+x+' y:'+y+' w:'+width+' h:'+height);
       let flashspot = new Flashspot.Flashspot({ x : x, y : y, width: width, height: height});
       global.f = flashspot;
       flashspot.fire();
@@ -843,6 +856,12 @@ ScreenshotHelper.prototype = {
       })));
    },
 
+   selectMonitor: function() {
+      this.captureTimer(this._params, Lang.bind(this, Lang.bind(this, function() {
+         this.screenshotMonitor();
+      })));
+   },
+   
    selectCinnamon: function() {
       this._modal = true;
       this._target = null;
@@ -1136,6 +1155,36 @@ ScreenshotHelper.prototype = {
       return true;
    },
 
+   screenshotMonitor: function(options) {
+      global.log('screenshotScreen()');
+
+      let opts = this.getParams(options);
+      let filename = this.getFilename(opts);
+
+      let monitor = Main.layoutManager.monitors[opts.useIndex];
+      
+      // Call capture back-end.
+      let screenshot = new Cinnamon.Screenshot();
+      screenshot.screenshot_area (opts.includeCursor, 
+                                  monitor.x, monitor.y, 
+                                  monitor.width, monitor.height, 
+                                  filename,
+         Lang.bind(this, function() {
+            this.runCallback({
+               x: monitor.x,
+               y: monitor.y,
+               width: monitor.width,
+               height: monitor.height,
+               file: filename,
+               options: opts
+            });
+         }));
+
+      return true;
+   },
+
+   
+
    screenshotCinnamon: function(actor, stageX, stageY, options) {
       global.log('screenshotCinnamon() [actor,stageX,stageY]');
 
@@ -1281,7 +1330,7 @@ ScreenshotHelper.prototype = {
       screenshot.outputFilename = fileCapture.get_basename();
       screenshot.outputDirectory = fileCapture.get_parent().get_path();
 
-      if (screenshot.options.useFlash) {
+      if (1==1 || screenshot.options.useFlash) {
          if (this._selectionType == SelectionType.WINDOW
           && screenshot.window.get_meta_window().get_title() != _('Desktop')
           && screenshot.options.padWindowFlash) {
@@ -1324,8 +1373,8 @@ ScreenshotHelper.prototype = {
          }
          else if (screenshot.options.copyToClipboard) {
             St.Clipboard.get_default().set_text(screenshot.file);
-            global.cancel_theme_sound(SOUND_ID);
-            global.play_theme_sound(SOUND_ID, 'bell');
+            //global.cancel_theme_sound(SOUND_ID);
+            //global.play_theme_sound(SOUND_ID, 'bell');
          }
 
          if (screenshot.options.sendNotification) {
@@ -1353,15 +1402,23 @@ ScreenshotHelper.prototype = {
 
             source.notify(notification);
          }
+
+         if (screenshot.options.openAfter) {
+            try {
+               Gio.app_info_launch_default_for_uri('file://' + screenshot.outputDirectory,
+                  global.create_app_launch_context());
+            }
+            catch (e) {
+               Util.spawn(['gvfs-open', screenshot.outputDirectory]);
+            }
+         }
       }
       
       return true;
    },
 
    abort: function() {
-      //global.log('abort()');
       this.reset();
-
       return true;
    },
 

@@ -28,9 +28,11 @@ const Gtk = imports.gi.Gtk;
 
 const Capture = imports.ui.appletManager.applets["capture@rjanja"];
 const Screenshot = Capture.screenshot;
+const Preview = Capture.preview;
 const AppletDir = imports.ui.appletManager.appletMeta["capture@rjanja"].path;
 const SUPPORT_FILE = AppletDir + '/support.json';
 const SETTINGS_FILE = AppletDir + '/settings.json';
+const ICON_FILE = AppletDir + '/retro-icon-mint.png';
 
 const CAMERA_PROGRAM_GNOME = 'gnome-screenshot';
 const KEY_GNOME_SCREENSHOT_SCHEMA = "org.gnome.gnome-screenshot"
@@ -249,6 +251,7 @@ MyApplet.prototype = {
       this._modifiers = {};
       let oldCamera = this._cameraProgram;
       let oldRecorder = this._recorderProgram;
+      let oldIcon = this._useSymbolicIcon;
 
       let settingsFile = GLib.build_filenamev([SETTINGS_FILE]);
       try {
@@ -289,6 +292,7 @@ MyApplet.prototype = {
       this._includeStyles = this._settings['include-styles'];
       this._modActivatesTimer = this._settings['mod-activates-timer'];
       this._uploadToImgur = this._settings['upload-to-imgur'];
+      this._useSymbolicIcon = this._settings['use-symbolic-icon'];
 
       if (this._cameraProgram == 'none')
       {
@@ -301,7 +305,8 @@ MyApplet.prototype = {
       }
 
       // Were we called due to a settings change, or by init?
-      if (oldCamera != this._cameraProgram || oldRecorder != this._recorderProgram)
+      if (oldCamera != this._cameraProgram || oldRecorder != this._recorderProgram
+       || oldIcon != this._useSymbolicIcon)
       {
          if (this._programSupport['camera'] !== undefined)
          {
@@ -367,7 +372,7 @@ MyApplet.prototype = {
 
    _init: function(orientation) {
       Applet.IconApplet.prototype._init.call(this, orientation);
-
+      
       try {
          this._programs = {};
          this._programSupport = {};
@@ -380,6 +385,7 @@ MyApplet.prototype = {
          this._crFileExtension = null;
          this._crPipeline = null;
          this._redoMenuItem = null;
+         this._useSymbolicIcon = false;
          this.lastCapture = null;
 
          // Load up our settings
@@ -411,10 +417,14 @@ MyApplet.prototype = {
          let xfixesCursor = Cinnamon.XFixesCursor.get_for_stage(global.stage);
          this._xfixesCursor = xfixesCursor;
 
-         this.set_applet_icon_symbolic_name("camera-photo-symbolic");
+         
+         
          this.set_applet_tooltip(_("Screenshot and desktop video"));
 
          this.draw_menu(orientation);
+
+         // When monitors are connected or disconnected, redraw the menu
+         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this.draw_menu));
 
          // Add the right-click context menu item. This only needs
          // to be drawn a single time.
@@ -422,7 +432,6 @@ MyApplet.prototype = {
            'system-run', Lang.bind(this, this._launch_settings));
 
          this._applet_context_menu.addMenuItem(this.settingsItem);
-
       }
       catch (e) {
          global.logError(e);
@@ -462,6 +471,14 @@ MyApplet.prototype = {
       this._contentSection = new PopupMenu.PopupMenuSection();
       this.menu.addMenuItem(this._contentSection);
 
+      // Honor user's choice between the new colored icon and the old one.
+      if (this._useSymbolicIcon == 1) {
+         this.set_applet_icon_symbolic_name("camera-photo-symbolic");
+      }
+      else {
+         this.set_applet_icon_path(ICON_FILE);
+      }
+
       if (this.has_camera()) {
          this._outputTitle = new TextImageMenuItem(_("Camera"), "camera-photo", false, "right", "sound-volume-menu-item");
          this.menu.addMenuItem(this._outputTitle);
@@ -479,6 +496,16 @@ MyApplet.prototype = {
             this.menu.addAction(this.indent(_("Screen")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.SCREEN, e);
             }));
+
+            if (Main.layoutManager.monitors.length > 1) {
+               Main.layoutManager.monitors.forEach(function(monitor, index) {
+                  this.menu.addAction(this.indent(_("Monitor %d").format(index + 1)), 
+                   Lang.bind(this, function(e) {
+                     return this.run_cinnamon_camera(Screenshot.SelectionType.MONITOR, e, index);
+                  }));
+                }, this);
+            }
+
             this.menu.addAction(this.indent(_("Interactive")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
             }));
@@ -487,6 +514,11 @@ MyApplet.prototype = {
             if (this.lastCapture === null) {
                this._redoMenuItem.actor.hide();
             }
+
+            // @todo add preview menu once preview app is finished
+            //this.menu.addAction(this.indent(_("Preview last capture")), Lang.bind(this, function(e) {
+            //}));
+            
          }
          else {
 
@@ -707,7 +739,7 @@ MyApplet.prototype = {
       }
    },
 
-   run_cinnamon_camera: function(type, event) {
+   run_cinnamon_camera: function(type, event, index) {
       let enableTimer = this._modActivatesTimer ? this.getModifier(Clutter.Shift_L) : this._delay > 0;
 
       new Screenshot.ScreenshotHelper(type, Lang.bind(this, this.cinnamon_camera_complete),
@@ -726,7 +758,9 @@ MyApplet.prototype = {
             soundShutter: 'camera-shutter',
             sendNotification: this._sendNotification,
             filename: this.get_camera_filename(type),
-            uploadToImgur: this._uploadToImgur
+            uploadToImgur: this._uploadToImgur,
+            useIndex: index,
+            openAfter: this._openAfter
          });
       return true;
    },
@@ -779,10 +813,6 @@ MyApplet.prototype = {
        }
 
        this._update_cinnamon_recorder_status(actor);
-
-       //label.set_text(newLabel);
-
-       //global.screen.emit('toggle-recording');
    },
 
    _launch_settings: function() {

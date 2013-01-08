@@ -392,6 +392,23 @@ transparency or otherwise will also be captured.</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkCheckButton" id="cb_symbolic_icon">
+                            <property name="label" translatable="yes">Use symbolic icon (black and white)</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="xalign">0</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -506,7 +523,22 @@ transparency or otherwise will also be captured.</property>
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
+                          <object class="GtkCheckButton" id="cb_open_after">
+                            <property name="label" translatable="yes">Open file manager after capturing</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">Whether to open a file manager each time an image is captured. Note that if desktop notifications are enabled above, you can click the notification itself to open a file manager.</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="xalign">0</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>

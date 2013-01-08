@@ -153,6 +153,16 @@ class MyWindow(Gtk.Window):
         settingsKey = self.checkboxMap[buttonId]
         set_settings_key(settingsKey, button.get_active())
 
+        if settingsKey == 'use-symbolic-icon':
+            self.check_set_icon()
+
+    def check_set_icon(self):
+        if get_settings_key('use-symbolic-icon'):
+            self.window.set_icon_name('camera-photo-symbolic')
+        else:
+            self.window.set_icon_name('')
+            self.window.set_icon_from_file("retro-icon-mint.png")
+
     def __init__(self):
         self.builder = Gtk.Builder()
         self.builder.add_from_file(os.path.dirname(os.path.abspath(__file__)) + "/settings.ui")
@@ -185,6 +195,10 @@ class MyWindow(Gtk.Window):
         self.recorderSaveDir = get_settings_key('recorder-save-dir')
         self.cameraSavePrefix = get_settings_key('camera-save-prefix')
         self.recorderSavePrefix = get_settings_key('recorder-save-prefix')
+        self.useSymbolicIcon = get_settings_key('use-symbolic-icon');
+
+        self.check_set_icon()
+        
 
         self.camera_save_name.set_text(self.cameraSavePrefix)
         self.recorder_save_name.set_text(self.recorderSavePrefix)
@@ -200,7 +214,9 @@ class MyWindow(Gtk.Window):
             'cb_copy_clipboard': 'copy-to-clipboard',
             'cb_send_notification': 'send-notification',
             'cb_mod_timer': 'mod-activates-timer',
-            'cb_include_styles': 'include-styles'
+            'cb_include_styles': 'include-styles',
+            'cb_open_after': 'open-after',
+            'cb_symbolic_icon': 'use-symbolic-icon'
         }
 
         for x in self.checkboxMap:
