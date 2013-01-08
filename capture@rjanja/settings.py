@@ -67,6 +67,12 @@ def save_settings():
     f.write(json.dumps(settings, sort_keys=False, indent=3))
     f.close()
 
+def get_resource_path(rel_path):
+    dir_of_py_file = os.path.dirname(__file__)
+    rel_path_to_resource = os.path.join(dir_of_py_file, rel_path)
+    abs_path_to_resource = os.path.abspath(rel_path_to_resource)
+    return abs_path_to_resource
+
 class MyWindow(Gtk.Window):
     def camera_changed(self, widget):
         tree_iter = widget.get_active_iter()
@@ -161,7 +167,7 @@ class MyWindow(Gtk.Window):
             self.window.set_icon_name('camera-photo-symbolic')
         else:
             self.window.set_icon_name('')
-            self.window.set_icon_from_file("retro-icon-mint.png")
+            self.window.set_icon_from_file(get_resource_path("retro-icon-mint.png"))
 
     def __init__(self):
         self.builder = Gtk.Builder()
@@ -195,10 +201,6 @@ class MyWindow(Gtk.Window):
         self.recorderSaveDir = get_settings_key('recorder-save-dir')
         self.cameraSavePrefix = get_settings_key('camera-save-prefix')
         self.recorderSavePrefix = get_settings_key('recorder-save-prefix')
-        self.useSymbolicIcon = get_settings_key('use-symbolic-icon');
-
-        self.check_set_icon()
-        
 
         self.camera_save_name.set_text(self.cameraSavePrefix)
         self.recorder_save_name.set_text(self.recorderSavePrefix)
@@ -297,6 +299,8 @@ class MyWindow(Gtk.Window):
         self.dropdown_recorder.pack_start(cell, True)
         self.dropdown_recorder.add_attribute(cell, "text", 0)
         self.dropdown_recorder.connect('changed', self.recorder_changed)
+
+        self.check_set_icon()
 
         self.window.show()
 
