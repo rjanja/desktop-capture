@@ -1,6 +1,127 @@
 {
-"uuid": "capture@rjanja",
-"name": "Desktop Capture",
-"description": "Screenshot and screencasting tools",
-"icon": "applets-screenshooter"
+   "uuid": "capture@rjanja",
+   "name": "Desktop Capture",
+   "description": "Screenshot and screencasting tools",
+   "icon": "applets-screenshooter",
+   "homepage": "https://github.com/rjanja/desktop-capture",
+   "version": "1.0",
+   "timestamp": "",
+   "settings": {
+      "camera-program": {
+         "value": "cinnamon",
+         "type": "string",
+         "description": "Preferred screen capture program"
+      },
+      "recorder-program": {
+         "value": "cinnamon",
+         "type": "string",
+         "description": "Preferred screen recorder program"
+      },
+      "include-cursor": {
+         "value": false,
+         "type": "boolean",
+         "description": "Whether to include mouse cursor in screenshot"
+      },
+      "open-after": {
+         "value": false,
+         "type": "boolean",
+         "description": "Whether to open the screenshot in file manager"
+      },
+      "delay-seconds": {
+         "value": 2,
+         "type": "integer",
+         "description": "How many seconds to wait before taking a screenshot"
+      },
+      "camera-save-dir": {
+         "value": "~/Pictures/screenshots",
+         "type": "path",
+         "description": "Save location for screen grabs"
+      },
+      "recorder-save-dir": {
+         "value": "~/Videos/screencasts",
+         "type": "path",
+         "description": "Save location for screen recordings"
+      },
+      "camera-save-prefix": {
+         "value": "screenshot-%TYPE-%Y-%M-%D-%H%I%S",
+         "type": "string",
+         "description": "Filename format for screen grabs"
+      },
+      "recorder-save-prefix": {
+         "value": "screencast-%Y-%M-%D-%H%I%S",
+         "type": "string",
+         "description": "Filename format for screen recordings"
+      },
+      "capture-window-as-area": {
+         "value": false,
+         "type": "boolean",
+         "description": "Whether to use area selection for window captures"
+      },
+      "include-window-frame": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to include the window frame and titlebar in window captures"
+      },
+      "use-camera-flash": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to show a bright flash over the capture area"
+      },
+      "show-capture-timer": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to show the timer on the screen"
+      },
+      "play-shutter-sound": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to play the shutter sound as the capture is made"
+      },
+      "play-timer-interval-sound": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to play the timer interval sound as the timer counts down"
+      },
+      "copy-to-clipboard": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to copy path/filename of screenshots to clipboard after capture"
+      },
+      "upload-to-imgur": {
+         "value": false,
+         "type": "boolean",
+         "description": "Whether to upload all captures to imgur.com",
+         "help": "If enabled, all captures will be uploaded to imgur. The view and delete URLs for each capture are stored in a file imgur.log in the capture save directory."
+      },
+      "send-notification": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to send a notification to desktop after capture"
+      },
+      "include-styles": {
+         "value": false,
+         "type": "boolean",
+         "description": "Whether to include CSS selection styles in Cinnamon UI screenshots"
+      },
+      "mod-activates-timer": {
+         "value": false,
+         "type": "boolean",
+         "description": "Whether to only activate timer when Shift key is held"
+      },
+      "last-selected-page": {
+         "value": 0,
+         "type": "integer",
+         "description": "Last selected page (tab index) of settings application"
+      },
+      "last-selected-subpage": {
+         "value": 0,
+         "type": "integer",
+         "description": "Last selected sub-page (tab index) of settings application"
+      },
+      "use-symbolic-icon": {
+         "value": true,
+         "type": "boolean",
+         "description": "Whether to use symbolic (black and white) icon for applet"
+      }
+   }
 }
