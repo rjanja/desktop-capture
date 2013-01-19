@@ -28,7 +28,6 @@ const Gtk = imports.gi.Gtk;
 
 const Capture = imports.ui.appletManager.applets["capture@rjanja"];
 const Screenshot = Capture.screenshot;
-const Preview = Capture.preview;
 const AppletDir = imports.ui.appletManager.appletMeta["capture@rjanja"].path;
 const SUPPORT_FILE = AppletDir + '/support.json';
 const SETTINGS_FILE = AppletDir + '/settings.json';
