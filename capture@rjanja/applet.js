@@ -235,9 +235,14 @@ TextImageMenuItem.prototype = {
 }
 
 function getSettings(schema) {
-   if (Gio.Settings.list_schemas().indexOf(schema) == -1)
-      throw _("Schema \"%s\" not found.").format(schema);
-   return new Gio.Settings({ schema: schema });
+   try {
+      if (Gio.Settings.list_schemas().indexOf(schema) == -1)
+         throw _("Schema \"%s\" not found.").format(schema);
+      return new Gio.Settings({ schema: schema });
+   }
+   catch (e) {
+      return null;
+   }
 }
 
 function MyApplet(orientation) {
@@ -592,7 +597,8 @@ MyApplet.prototype = {
             this._includeCursor = v;
             this.setSettingsKey('include-cursor', v);
             
-            if (this.get_camera_program() == CAMERA_PROGRAM_GNOME) {
+            if (this.get_camera_program() == CAMERA_PROGRAM_GNOME
+             && null !== this._ssSettings) {
                // We can't pass a cursor option to gnome-screenshot,
                // so we modify its settings instead.
                this._ssSettings.set_boolean(KEY_GNOME_INCLUDE_CURSOR, v);
@@ -619,7 +625,8 @@ MyApplet.prototype = {
 
             this.setSettingsKey('delay-seconds', parseInt(this._delay));
 
-            if (this.get_camera_program() == CAMERA_PROGRAM_GNOME) {
+            if (this.get_camera_program() == CAMERA_PROGRAM_GNOME
+             && null !== this._ssSettings) {
                // We can't pass a delay option to gnome-screenshot,
                // so we modify its settings instead.
                this._ssSettings.set_int(KEY_GNOME_DELAY_SECONDS, parseInt(this._delay));
