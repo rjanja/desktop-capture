@@ -49,7 +49,7 @@ For recorder/screencast programs, there is no similar list of "supported" featur
 
 ### Thanks
 * The Linux Mint development team and contributors for all of their efforts!
-* infektedpc, who developed the very first screenshot applet for Cinnamon (as a teenager!)
+* infektedpc, who developed the very first screenshot applet for Cinnamon!
 * Ben Scholzen, author of Shell's Area Screenshot extension, from which area selection and timer have been integrated and improved upon.
 * The author(s) of Shell's capture backend.
 * GNOME for all their work adding some really great features we can all enjoy, despite some misguided attempts to remove features we still use.
