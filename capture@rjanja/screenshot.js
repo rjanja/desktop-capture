@@ -895,6 +895,7 @@ ScreenshotHelper.prototype = {
 
       this.captureTimer(this._params, Lang.bind(this, Lang.bind(this, function() {
          global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
+         this.showInstructions();
          this._capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
       })));
    },
@@ -1002,13 +1003,79 @@ ScreenshotHelper.prototype = {
       this.container.add_actor(this.handle7);
       this.container.add_actor(this.handle8);
 
+      
       this.initializeShadow();
       this.drawShadows(0, 0, 0, 0);
+
+      this.showInstructions();
 
       global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
 
       this._capturedEventId = global.stage.connect('captured-event', Lang.bind(this, this._onCapturedEvent));
 
+   },
+
+   hideInstructions: function() {
+      if (this.instructionsContainer && this.instructionsContainer !== null) {
+         Main.uiGroup.remove_actor(this.instructionsContainer);
+         this.instructionsContainer.destroy();
+         this.instructionsContainer = null;
+         return true;
+      } 
+      else {
+         return false;
+      }
+   }, 
+
+   showInstructions: function() {
+      this.instructionsContainer = new St.Group({
+         reactive: false,
+         style_class: 'instructions-container'
+      });
+
+      Main.uiGroup.add_actor(this.instructionsContainer);
+
+      let monitor = Main.layoutManager.primaryMonitor;
+      let [startX, startY] = [monitor.x, monitor.height / 2 + monitor.y];
+
+      function instructionHeader(container, labelText) {
+         let label = new St.Label({
+            text: labelText,
+            style_class: 'instructions'
+         });
+         container.add_actor(label);
+         label.set_position(startX, startY);
+         label.set_size(monitor.width, 50);
+         return true;
+      }
+
+      let subCount = 0;
+      function instructionSub(container, labelText) {
+         subCount++;
+         let label = new St.Label({
+            text: labelText,
+            style_class: 'instructions-sub'
+         });
+         container.add_actor(label);
+         label.set_position(startX, startY + (subCount * 50));
+         label.set_size(monitor.width, 30);
+         return true;
+      }
+
+      if (this._selectionType == SelectionType.AREA) {
+         startY -= 140; // 30*3 + 50
+         instructionHeader(this.instructionsContainer, _("Click and drag to select an area for capture"));
+         instructionSub(this.instructionsContainer, _("Arrow keys move the selection"));
+         instructionSub(this.instructionsContainer, _("Holding SHIFT, arrow keys resize the selection"));
+         instructionSub(this.instructionsContainer, _("Press ENTER or KP_RETURN to complete the capture, or ESC to cancel"));
+      }
+      else if (this._selectionType == SelectionType.CINNAMON) {
+         startY -= 140;
+         instructionHeader(this.instructionsContainer, _("Move mouse over a UI element to select it"));
+         instructionSub(this.instructionsContainer, _("Mousewheel traverses through parent elements"));
+         instructionSub(this.instructionsContainer, _("Holding SHIFT, clicks pass through to UI"));
+         instructionSub(this.instructionsContainer, _("Click to complete the capture, or ESC to cancel"));
+      }
    },
 
    initializeShadow: function() {
@@ -1449,6 +1516,8 @@ ScreenshotHelper.prototype = {
          this.shadowContainer.destroy();
       }
 
+      this.hideInstructions();
+      
       if (this._timer) {
          Main.uiGroup.remove_actor(this._timer);
          this._timer.destroy();
@@ -1550,6 +1619,7 @@ ScreenshotHelper.prototype = {
       let type = event.type();
 
       if (type == Clutter.EventType.KEY_PRESS) {
+         this.hideInstructions();
          let sym = event.get_key_symbol();
          if (sym == Clutter.Escape) {
             global.log("Aborting screenshot.");
@@ -1637,6 +1707,8 @@ ScreenshotHelper.prototype = {
          }
       }
       else if (type == Clutter.EventType.BUTTON_PRESS) {
+         this.hideInstructions();
+
          if (event.get_button() != 1) {
              return true;
          }
@@ -1737,6 +1809,7 @@ ScreenshotHelper.prototype = {
          this._updateCinnamon(event);
       }
       else if (type == Clutter.EventType.SCROLL && this._selectionType == SelectionType.CINNAMON) {
+         this.hideInstructions();
          switch (event.get_scroll_direction()) {
          case Clutter.ScrollDirection.UP:
             // select parent

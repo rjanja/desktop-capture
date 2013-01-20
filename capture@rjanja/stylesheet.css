@@ -95,108 +95,14 @@
    
 }
 
-/*.delay-chooser {
-    spacing: .4em;
-    color: inherit;
+.instructions {
+   text-align: center;
+   font-size: 28px;
+   text-shadow: 2px 1px 1px #333;
 }
-
-.delay-chooser .popup-menu-item,
-.delay-chooser-combo .popup-menu-item {
-    padding: .4em;
+.instructions-sub {
+   text-align: center;
+   font-size: 22px;
+   color: #ffc;
+   text-shadow: 2px 1px 1px #333;
 }
-
-.delay-chooser-user-icon {
-    border: 2px solid #8b8b8b;
-    border-radius: 5px;
-    width: 48pt;
-    height: 48pt;
-}
-
-.delay-chooser-user-icon:hover {
-    border: 2px solid #bbbbbb;
-}
-
-.delay-chooser-user-name {
-    font-weight: bold;
-    font-size: 1.3em;
-    min-width: 120pt;
-}
-
-.delay-chooser-combo {
-    border: 1px solid transparent;
-}
-
-
-
-.delay-chooser-combo.popup-combo-menu {
-    background-color: rgba(0,0,0,0.7);
-    padding: .4em 0em;
-    border-radius: 4px;
-    border: 1px solid #5f5f5f;
-    color: inherit;
-}
-
-.delay-chooser-status-item,
-.delay-chooser-combo .popup-combobox-item {
-    spacing: .4em;
-}*/
-
-/*.popup-slider-menu-item {
-    height: 1em;
-    width: 5px;
-    max-width: 5px;
-    color: #eae3d1;
-    background-color: #ff0;
-      overflow: hidden;
-}*/
-
-/*.popup-sub-menu {
-   background: #ff0;
-   }
-
-.popup-menu-item {
-    padding: 0;
-    spacing: 0;
-}
-.toggle-switch {
-    width: 64px;
-    height: 22px;
-}
-.popup-sub-menu .popup-menu-item {
-   background-color: #336699;
-   }
-.popup-sub-menu .popup-switch-menu-bin {
-   background-color: #993399;
-   padding-right: 22px;
-   }
-.popup-switch-menu-bin2 {
-   background-color: #993399;
-   text-align: left;
-   padding: 0;
-   padding-right: 30px;
-   }
-.popup-switch-menu-bin * {
-   background-color: #663366;
-   text-align: left;
-   padding: 0;
-   
-   }
-.popup-switch-menu-label {
-    color: #ff0000;
-    background-color: #00ff00;
-}
-
-.popup-sub-menu .popup-menu-item:rtl {
-
-    padding: 0;
-}
-
-.popup-sub-menu .toggle-switch {
-   background-color: #ffff00;
-   text-align: left;
-   color: #0000ff;
-   width: auto;
-   margin: 0 auto;
-   padding: 0;
-   }
-*/
