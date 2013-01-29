@@ -26,7 +26,7 @@ const Lang = imports.lang;
 const St = imports.gi.St;
 const Gtk = imports.gi.Gtk;
 
-let uuid = 'capture-dev@rjanja';
+let uuid = 'capture@rjanja';
 
 const Capture = imports.ui.appletManager.applets[uuid];
 const Screenshot = Capture.screenshot;
