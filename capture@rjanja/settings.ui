@@ -257,6 +257,7 @@
                       <object class="GtkBox" id="box2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_top">2</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkCheckButton" id="cb_window_as_area">
@@ -320,6 +321,7 @@ transparency or otherwise will also be captured.</property>
                       <object class="GtkBox" id="box6">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_top">2</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkCheckButton" id="cb_camera_flash">
@@ -429,6 +431,7 @@ transparency or otherwise will also be captured.</property>
                       <object class="GtkBox" id="box8">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_top">2</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkCheckButton" id="cb_play_shutter_sound">
@@ -487,17 +490,45 @@ transparency or otherwise will also be captured.</property>
                       <object class="GtkBox" id="box10">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_top">2</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkCheckButton" id="cb_copy_clipboard">
-                            <property name="label" translatable="yes">Copy screenshot path to clipboard</property>
-                            <property name="use_action_appearance">False</property>
+                          <object class="GtkBox" id="box13">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="use_action_appearance">False</property>
-                            <property name="xalign">0</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkCheckButton" id="cb_copy_clipboard">
+                                <property name="label" translatable="yes">Copy to clipboard</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="xalign">0</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBox" id="dropdown_clipboard_type">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Path: Full "/path/to/file.png" is copied to clipboard.
+Directory: Only "/path/to/" is copied.
+Filename: Only "file.png" is copied.
+Image data: Uses a helper script to store entire image in clipboard.</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">4</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -529,6 +560,8 @@ transparency or otherwise will also be captured.</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_markup" translatable="yes">Whether to open a file manager each time an image is captured. Note that if desktop notifications are enabled above, you can click the notification itself to open a file manager.</property>
                             <property name="tooltip_text" translatable="yes">Whether to open a file manager each time an image is captured. Note that if desktop notifications are enabled above, you can click the notification itself to open a file manager.</property>
                             <property name="use_action_appearance">False</property>
                             <property name="xalign">0</property>

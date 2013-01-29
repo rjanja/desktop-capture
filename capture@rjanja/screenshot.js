@@ -63,6 +63,14 @@ const SelectionTypeStr = {
    6: "interactive"
 }
 
+const ClipboardCopyType = {
+   OFF: 0,
+   DEFAULT: 1,
+   PATH: 1,
+   DIRECTORY: 2,
+   FILENAME: 3,
+   IMAGEDATA: 4
+}
 
 function ImgurDialog(upload) {
    if (_imgurDialog == null) {
@@ -651,7 +659,7 @@ ScreenshotHelper.prototype = {
          includeCursor: true,
          includeStyles: true,
          windowAsArea: false,
-         copyToClipboard: true,
+         copyToClipboard: ClipboardCopyType.DEFAULT,
          playShutterSound: true,
          useTimer: true,
          playTimerSound: true,
@@ -661,7 +669,8 @@ ScreenshotHelper.prototype = {
          sendNotification: true,
          uploadToImgur: false,
          useIndex: null,
-         openAfter: false
+         openAfter: false,
+         clipboardHelper: null
       };
 
       this.setOptions(params);
@@ -1036,7 +1045,13 @@ ScreenshotHelper.prototype = {
       Main.uiGroup.add_actor(this.instructionsContainer);
 
       let monitor = Main.layoutManager.primaryMonitor;
-      let [startX, startY] = [monitor.x, monitor.height / 2 + monitor.y];
+      let [startX, startY] = [monitor.x, monitor.height / 4 + monitor.y + 50];
+
+      let labelWidth = monitor.width / 2,
+          labelHeight = monitor.height / 2;
+
+      this.instructionsContainer.set_size(labelWidth, labelHeight);
+      this.instructionsContainer.set_position(monitor.x + monitor.width / 4, monitor.y + monitor.height / 4);
 
       function instructionHeader(container, labelText) {
          let label = new St.Label({
@@ -1044,8 +1059,8 @@ ScreenshotHelper.prototype = {
             style_class: 'instructions'
          });
          container.add_actor(label);
-         label.set_position(startX, startY);
-         label.set_size(monitor.width, 50);
+         label.set_position(0, startY);
+         label.set_size(labelWidth, 50);
          return true;
       }
 
@@ -1057,8 +1072,8 @@ ScreenshotHelper.prototype = {
             style_class: 'instructions-sub'
          });
          container.add_actor(label);
-         label.set_position(startX, startY + (subCount * 50));
-         label.set_size(monitor.width, 30);
+         label.set_position(0, startY + (subCount * 50));
+         label.set_size(labelWidth, 30);
          return true;
       }
 
@@ -1439,7 +1454,20 @@ ScreenshotHelper.prototype = {
             });
          }
          else if (screenshot.options.copyToClipboard) {
-            St.Clipboard.get_default().set_text(screenshot.file);
+            if (ClipboardCopyType.PATH == screenshot.options.copyToClipboard) {
+               St.Clipboard.get_default().set_text(screenshot.file);
+            }
+            else if (ClipboardCopyType.FILENAME == screenshot.options.copyToClipboard) {
+               St.Clipboard.get_default().set_text(screenshot.outputFilename);
+            }
+            else if (ClipboardCopyType.DIRECTORY == screenshot.options.copyToClipboard) {
+               St.Clipboard.get_default().set_text(screenshot.outputDirectory);
+            }
+            else if (ClipboardCopyType.IMAGEDATA == screenshot.options.copyToClipboard
+                  && screenshot.options.clipboardHelper) {
+               this.runProgram('python '+screenshot.options.clipboardHelper+' '+screenshot.file);
+            }
+            
             //global.cancel_theme_sound(SOUND_ID);
             //global.play_theme_sound(SOUND_ID, 'bell');
          }
@@ -2210,6 +2238,21 @@ ScreenshotHelper.prototype = {
          return true;
       }, null);
       
+      return true;
+   },
+
+   runProgram: function(cmd) {
+      try {
+         let success, argc, argv, pid, stdin, stdout, stderr;
+         [success,argv] = GLib.shell_parse_argv(cmd);
+         [success,pid,stdin,stdout,stderr] =
+           GLib.spawn_async_with_pipes(null,argv,null,GLib.SpawnFlags.SEARCH_PATH,null,null);
+      }
+      catch (e)
+      {
+         global.log(e);
+      }
+
       return true;
    }
 }

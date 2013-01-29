@@ -26,12 +26,15 @@ const Lang = imports.lang;
 const St = imports.gi.St;
 const Gtk = imports.gi.Gtk;
 
-const Capture = imports.ui.appletManager.applets["capture@rjanja"];
+let uuid = 'capture-dev@rjanja';
+
+const Capture = imports.ui.appletManager.applets[uuid];
 const Screenshot = Capture.screenshot;
-const AppletDir = imports.ui.appletManager.appletMeta["capture@rjanja"].path;
+const AppletDir = imports.ui.appletManager.appletMeta[uuid].path;
 const SUPPORT_FILE = AppletDir + '/support.json';
 const SETTINGS_FILE = AppletDir + '/settings.json';
 const ICON_FILE = AppletDir + '/retro-icon-mint.png';
+const CLIPBOARD_HELPER = AppletDir + '/clip.py';
 
 const CAMERA_PROGRAM_GNOME = 'gnome-screenshot';
 const KEY_GNOME_SCREENSHOT_SCHEMA = "org.gnome.gnome-screenshot"
@@ -766,7 +769,8 @@ MyApplet.prototype = {
             filename: this.get_camera_filename(type),
             uploadToImgur: this._uploadToImgur,
             useIndex: index,
-            openAfter: this._openAfter
+            openAfter: this._openAfter,
+            clipboardHelper: CLIPBOARD_HELPER
          });
       return true;
    },

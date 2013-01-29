@@ -102,6 +102,16 @@ class MyWindow(Gtk.Window):
               self.set_recorder_tab(False)
             self.maybe_show_tabs()
 
+    def clipboard_type_changed(self, widget):
+        tree_iter = widget.get_active_iter()
+        if tree_iter != None:
+            model = widget.get_model()
+            value = model[tree_iter][0]
+            set_settings_key('copy-to-clipboard', value)
+            self.copyClipboardType = value
+            self.cbClipboardEnabled.set_active(self.copyClipboardType > 0)
+            print "clipboard value is %d" % value
+
     def fps_changed(self, widget):
         fps = widget.get_value()
         crSettings.set_int('framerate', fps)
@@ -162,6 +172,18 @@ class MyWindow(Gtk.Window):
         if settingsKey == 'use-symbolic-icon':
             self.check_set_icon()
 
+    def clipboard_toggled(self, button):
+        tree_iter = self.dropdown_clipboard_type.get_active_iter()
+        value = 0
+        if tree_iter != None:
+            model =self.dropdown_clipboard_type.get_model()
+            value = model[tree_iter][0]
+        
+        self.copyClipboardType = max(value,1) if button.get_active() else 0
+        set_settings_key('copy-to-clipboard', self.copyClipboardType)
+        print self.copyClipboardType
+        self.dropdown_clipboard_type.set_active(self.copyClipboardType)
+
     def check_set_icon(self):
         if get_settings_key('use-symbolic-icon'):
             self.window.set_icon_name('camera-photo-symbolic')
@@ -176,6 +198,8 @@ class MyWindow(Gtk.Window):
         self.button_cancel = self.builder.get_object("button_cancel")
         self.dropdown_camera = self.builder.get_object("dropdown_camera")
         self.dropdown_recorder = self.builder.get_object("dropdown_recorder")
+        self.dropdown_clipboard_type = self.builder.get_object("dropdown_clipboard_type")
+
         self.fps_spin = self.builder.get_object("fps_spin")
         self.pipeline_input = self.builder.get_object("pipeline_input")
         self.camera_save_dir = self.builder.get_object("camera_save_dir")
@@ -213,7 +237,7 @@ class MyWindow(Gtk.Window):
             'cb_show_timer': 'show-capture-timer',
             'cb_play_shutter_sound': 'play-shutter-sound',
             'cb_play_interval_sound': 'play-timer-interval-sound',
-            'cb_copy_clipboard': 'copy-to-clipboard',
+            #'cb_copy_clipboard': 'copy-to-clipboard',
             'cb_send_notification': 'send-notification',
             'cb_mod_timer': 'mod-activates-timer',
             'cb_include_styles': 'include-styles',
@@ -226,6 +250,29 @@ class MyWindow(Gtk.Window):
             self.checkboxes[x] = self.builder.get_object(x)
             self.checkboxes[x].set_active(currentSetting)
             self.checkboxes[x].connect("toggled", self.checkbox_toggled)
+
+        self.copyClipboardType = get_settings_key('copy-to-clipboard')
+        self.cbClipboardEnabled = self.builder.get_object('cb_copy_clipboard')
+        self.cbClipboardEnabled.set_active(self.copyClipboardType > 0)
+        self.cbClipboardEnabled.connect("toggled", self.clipboard_toggled)
+
+        self.clipboard_list_store = Gtk.ListStore(GObject.TYPE_INT, GObject.TYPE_STRING)
+        self.clipboard_list_store.append([0, _("Disabled")])
+        self.clipboard_list_store.append([1, _("Path and filename")])
+        self.clipboard_list_store.append([2, _("Only Directory")])
+        self.clipboard_list_store.append([3, _("Only Filename")])
+        self.clipboard_list_store.append([4, _("Image data")])
+        self.dropdown_clipboard_type.set_model(self.clipboard_list_store)
+        
+        if isinstance(self.copyClipboardType, bool):
+            self.copyClipboardType = 1 if self.copyClipboardType else 0;
+            set_settings_key('copy-to-clipboard', self.copyClipboardType)
+
+        self.dropdown_clipboard_type.set_active(self.copyClipboardType)
+        cell = Gtk.CellRendererText()
+        self.dropdown_clipboard_type.pack_start(cell, True)
+        self.dropdown_clipboard_type.add_attribute(cell, "text", 1)
+        self.dropdown_clipboard_type.connect('changed', self.clipboard_type_changed)
 
         lastPage = get_settings_key('last-selected-page')
         lastSubPage = get_settings_key('last-selected-subpage')
