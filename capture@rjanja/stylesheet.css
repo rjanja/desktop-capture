@@ -95,6 +95,11 @@
    
 }
 
+.handle {
+   border: 1px solid #000;
+   background-color: rgba(250, 250, 250, 0.5);
+}
+
 .instructions {
    text-align: center;
    font-size: 28px;
