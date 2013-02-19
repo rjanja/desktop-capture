@@ -1,9 +1,9 @@
 {
-   "uuid": "capture@rjanja",
+   "uuid": "capture-dev@rjanja",
    "name": "Desktop Capture",
    "description": "Screenshot and screencasting tools",
-   "icon": "applets-screenshooter",
+   "icon": "retro-icon-mint.png",
    "homepage": "https://github.com/rjanja/desktop-capture",
    "version": "1.0",
-   "timestamp": ""
+   "hide-configuration": false
 }
