@@ -409,8 +409,6 @@ class MyWindow(Gtk.Window):
         if self.recorderApp != "cinnamon":
            self.set_recorder_tab(False)
 
-        self.maybe_show_tabs()
-
         self.notebook.set_current_page(lastPage)
         self.notebookCamera.set_current_page(lastSubPage)
 
