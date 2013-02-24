@@ -2,7 +2,7 @@ Desktop Capture<a name="top">&nbsp;</a>
 ===============
 A comprehensive screenshot and screencasting applet for Cinnamon.
 
-![Applet configured for Cinnamon Screenshot and Recorder](https://raw.github.com/rjanja/desktop-capture/master/img/cinnamon-screenshot.png?login=rjanja&token=2b7eea0e4cbd049e2760a9d9a2c83b3a "Applet configured for Cinnamon Screenshot and Recorder")
+![Applet configured for Cinnamon Screenshot and Recorder](https://raw.github.com/rjanja/desktop-capture/master/img/cinnamon-screenshot.png "Applet configured for Cinnamon Screenshot and FFmpeg Recorder")
 
 ### Intro<a name="intro">&nbsp;</a>
 This project started because I wanted a simple way to choose and switch between capture software packages. I consider screen capture to be one of the more important utilities mostly ignored (inaccessible, featureless) in both Unity and GNOME Shell.
@@ -16,7 +16,7 @@ My favorite capture software has always been Shutter, but when I found it wouldn
 * Options for changing most configuration settings; further customisations are possible via JSON support file - add custom capture entries to compose a menu that works for you. Additional options for controlling screen recorder (frames per second and GStreamer pipeline).
 * Timer delay with optional onscreen countdown and interval sound.
 
-![Applet settings](https://raw.github.com/rjanja/desktop-capture/master/img/cinnamon-screenshot-settings.png?login=rjanja&token=d3758a887e24592e1fdc1163782facd0 "Applet settings")
+![Applet settings](https://raw.github.com/rjanja/desktop-capture/master/img/cinnamon-screenshot-settings.png "Applet settings")
 
 ### Installation<a name="installing">&nbsp;</a>
 * Make sure you have Cinnamon 1.6 or newer
@@ -36,12 +36,13 @@ My favorite capture software has always been Shutter, but when I found it wouldn
 
 ### Still to come<a name="wishlist">&nbsp;</a>
 * Imgur upload options (waiting on account access API)
-* Instructions overlay
+* Cinnamon 1.8 settings support (for preserving settings across installs/upgrades)
+* Separate interactive mode with preview and post-capture options
 
 ### Adding program support<a name="extending">&nbsp;</a>
 A number of program-specific options can be set for your preferred capture program by manually editing the `support.json` file. New programs can be added by creating a new block, just remember not to use trailing commas on the last elements and do not try to add comments as they seem to break the parser.
 
-![Extending](https://raw.github.com/rjanja/desktop-capture/master/img/custom-entries.png?login=rjanja&token=3d94754ee03361f082dbe6e82e774b82 "Extending program support")
+![Extending](https://raw.github.com/rjanja/desktop-capture/master/img/custom-entries.png "Extending program support")
 
 For camera/screenshot programs, a standard set of "supported" features can be enabled. If they are missing, or set to false, they will be considered to be disabled/not present. Custom options can be supplied which will appear after the standard supported options, with the key being the text that shall be shown and the value being the full command to run, including the executable name.
 
