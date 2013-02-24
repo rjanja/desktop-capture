@@ -670,7 +670,8 @@ ScreenshotHelper.prototype = {
          uploadToImgur: false,
          useIndex: null,
          openAfter: false,
-         clipboardHelper: null
+         clipboardHelper: null,
+         selectionHelper: false
       };
 
       this.setOptions(params);
@@ -793,8 +794,6 @@ ScreenshotHelper.prototype = {
                monitor = Main.layoutManager.primaryMonitor;
             }
 
-            global.log(monitor);
-            
             this._timer.set_position(
               (monitor.width / 2 + monitor.x),
               (monitor.height / 2 + monitor.y)
@@ -841,7 +840,7 @@ ScreenshotHelper.prototype = {
    },
 
    flash: function(x, y, width, height) {
-      global.log('flash x:'+x+' y:'+y+' w:'+width+' h:'+height);
+      //global.log('flash x:'+x+' y:'+y+' w:'+width+' h:'+height);
       let flashspot = new Flashspot.Flashspot({ x : x, y : y, width: width, height: height});
       global.f = flashspot;
       flashspot.fire();
@@ -1129,7 +1128,6 @@ ScreenshotHelper.prototype = {
    },
 
    selectWindow: function() {
-      global.log("selectWindow");
       this._modal = true;
       this._mouseDown = false;
       this._outlineBackground = null;
@@ -1220,7 +1218,7 @@ ScreenshotHelper.prototype = {
    },
 
    screenshotScreen: function(options) {
-      global.log('screenshotScreen()');
+      //global.log('screenshotScreen()');
 
       let opts = this.getParams(options);
       let filename = this.getFilename(opts);
@@ -1238,7 +1236,7 @@ ScreenshotHelper.prototype = {
    },
 
    screenshotMonitor: function(options) {
-      global.log('screenshotScreen()');
+      //global.log('screenshotMonitor()');
 
       let opts = this.getParams(options);
       let filename = this.getFilename(opts);
@@ -1268,7 +1266,7 @@ ScreenshotHelper.prototype = {
    
 
    screenshotCinnamon: function(actor, stageX, stageY, options) {
-      global.log('screenshotCinnamon() [actor,stageX,stageY]');
+      //global.log('screenshotCinnamon() [actor,stageX,stageY]');
 
       if (actor.get_paint_visibility() === false) {
          global.log('Actor is not visible. Cancelling screenshot to prevent empty output.');
@@ -1322,11 +1320,18 @@ ScreenshotHelper.prototype = {
    },
 
    screenshotArea: function(x, y, width, height, options) {
-      global.log('screenshotArea(' + x + ', ' + y + ', ' + width + ', ' + height + ') [x,y,w,h]');
+      //global.log('screenshotArea(' + x + ', ' + y + ', ' + width + ', ' + height + ') [x,y,w,h]');
       this.reset();
 
       let opts = this.getParams(options);
       let filename = this.getFilename(opts);
+
+      if (null !== this._callback && opts.selectionHelper === true) {
+         this._callback({
+            x: x, y: y, width: width, height: height,
+            file: filename, options: opts });
+         return false;
+      }
 
       // Call capture back-end.
       let screenshot = new Cinnamon.Screenshot();
@@ -1360,7 +1365,7 @@ ScreenshotHelper.prototype = {
              tracker.disconnect(focusEventId);
          }));
 
-         Main.activateWindow(window.get_meta_window())
+         Main.activateWindow(window.get_meta_window(), global.get_current_time())
 
          return true;
       }
@@ -1371,13 +1376,20 @@ ScreenshotHelper.prototype = {
       let rect = window.get_meta_window().get_outer_rect();
       [width, height, x, y] = [rect.width, rect.height, rect.x, rect.y];
 
-      global.log('screenshotWindow(..) [frame, cursor, flash, filename]');
+      //global.log('screenshotWindow(..) [frame, cursor, flash, filename]');
       this.reset();
 
       let opts = this.getParams(options);
       let filename = this.getFilename(opts);
 
       let screenshot = new Cinnamon.Screenshot();
+
+      if (null !== this._callback && opts.selectionHelper === true) {
+         this._callback({
+            window: window, x: x, y: y, width: width, height: height,
+            file: filename, options: opts });
+         return false;
+      }
 
       this.captureTimer(opts, Lang.bind(this, function() {
          if (opts.windowAsArea) {
@@ -1398,7 +1410,7 @@ ScreenshotHelper.prototype = {
          }
       }), Lang.bind(this, function() {
          // Make sure we have the right window focused.
-         Main.activateWindow(window.get_meta_window())
+         Main.activateWindow(window.get_meta_window(), global.get_current_time())
       }));
 
       return true;
@@ -1412,7 +1424,7 @@ ScreenshotHelper.prototype = {
       screenshot.outputFilename = fileCapture.get_basename();
       screenshot.outputDirectory = fileCapture.get_parent().get_path();
 
-      if (1==1 || screenshot.options.useFlash) {
+      if (screenshot.options.useFlash) {
          if (this._selectionType == SelectionType.WINDOW
           && screenshot.window.get_meta_window().get_title() != _('Desktop')
           && screenshot.options.padWindowFlash) {

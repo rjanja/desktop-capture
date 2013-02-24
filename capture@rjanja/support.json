@@ -33,12 +33,24 @@
          }
       },
       "xwd": {
-         "enabled": false,
+         "enabled": true,
          "title": "XWD",
-         "-append": " | convert - capture.png",
-         "supported": {
-            "window": "",
-            "screen": " --root"
+         "-append": " | convert - {DIRECTORY}/{FILENAME}.png",
+         "supported": {},
+         "custom": {
+            "Window": "#DC_WINDOW_HELPER# bash -c \"xwd -id {X_WINDOW} | convert - {DIRECTORY}/{FILENAME}.png\"",
+            "Screen": "bash -c \"xwd -root | convert - {DIRECTORY}/{FILENAME}.png\""
+         }
+      },
+      "import": {
+         "enabled": true,
+         "title": "ImageMagick",
+         "supported": {},
+         "custom": {
+            "Window": "#DC_WINDOW_HELPER# import -window root -crop {WIDTH}x{HEIGHT}+{X}+{Y} {DIRECTORY}/{FILENAME}.png",
+            "Area": "#DC_AREA_HELPER# import -window root -crop {WIDTH}x{HEIGHT}+{X}+{Y} {DIRECTORY}/{FILENAME}.png",
+            "Root window": "import -window root {DIRECTORY}/{FILENAME}.png",
+            "Screen": "import -window root -display :0.0 -screen {DIRECTORY}/{FILENAME}.png"
          }
       }
    },
@@ -50,20 +62,25 @@
       "ffmpeg": {
         "title": "FFmpeg",
         "enabled": true,
-        "-append": "-s $( xdpyinfo | grep 'dimensions:' | awk '{print $2}' ) -r 30 -qscale 1  -i :0.0 \"$HOME/Videos/$( date +'%b.%d_%I:%M%#p' ).mkv\"",
+        "-sound-on": "-f alsa -ac 2 -i pulse",
+        "-sound-off": "",
         "custom": {
-          "Record app with sound": "-f x11grab -f alsa -ac 2 -i pulse",
-          "Record app without sound": "-f x11grab",
-          "Record screen with sound": "-f alsa -ac 2 -i pulse",
-          "Record screen without sound": "",
+          "Area (Window)": "#DC_WINDOW_HELPER# bash -c \"ffmpeg {SOUND} -f x11grab -s {WIDTH}x{HEIGHT} -r 30 -qscale 1 -i :0.0+{X},{Y} {DIRECTORY}/{FILENAME}.mkv\"",
+          "Area (Select)": "#DC_AREA_HELPER# bash -c \"ffmpeg {SOUND} -f x11grab -s {WIDTH}x{HEIGHT} -r 30 -qscale 1 -i :0.0+{X},{Y} {DIRECTORY}/{FILENAME}.mkv\"",
+          "Screen": "bash -c \"ffmpeg {SOUND} -f x11grab -s {SCREEN_WIDTH}x{SCREEN_HEIGHT} -r 30 -qscale 1 -i :0.0 {DIRECTORY}/{FILENAME}.mkv\"",
           "Stop recording": "killall ffmpeg"
         }
       },
       "gtk-recordmydesktop": {
         "title": "Record My Desktop",
         "enabled": true,
+        "-sound-on": "",
+        "-sound-off": "--no-sound",
         "custom": {
-          "Open recorder": ""
+          "Open GUI": "gtk-recordmydesktop",
+          "Area (Window)": "#DC_WINDOW_HELPER# recordmydesktop {SOUND} -x {X} -y {Y} --width {WIDTH} --height {HEIGHT} -o {DIRECTORY}/{FILENAME}.ogv",
+          "Area (Select)": "#DC_AREA_HELPER# recordmydesktop {SOUND} -x {X} -y {Y} --width {WIDTH} --height {HEIGHT} -o {DIRECTORY}/{FILENAME}.ogv",
+          "Stop recording": "killall recordmydesktop"
         }
       }
    }

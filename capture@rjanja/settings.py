@@ -85,7 +85,7 @@ class MyWindow(Gtk.Window):
               self.set_camera_tab(True)
             else:
               self.set_camera_tab(False)
-            self.maybe_show_tabs()
+            #self.maybe_show_tabs()
 
     def recorder_changed(self, widget):
         tree_iter = widget.get_active_iter()
@@ -100,7 +100,7 @@ class MyWindow(Gtk.Window):
             else:
               self.pipeline_input.set_sensitive(False)
               self.set_recorder_tab(False)
-            self.maybe_show_tabs()
+            #self.maybe_show_tabs()
 
     def clipboard_type_changed(self, widget):
         tree_iter = widget.get_active_iter()
@@ -112,6 +112,11 @@ class MyWindow(Gtk.Window):
             self.cbClipboardEnabled.set_active(self.copyClipboardType > 0)
             print "clipboard value is %d" % value
 
+    def delay_changed(self, widget):
+        delay = int(widget.get_value())
+        set_settings_key('delay-seconds', delay)
+        self.delay = delay
+
     def fps_changed(self, widget):
         fps = widget.get_value()
         crSettings.set_int('framerate', fps)
@@ -120,17 +125,66 @@ class MyWindow(Gtk.Window):
         pipeline = widget.get_text()
         crSettings.set_string('pipeline', pipeline)
 
-    def camera_save_dir_changed(self, widget):
-        save_dir = widget.get_filename()
-        if save_dir != self.cameraSaveDir:
-           set_settings_key('camera-save-dir', save_dir)
-           self.cameraSaveDir = save_dir
+    def directory_filter_func(chooser, info, data):
+        return os.path.isdir(info.filename)
 
-    def recorder_save_dir_changed(self, widget):
-        save_dir = widget.get_filename()
-        if save_dir != self.recorderSaveDir:
-           set_settings_key('recorder-save-dir', save_dir)
-           self.recorderSaveDir = save_dir
+    def on_camera_browse(self, widget):
+        mode = Gtk.FileChooserAction.SELECT_FOLDER
+        string = _("Select a directory to use")
+        dialog = Gtk.FileChooserDialog(string,
+                                       None,
+                                       mode,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        filt = Gtk.FileFilter()
+        filt.set_name(_("Directories"))
+        filt.add_custom(Gtk.FileFilterFlags.FILENAME, self.directory_filter_func, None)
+        dialog.add_filter(filt)
+
+        dialog.set_filename(self.cameraSaveDir)
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            self.camera_save_dir.set_text(filename)
+            self.cameraSaveDir = filename
+            set_settings_key('camera-save-dir', filename)
+        dialog.destroy()
+
+    def on_recorder_browse(self, widget):
+        mode = Gtk.FileChooserAction.SELECT_FOLDER
+        string = _("Select a directory to use")
+        dialog = Gtk.FileChooserDialog(string,
+                                       None,
+                                       mode,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        filt = Gtk.FileFilter()
+        filt.set_name(_("Directories"))
+        filt.add_custom(Gtk.FileFilterFlags.FILENAME, self.directory_filter_func, None)
+        dialog.add_filter(filt)
+
+        dialog.set_filename(self.cameraSaveDir)
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            self.recorder_save_dir.set_text(filename)
+            self.recorderSaveDir = filename
+            set_settings_key('recorder-save-dir', filename)
+        dialog.destroy()
+
+    #def camera_save_dir_changed(self, widget):
+    #    save_dir = widget.get_filename()
+    #    if save_dir != self.cameraSaveDir:
+    #       set_settings_key('camera-save-dir', save_dir)
+    #       self.cameraSaveDir = save_dir
+
+    #def recorder_save_dir_changed(self, widget):
+    #    save_dir = widget.get_filename()
+    #    if save_dir != self.recorderSaveDir:
+    #       set_settings_key('recorder-save-dir', save_dir)
+    #       self.recorderSaveDir = save_dir
 
     def camera_save_name_changed(self, widget):
         save_prefix = widget.get_text()
@@ -143,12 +197,18 @@ class MyWindow(Gtk.Window):
         self.recorderSavePrefix = save_prefix
 
     def set_camera_tab(self, status=False):
-        page = self.builder.get_object('boxPage2')
-        page.set_sensitive(status)
+        notebook = self.builder.get_object('notebookCamera')
+        notebook.set_sensitive(status)
+        #page = self.builder.get_object('boxPage2')
+        #page.set_sensitive(status)
 
     def set_recorder_tab(self, status=False):
-        page = self.builder.get_object('boxPage3')
-        page.set_sensitive(status)
+        fps = self.builder.get_object('fps_spin')
+        fps.set_sensitive(status)
+        pipeline = self.builder.get_object('pipeline_input')
+        pipeline.set_sensitive(status)
+        #page = self.builder.get_object('boxPage3')
+        #page.set_sensitive(status)
 
     def maybe_show_tabs(self):
         if self.cameraApp != "cinnamon" and self.recorderApp != "cinnamon":
@@ -200,10 +260,14 @@ class MyWindow(Gtk.Window):
         self.dropdown_recorder = self.builder.get_object("dropdown_recorder")
         self.dropdown_clipboard_type = self.builder.get_object("dropdown_clipboard_type")
 
+        self.delay_spin = self.builder.get_object("spin_delay")
+
         self.fps_spin = self.builder.get_object("fps_spin")
         self.pipeline_input = self.builder.get_object("pipeline_input")
         self.camera_save_dir = self.builder.get_object("camera_save_dir")
+        self.camera_save_dir_browse = self.builder.get_object("camera_save_dir_browse")
         self.recorder_save_dir = self.builder.get_object("recorder_save_dir")
+        self.recorder_save_dir_browse = self.builder.get_object("recorder_save_dir_browse")
         self.notebook = self.builder.get_object("notebook")
         self.notebookCamera = self.builder.get_object("notebookCamera")
 
@@ -225,6 +289,7 @@ class MyWindow(Gtk.Window):
         self.recorderSaveDir = get_settings_key('recorder-save-dir')
         self.cameraSavePrefix = get_settings_key('camera-save-prefix')
         self.recorderSavePrefix = get_settings_key('recorder-save-prefix')
+        self.delay = get_settings_key('delay-seconds')
 
         self.camera_save_name.set_text(self.cameraSavePrefix)
         self.recorder_save_name.set_text(self.recorderSavePrefix)
@@ -239,7 +304,7 @@ class MyWindow(Gtk.Window):
             'cb_play_interval_sound': 'play-timer-interval-sound',
             #'cb_copy_clipboard': 'copy-to-clipboard',
             'cb_send_notification': 'send-notification',
-            'cb_mod_timer': 'mod-activates-timer',
+            'cb_use_timer': 'use-timer',
             'cb_include_styles': 'include-styles',
             'cb_open_after': 'open-after',
             'cb_symbolic_icon': 'use-symbolic-icon'
@@ -277,17 +342,27 @@ class MyWindow(Gtk.Window):
         lastPage = get_settings_key('last-selected-page')
         lastSubPage = get_settings_key('last-selected-subpage')
 
+        self.delay_spin.set_value(self.delay)
+        self.delay_spin.connect('changed', self.delay_changed)
+
         self.fps_spin.set_value(fps)
         self.fps_spin.connect('changed', self.fps_changed)
+
         self.pipeline_input.set_text(pipeline)
         self.pipeline_input.connect('changed', self.pipeline_changed)
-        self.camera_save_dir.unselect_all()
-
-        self.camera_save_dir.set_current_folder(self.cameraSaveDir)
-        self.camera_save_dir.connect('current-folder-changed', self.camera_save_dir_changed)
         
-        self.recorder_save_dir.set_current_folder(self.recorderSaveDir)
-        self.recorder_save_dir.connect('current-folder-changed', self.recorder_save_dir_changed)
+        #self.camera_save_dir.unselect_all()
+
+        self.camera_save_dir.set_text(self.cameraSaveDir)
+        self.camera_save_dir_browse.connect("clicked", self.on_camera_browse)
+        self.recorder_save_dir.set_text(self.recorderSaveDir)
+        self.recorder_save_dir_browse.connect('clicked', self.on_recorder_browse)
+
+        #self.camera_save_dir.set_current_folder(self.cameraSaveDir)
+        #self.camera_save_dir.connect('current-folder-changed', self.camera_save_dir_changed)
+        
+        #self.recorder_save_dir.set_current_folder(self.recorderSaveDir)
+        #self.recorder_save_dir.connect('current-folder-changed', self.recorder_save_dir_changed)
 
         self.camera_save_name.connect('changed', self.camera_save_name_changed)
         self.recorder_save_name.connect('changed', self.recorder_save_name_changed)

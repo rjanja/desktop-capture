@@ -291,15 +291,16 @@ MyApplet.prototype = {
       this._windowAsArea = this._settings['capture-window-as-area'];
       this._includeWindowFrame = this._settings['include-window-frame'];
       this._useCameraFlash = this._settings['use-camera-flash'];
+      this._useTimer = this._settings['use-timer'];
       this._showCaptureTimer = this._settings['show-capture-timer'];
       this._playShutterSound = this._settings['play-shutter-sound'];
       this._playIntervalSound = this._settings['play-timer-interval-sound'];
       this._copyToClipboard = this._settings['copy-to-clipboard'];
       this._sendNotification = this._settings['send-notification'];
       this._includeStyles = this._settings['include-styles'];
-      this._modActivatesTimer = this._settings['mod-activates-timer'];
       this._uploadToImgur = this._settings['upload-to-imgur'];
       this._useSymbolicIcon = this._settings['use-symbolic-icon'];
+      this._recordSound = this._settings['record-sound'];
 
       if (this._cameraProgram == 'none')
       {
@@ -335,12 +336,12 @@ MyApplet.prototype = {
    },
 
    getModifier: function(symbol) {
-      global.log('getModifier ' + symbol);
+      //global.log('getModifier ' + symbol);
       return this._modifiers[symbol] || false;
    },
 
    setModifier: function(symbol, value) {
-      global.log('setModifier ' + symbol);
+      //global.log('setModifier ' + symbol);
       this._modifiers[symbol] = value;
    },
 
@@ -379,13 +380,15 @@ MyApplet.prototype = {
 
    _init: function(orientation) {
       Applet.IconApplet.prototype._init.call(this, orientation);
-      
+
       try {
          this._programs = {};
          this._programSupport = {};
          this._includeCursor = false;
          this._openAfter = false;
          this._delay = 0;
+         this._useTimer = false;
+         this._recordSound = true;
          this.orientation = orientation;
          this.cRecorder = null;
          this._crFrameRate = null;
@@ -589,10 +592,6 @@ MyApplet.prototype = {
             }
          }
 
-         // Create a simple options submenu for quickly selecting
-         // most common options.
-         this.optionsMenu = new PopupMenu.PopupSubMenuMenuItem(this.indent(_("Capture options...")));
-
          // OPTION: Include Cursor (toggle switch)
          let optionSwitch = new StubbornSwitchMenuItem(this.indent(_("Include cursor")), this._includeCursor, { style_class: 'bin' });
          optionSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
@@ -607,35 +606,16 @@ MyApplet.prototype = {
             }
             return false;
          }));
-         this.optionsMenu.menu.addMenuItem(optionSwitch);
+         this.menu.addMenuItem(optionSwitch);
 
-         // OPTION: Capture Delay (combo menu)
-         this._inputTitle = new PopupMenu.PopupMenuItem(this.indent(_("Delay")), { reactive: false });
-
-         let item;
-         let activeItemNo = this._delay < 5 ? this._delay : 4;  // set active item
-         item = new StubbornComboMenuItem(this.indent(_("Delay")), activeItemNo,
-          Lang.bind(this, function(e, v) {
-            if (v == 4)
-            {
-               this._delay = 5;
-            }
-            else
-            {
-               this._delay = v;
-            }
-
-            this.setSettingsKey('delay-seconds', parseInt(this._delay));
-
-            if (this.get_camera_program() == CAMERA_PROGRAM_GNOME
-             && null !== this._ssSettings) {
-               // We can't pass a delay option to gnome-screenshot,
-               // so we modify its settings instead.
-               this._ssSettings.set_int(KEY_GNOME_DELAY_SECONDS, parseInt(this._delay));
-            }
+         let timerSwitch = new StubbornSwitchMenuItem(this.indent(_("Use timer")), this._useTimer, { style_class: 'bin' });
+         timerSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
+            this._useTimer = v;
+            this.setSettingsKey('use-timer', v);
+            
+            return false;
          }));
-         this.optionsMenu.menu.addMenuItem(item);
-         this.menu.addMenuItem(this.optionsMenu);
+         this.menu.addMenuItem(timerSwitch);
       }
 
       if (this.has_recorder())
@@ -658,14 +638,26 @@ MyApplet.prototype = {
          }
          else
          {
-             if (this.has_recorder_option('custom'))
-             {
-                let customOptions = this.get_recorder_option('custom');
+            if (this.has_recorder_option('custom'))
+            {
+               let customOptions = this.get_recorder_option('custom');
 
-                for (var title in customOptions) {
-                   this.addCustomRecorderOption(title, customOptions[title]);
-                }
-             }
+               if (this.has_recorder_option('-sound-on') && this.has_recorder_option('-sound-off')) {
+                  let soundSwitch = new StubbornSwitchMenuItem(this.indent(_("Record sound")), this._recordSound, { style_class: 'bin' });
+                  soundSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
+                     this._recordSound = v;
+                     this.setSettingsKey('record-sound', v);
+                     
+                     return false;
+                  }));
+                  this.menu.addMenuItem(soundSwitch);
+               }
+
+               for (var title in customOptions) {
+                  this.addCustomRecorderOption(title, customOptions[title]);
+               }
+
+            }
          }
       }
 
@@ -675,32 +667,47 @@ MyApplet.prototype = {
    },
 
    get_camera_filename: function(type) {
-      if (this._cameraProgram == 'cinnamon') {
-         return this._cameraSaveDir + '/' + this._cameraSavePrefix + '.png';
-      }
-      else {
-         let date = new Date();
-         return this._cameraSaveDir + '/' + 
-          str_replace(
-            ['%Y',
-            '%M',
-            '%D',
-            '%H',
-            '%I',
-            '%S',
-            '%m',
-            '%TYPE'],
-            [date.getFullYear(),
-            this._padNum(date.getMonth() + 1),
-            this._padNum(date.getDate()),
-            this._padNum(date.getHours()),
-            this._padNum(date.getMinutes()),
-            this._padNum(date.getSeconds()),
-            this._padNum(date.getMilliseconds()),
-            Screenshot.SelectionTypeStr[type]
-            ],
-            this._cameraSavePrefix) + '.png';
-      }
+      let date = new Date();
+      return str_replace(
+         ['%Y',
+         '%M',
+         '%D',
+         '%H',
+         '%I',
+         '%S',
+         '%m',
+         '%TYPE'],
+         [date.getFullYear(),
+         this._padNum(date.getMonth() + 1),
+         this._padNum(date.getDate()),
+         this._padNum(date.getHours()),
+         this._padNum(date.getMinutes()),
+         this._padNum(date.getSeconds()),
+         this._padNum(date.getMilliseconds()),
+         Screenshot.SelectionTypeStr[type]
+         ],
+         this._cameraSavePrefix);
+   },
+
+   get_recorder_filename: function(type) {
+      let date = new Date();
+      return str_replace(
+         ['%Y',
+         '%M',
+         '%D',
+         '%H',
+         '%I',
+         '%S',
+         '%m',],
+         [date.getFullYear(),
+         this._padNum(date.getMonth() + 1),
+         this._padNum(date.getDate()),
+         this._padNum(date.getHours()),
+         this._padNum(date.getMinutes()),
+         this._padNum(date.getSeconds()),
+         this._padNum(date.getMilliseconds())
+         ],
+         this._recorderSavePrefix);
    },
 
    _padNum: function(num) {
@@ -709,7 +716,7 @@ MyApplet.prototype = {
 
    redo_cinnamon_camera: function(event) {
       if (this.lastCapture) {
-         this.lastCapture.options.filename = this.get_camera_filename(this.lastCapture.selectionType);
+         this.lastCapture.options.filename = this._cameraSaveDir + '/' + this.get_camera_filename(this.lastCapture.selectionType);
 
          let camera = new Screenshot.ScreenshotHelper(null, null, this.lastCapture.options);
 
@@ -749,7 +756,7 @@ MyApplet.prototype = {
    },
 
    run_cinnamon_camera: function(type, event, index) {
-      let enableTimer = this._modActivatesTimer ? this.getModifier(Clutter.Shift_L) : this._delay > 0;
+      let enableTimer = (this._useTimer && this._delay > 0);
 
       new Screenshot.ScreenshotHelper(type, Lang.bind(this, this.cinnamon_camera_complete),
          { 
@@ -766,7 +773,7 @@ MyApplet.prototype = {
             soundTimerInterval: 'dialog-warning',
             soundShutter: 'camera-shutter',
             sendNotification: this._sendNotification,
-            filename: this.get_camera_filename(type),
+            filename: this._cameraSaveDir + '/' + this.get_camera_filename(type),
             uploadToImgur: this._uploadToImgur,
             useIndex: index,
             openAfter: this._openAfter,
@@ -777,13 +784,13 @@ MyApplet.prototype = {
 
    addCustomCameraOption: function(title, cmd) {
       this.menu.addAction(this.indent(title), Lang.bind(this, function(actor, event) {
-         this.Exec(this.get_custom_camera_command(title));
+         this.runCustomCommand(title, 'camera');
       }));
    },
 
    addCustomRecorderOption: function(title, cmd) {
       this.menu.addAction(this.indent(title), Lang.bind(this, function(actor, event) {
-         this.Exec(this.get_custom_recorder_command(title));
+         this.runCustomCommand(title, 'recorder');
       }));
    },
 
@@ -808,7 +815,7 @@ MyApplet.prototype = {
        }
        else {
           this.cRecorder.set_framerate(this._crFrameRate);
-          this.cRecorder.set_filename('cinnamon-%d%u-%c.' + this._crFileExtension);
+          this.cRecorder.set_filename(this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
 
           let pipeline = this._crPipeline;
           global.log("Pipeline is " + pipeline);
@@ -891,7 +898,7 @@ MyApplet.prototype = {
       if (fnType in supported)
       {
          let cmd = supported[fnType];
-         if (cmd) {
+         if (cmd !== false && cmd !== null) {
             return this.get_camera_program() + ' ' + this.command_replacements(cmd, options, true);
          }
          else {
@@ -956,11 +963,136 @@ MyApplet.prototype = {
          sDelay = this._delay;
       }
 
+      let sDimensions = global.screen_width + 'x' + global.screen_height;
       // Replace tokens from our json support command arguments
       return str_replace(
-         ['{DELAY}', '{CURSOR}'],
-         [sDelay, sCursor],
+         ['{DELAY}', '{CURSOR}', '{SCREEN_DIMENSIONS}', '{RECORDER_DIR}', '{SCREENSHOT_DIR}'],
+         [sDelay, sCursor, sDimensions, this._recorderSaveDir, this._cameraSaveDir],
          cmd);
+   },
+
+   runCustomCommand: function(custom, mode, appendCommand) {
+      let options;
+      if (mode == 'camera') {
+         options = this.get_camera_options();
+      }
+      else {
+         options = this.get_recorder_options();
+      }
+      
+      let cmd = options['custom'][custom];
+
+      if (!cmd) {
+         return "";
+      }
+
+      let psCursorOn = options['-cursor-on'];
+      let psCursorOff = options['-cursor-off'];
+      let psAppend = options['-append'];
+      
+      let sCursor = "", sSound = "", sDelay = "", sDefaults = "";
+
+      if (psCursorOn && this._includeCursor)
+      {
+         sCursor = psCursorOn;
+      }
+      else if (psCursorOff && !this._includeCursor)
+      {
+         sCursor = psCursorOff;
+      }
+
+      let psSoundOn = options['-sound-on'];
+      let psSoundOff = options['-sound-off'];
+
+      if (psSoundOn && this._recordSound) {
+         sSound = psSoundOn;
+      }
+      else if (psSoundOff && !this._recordSound) {
+         sSound = psSoundOff;
+      }
+
+      // Rather than repeating same options in support.json, they can
+      // be made common to all capture modes for that application.
+      if (psAppend && appendCommand == true) {
+         cmd = cmd + ' ' + psAppend;
+      }
+
+      if (this._delay > 0)
+      {
+         sDelay = this._delay;
+      }
+
+      let replacements = {
+         '{DELAY}': sDelay,
+         '{CURSOR}': sCursor,
+         '{SOUND}': sSound,
+         '{DIRECTORY}': mode == 'camera' ? this._cameraSaveDir : this._recorderSaveDir,
+         '{SCREEN_WIDTH}': global.screen_width,
+         '{SCREEN_HEIGHT}': global.screen_height,
+         '{FILENAME}': mode == 'camera' ? this.get_camera_filename() : this.get_recorder_filename()
+      };
+
+      for (var k in replacements) {
+         cmd = cmd.replace(k, replacements[k]);
+      }
+
+      let interactiveCallouts = {
+         '#DC_WINDOW_HELPER#': Screenshot.SelectionType.WINDOW,
+         '#DC_AREA_HELPER#': Screenshot.SelectionType.AREA
+      };
+
+      let helperMode = null;
+      for (var k in interactiveCallouts) {
+         if (cmd.indexOf(k) === 0) {
+            helperMode = interactiveCallouts[k];
+            global.log('Using screenshot helper from capture mode "' + Screenshot.SelectionTypeStr[helperMode] + '"');
+            cmd = cmd.replace(k,'');
+            if (cmd.charAt(0)==' ') {
+               cmd = cmd.substr(1);
+            }
+            break;
+         }
+      }
+
+      if (null !== helperMode) {
+         let ss = new Screenshot.ScreenshotHelper(helperMode, Lang.bind(this, function(vars) {
+            global.res = vars;
+            this.runInteractiveCustom(cmd, vars);
+            
+         }), { selectionHelper: true });
+      }
+      else {
+         global.log('**FINAL CMD IS** '+cmd);
+         this.Exec(cmd);
+      }
+
+      return false;
+   },
+
+   runInteractiveCustom: function(cmd, vars) {
+      //global.log('runInteractiveCustom');
+
+      let replacements = {
+         '{X}': vars['x'],
+         '{Y}': vars['y'],
+         '{X_Y}': vars['x']+','+vars['y'],
+         '{WIDTH}': vars['width'],
+         '{HEIGHT}': vars['height'],
+         
+      };
+
+      if (vars['window']) {
+         replacements['{X_WINDOW}'] = vars.window['x-window']; // Window frame
+         replacements['{WM_CLASS}'] = vars.window.get_meta_window().get_wm_class();
+         replacements['{WINDOW_TITLE}'] = vars.window.get_meta_window().get_title();
+      }
+
+      for (var k in replacements) {
+         cmd = cmd.replace(k, replacements[k]);
+      }
+
+      global.log('**FINAL CMD IS** '+cmd);
+      this.Exec(cmd);
    },
 
    get_program_available: function(program) {
