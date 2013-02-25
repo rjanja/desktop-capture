@@ -773,7 +773,7 @@ MyApplet.prototype = {
             soundTimerInterval: 'dialog-warning',
             soundShutter: 'camera-shutter',
             sendNotification: this._sendNotification,
-            filename: this._cameraSaveDir + '/' + this.get_camera_filename(type),
+            filename: this._cameraSaveDir + '/' + this.get_camera_filename(type) + '.png',
             uploadToImgur: this._uploadToImgur,
             useIndex: index,
             openAfter: this._openAfter,
