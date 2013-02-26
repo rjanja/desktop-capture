@@ -261,7 +261,7 @@ class MyWindow(Gtk.Window):
             self.window.set_icon_name('camera-photo-symbolic')
         else:
             self.window.set_icon_name('')
-            self.window.set_icon_from_file(get_resource_path("retro-icon-mint.png"))
+            self.window.set_icon_from_file(get_resource_path("desktop-capture.png"))
 
     def __init__(self):
         self.builder = Gtk.Builder()

@@ -1,3 +1,7 @@
+StBoxLayout.applet-box.desktop-capture StBin {
+   min-width: 22px;
+}
+
 .capture-outline-background {
    background-color: rgba(60, 120, 80, 0.7);
 }

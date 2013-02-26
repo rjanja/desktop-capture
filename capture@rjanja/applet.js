@@ -33,7 +33,8 @@ const Screenshot = Capture.screenshot;
 const AppletDir = imports.ui.appletManager.appletMeta[uuid].path;
 const SUPPORT_FILE = AppletDir + '/support.json';
 const SETTINGS_FILE = AppletDir + '/settings.json';
-const ICON_FILE = AppletDir + '/retro-icon-mint.png';
+const ICON_FILE = AppletDir + '/desktop-capture.png';
+const ICON_FILE_ACTIVE = AppletDir + '/desktop-capture-active.png';
 const CLIPBOARD_HELPER = AppletDir + '/clip.py';
 
 const CAMERA_PROGRAM_GNOME = 'gnome-screenshot';
@@ -457,12 +458,12 @@ MyApplet.prototype = {
          let xfixesCursor = Cinnamon.XFixesCursor.get_for_stage(global.stage);
          this._xfixesCursor = xfixesCursor;
 
-         
+         this.actor.add_style_class_name('desktop-capture');
          
          this.set_applet_tooltip(_("Screenshot and desktop video"));
 
          this.draw_menu(orientation);
-
+         
          // When monitors are connected or disconnected, redraw the menu
          Main.layoutManager.connect('monitors-changed', Lang.bind(this, this.draw_menu));
 
@@ -698,6 +699,14 @@ MyApplet.prototype = {
 
    get_camera_filename: function(type) {
       let date = new Date();
+      let prefix = this._cameraSavePrefix;
+
+      if (type == undefined) {
+         prefix = prefix.replace('%TYPE_', '');
+         prefix = prefix.replace('%TYPE-', '');
+         prefix = prefix.replace('%TYPE', '');
+      }
+
       return str_replace(
          ['%Y',
          '%M',
@@ -716,7 +725,7 @@ MyApplet.prototype = {
          this._padNum(date.getMilliseconds()),
          Screenshot.SelectionTypeStr[type]
          ],
-         this._cameraSavePrefix);
+         prefix);
    },
 
    get_recorder_filename: function(type) {
@@ -859,28 +868,36 @@ MyApplet.prototype = {
    },
 
    _toggle_cinnamon_recorder: function(actor, event) {
-       if (this.cRecorder.is_recording()) {
-          this.cRecorder.pause();
-          Meta.enable_unredirect_for_screen(global.screen);
-       }
-       else {
-          this.cRecorder.set_framerate(this._crFrameRate);
-          this.cRecorder.set_filename(this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
-          global.log("Capturing screencast to " + this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
+      if (this.cRecorder.is_recording()) {
+         this.cRecorder.pause();
+         Meta.enable_unredirect_for_screen(global.screen);
+      
+         if (!this._useSymbolicIcon) {
+            this.set_applet_icon_path(ICON_FILE);
+         }
+      }
+      else {
+         this.cRecorder.set_framerate(this._crFrameRate);
+         this.cRecorder.set_filename(this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
+         global.log("Capturing screencast to " + this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
 
-          let pipeline = this._crPipeline;
-          global.log("Pipeline is " + pipeline);
+         let pipeline = this._crPipeline;
+         global.log("Pipeline is " + pipeline);
 
-          if (!pipeline.match(/^\s*$/))
-             this.cRecorder.set_pipeline(pipeline);
-          else
-             this.cRecorder.set_pipeline(null);
+         if (!pipeline.match(/^\s*$/))
+            this.cRecorder.set_pipeline(pipeline);
+         else
+            this.cRecorder.set_pipeline(null);
 
-          Meta.disable_unredirect_for_screen(global.screen);
-          this.cRecorder.record();
-       }
+         if (!this._useSymbolicIcon) {
+            this.set_applet_icon_path(ICON_FILE_ACTIVE);
+         }
 
-       this._update_cinnamon_recorder_status(actor);
+         Meta.disable_unredirect_for_screen(global.screen);
+         this.cRecorder.record();
+      }
+
+      this._update_cinnamon_recorder_status(actor);
    },
 
    _launch_settings: function() {
@@ -1119,7 +1136,9 @@ MyApplet.prototype = {
       }
       else {
          global.log('**FINAL CMD IS** '+cmd);
-         this.Exec(cmd);
+         this.TryExec(cmd, Lang.bind(this, this.onProcessSpawned),
+            Lang.bind(this, this.onProcessError),
+            Lang.bind(this, this.onProcessComplete));
       }
 
       return false;
@@ -1148,7 +1167,32 @@ MyApplet.prototype = {
       }
 
       global.log('**FINAL CMD IS** '+cmd);
-      this.Exec(cmd);
+      this.TryExec(cmd, Lang.bind(this, this.onProcessSpawned),
+         Lang.bind(this, this.onProcessError),
+         Lang.bind(this, this.onProcessComplete));
+   },
+
+   onProcessSpawned: function(pid) {
+      if (!this._useSymbolicIcon) {
+         this.set_applet_icon_path(ICON_FILE_ACTIVE);
+      }
+   },
+
+   onProcessError: function(cmd) {
+      if (!this._useSymbolicIcon) {
+         this.set_applet_icon_path(ICON_FILE);
+      }
+      this.Exec('zenity --info --title="Desktop Capture" --text="Command exited with error status:\n\n'
+         + '<span font_desc=\'monospace 10\'>' + cmd.replace('"', '\"') + '</span>"')
+   },
+
+   onProcessComplete: function(status, stdout) {
+      if (!this._useSymbolicIcon) {
+         this.set_applet_icon_path(ICON_FILE);
+      }
+      // @future Check status when we're able to (depends on Cinnamon)
+      //this.Exec('zenity --info --title="Desktop Capture" --text="Command completed, output is:\n\n'
+      //   + '<span font_desc=\'monospace 10\'>' + stdout.replace('"', '\"') + '</span>"')
    },
 
    get_program_available: function(program) {
@@ -1218,19 +1262,30 @@ MyApplet.prototype = {
       return true;
    },
 
-   TryExec: function(cmd, onSuccess, onFailure) {
-      let [success, pid, in_fd, out_fd, err_fd] = GLib.spawn_async_with_pipes(
-         null,
-         cmd,
-         null,
-         GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.DO_NOT_REAP_CHILD,
-         null);
+   TryExec: function(cmd, onStart, onFailure, onComplete) {
+      let success, argv, pid, in_fd, out_fd, err_fd;
+      [success,argv] = GLib.shell_parse_argv(cmd);
 
-      let out_reader = new Gio.DataInputStream({ base_stream: new Gio.UnixInputStream({fd: out_fd}) });
+      try {
+         [success, pid, in_fd, out_fd, err_fd] = GLib.spawn_async_with_pipes(
+            null,
+            argv,
+            null,
+            GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+            null);
+         }
+      catch (e) {
+         onFailure(cmd);
+         return false;
+      }
+
       if (success && pid != 0)
       {
+         let out_reader = new Gio.DataInputStream({ base_stream: new Gio.UnixInputStream({fd: out_fd}) });
          // Wait for answer
          global.log("Created process, pid=" + pid);
+         typeof onStart == 'function' && onStart(pid);
+
          GLib.child_watch_add( GLib.PRIORITY_DEFAULT, pid,
             function(pid,status) {
                GLib.spawn_close_pid(pid);
@@ -1241,13 +1296,13 @@ MyApplet.prototype = {
                   global.log(size);
                   buf += line;
                }
-               typeof onSuccess == 'function' && onSuccess(buf);
+               typeof onComplete == 'function' && onComplete(status, buf);
             });
       }
       else
       {
          global.log("Failed process creation");
-         typeof onFailure == 'function' && onFailure();
+         typeof onFailure == 'function' && onFailure(cmd);
       }
 
       return true;
