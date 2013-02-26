@@ -276,6 +276,7 @@ MyApplet.prototype = {
       this._cameraProgram = this._settings['camera-program'];
       this._recorderProgram = this._settings['recorder-program'];
 
+      // Use special directories if save locations aren't set.
       this._cameraSaveDir = this._settings['camera-save-dir'];
       if (this._cameraSaveDir == "" || this._cameraSaveDir === null) {
          this._cameraSaveDir = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES);
@@ -284,6 +285,19 @@ MyApplet.prototype = {
       this._recorderSaveDir = this._settings['recorder-save-dir'];
       if (this._recorderSaveDir == "" || this._recorderSaveDir === null) {
          this._recorderSaveDir = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_VIDEOS);
+      }
+
+      // Allow save locations to begin with a tilde.
+      let input;
+
+      if (this._cameraSaveDir.charAt(0) == '~') {
+         input = this._cameraSaveDir.slice(1);
+         this._cameraSaveDir = GLib.get_home_dir() + '/' + input;
+      }
+
+      if (this._recorderSaveDir.charAt(0) == '~') {
+         input = this._recorderSaveDir.slice(1);
+         this._recorderSaveDir = GLib.get_home_dir() + '/' + input;
       }
 
       this._cameraSavePrefix = this._settings['camera-save-prefix'];
@@ -816,6 +830,7 @@ MyApplet.prototype = {
        else {
           this.cRecorder.set_framerate(this._crFrameRate);
           this.cRecorder.set_filename(this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
+          global.log("Capturing screencast to " + this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
 
           let pipeline = this._crPipeline;
           global.log("Pipeline is " + pipeline);

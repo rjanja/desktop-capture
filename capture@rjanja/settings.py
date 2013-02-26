@@ -187,13 +187,13 @@ class MyWindow(Gtk.Window):
     #       self.recorderSaveDir = save_dir
 
     def camera_save_dir_changed(self, widget):
-        newdir = widget.get_text()
+        newdir = os.path.expanduser(widget.get_text())
         if (os.path.isdir(newdir)):
             set_settings_key('camera-save-dir', newdir)
             self.cameraSaveDir = newdir
 
     def recorder_save_dir_changed(self, widget):
-        newdir = widget.get_text()
+        newdir = os.path.expanduser(widget.get_text())
         if (os.path.isdir(newdir)):
             set_settings_key('recorder-save-dir', newdir)
             self.recorderSaveDir = newdir
