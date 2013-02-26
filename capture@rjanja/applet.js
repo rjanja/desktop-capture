@@ -143,27 +143,47 @@ StubbornComboMenuItem.prototype = {
    }
 };
 
-function MyAppletPopupMenu(launcher, orientation) {
-    this._init(launcher, orientation);
+function MyAppletPopupMenu(launcher, orientation, animateClose) {
+    this._init(launcher, orientation, animateClose);
 }
 
 MyAppletPopupMenu.prototype = {
-    __proto__: Applet.AppletPopupMenu.prototype,
+   __proto__: Applet.AppletPopupMenu.prototype,
 
-    _init: function(launcher, orientation) {
-        Applet.AppletPopupMenu.prototype._init.call(this, launcher, orientation);
-    },
+   _init: function(launcher, orientation, animateClose) {
+      Applet.AppletPopupMenu.prototype._init.call(this, launcher, orientation);
+      this._animateClose = animateClose;
+   },
 
-    addAction: function(title, callback) {
-        let menuItem = new PopupMenu.PopupMenuItem(title, {  });
-        this.addMenuItem(menuItem);
-        menuItem.connect('activate', Lang.bind(this, function (menuItem, event) {
-            callback(event);
-            return false;
-        }));
+   addAction: function(title, callback) {
+      let menuItem = new MyPopupMenuItem(title, { });
+      this.addMenuItem(menuItem);
+      menuItem.connect('activate', Lang.bind(this, function (menuItem, event) {
+         callback(event);
+         return false;
+      }));
 
-        return menuItem;
-    },
+      return menuItem;
+   },
+
+   close: function(animate) {
+      if (!this.isOpen)
+         return;
+         
+      global.menuStackLength -= 1;
+
+      Main.panel._hidePanel();
+      if (Main.panel2 != null)
+         Main.panel2._hidePanel();
+
+      if (this._activeMenuItem)
+         this._activeMenuItem.setActive(false);
+
+      this._boxPointer.hide(this._animateClose);
+
+      this.isOpen = false;
+      this.emit('open-state-changed', false);
+   }
 }
 
 function MyPopupMenuItem()
@@ -173,14 +193,10 @@ function MyPopupMenuItem()
 
 MyPopupMenuItem.prototype =
 {
-   __proto__: PopupMenu.PopupBaseMenuItem.prototype,
-   _init: function(icon, text, params)
-   {
-      PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
-      this.icon = icon;
-      this.addActor(this.icon);
-      this.label = new St.Label({ text: text });
-      this.addActor(this.label);
+   __proto__: PopupMenu.PopupMenuItem.prototype,
+
+   _init: function (text, params) {
+      PopupMenu.PopupMenuItem.prototype._init.call(this, text, params);
    }
 };
 
@@ -489,7 +505,7 @@ MyApplet.prototype = {
 
    draw_menu: function(orientation) {
       this.menuManager = new PopupMenu.PopupMenuManager(this);
-      this.menu = new MyAppletPopupMenu(this, this.orientation);
+      this.menu = new MyAppletPopupMenu(this, this.orientation, this._useTimer);
       this.menuManager.addMenu(this.menu);
 
       this._contentSection = new PopupMenu.PopupMenuSection();
@@ -626,7 +642,7 @@ MyApplet.prototype = {
          timerSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
             this._useTimer = v;
             this.setSettingsKey('use-timer', v);
-            
+            this.menu._animateClose = v; // Tell the menu not to animate while timer is off
             return false;
          }));
          this.menu.addMenuItem(timerSwitch);
@@ -730,8 +746,9 @@ MyApplet.prototype = {
 
    redo_cinnamon_camera: function(event) {
       if (this.lastCapture) {
-         this.lastCapture.options.filename = this._cameraSaveDir + '/' + this.get_camera_filename(this.lastCapture.selectionType);
+         this.lastCapture.options.filename = this._cameraSaveDir + '/' + this.get_camera_filename(this.lastCapture.selectionType) + '.png';
 
+         this.maybeCloseMenu();
          let camera = new Screenshot.ScreenshotHelper(null, null, this.lastCapture.options);
 
          switch (this.lastCapture.selectionType) {
@@ -772,7 +789,8 @@ MyApplet.prototype = {
    run_cinnamon_camera: function(type, event, index) {
       let enableTimer = (this._useTimer && this._delay > 0);
 
-      new Screenshot.ScreenshotHelper(type, Lang.bind(this, this.cinnamon_camera_complete),
+      let fnCapture = Lang.bind(this, function() {
+         new Screenshot.ScreenshotHelper(type, Lang.bind(this, this.cinnamon_camera_complete),
          { 
             includeCursor: this._includeCursor,
             useFlash: this._useCameraFlash,
@@ -793,7 +811,25 @@ MyApplet.prototype = {
             openAfter: this._openAfter,
             clipboardHelper: CLIPBOARD_HELPER
          });
+
+      });
+
+      if (enableTimer || Screenshot.SelectionType.SCREEN != type) {
+         fnCapture();
+      }
+      else {
+         this.maybeCloseMenu();
+         Mainloop.timeout_add(150, fnCapture);
+      }
+
       return true;
+   },
+
+   maybeCloseMenu: function() {
+      // Make sure we don't get our popup menu in the screenshot
+      if (!this.useTimer) {
+         this.menu.close(false);
+      }
    },
 
    addCustomCameraOption: function(title, cmd) {
@@ -914,6 +950,9 @@ MyApplet.prototype = {
       {
          let cmd = supported[fnType];
          if (cmd !== false && cmd !== null) {
+            // @todo Move this elsewhere when consolidating execution
+            this.maybeCloseMenu();
+
             return this.get_camera_program() + ' ' + this.command_replacements(cmd, options, true);
          }
          else {
@@ -1068,6 +1107,8 @@ MyApplet.prototype = {
             break;
          }
       }
+
+      this.maybeCloseMenu();
 
       if (null !== helperMode) {
          let ss = new Screenshot.ScreenshotHelper(helperMode, Lang.bind(this, function(vars) {
