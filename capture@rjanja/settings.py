@@ -186,6 +186,18 @@ class MyWindow(Gtk.Window):
     #       set_settings_key('recorder-save-dir', save_dir)
     #       self.recorderSaveDir = save_dir
 
+    def camera_save_dir_changed(self, widget):
+        newdir = widget.get_text()
+        if (os.path.isdir(newdir)):
+            set_settings_key('camera-save-dir', newdir)
+            self.cameraSaveDir = newdir
+
+    def recorder_save_dir_changed(self, widget):
+        newdir = widget.get_text()
+        if (os.path.isdir(newdir)):
+            set_settings_key('recorder-save-dir', newdir)
+            self.recorderSaveDir = newdir
+
     def camera_save_name_changed(self, widget):
         save_prefix = widget.get_text()
         set_settings_key('camera-save-prefix', save_prefix)
@@ -363,6 +375,9 @@ class MyWindow(Gtk.Window):
         
         #self.recorder_save_dir.set_current_folder(self.recorderSaveDir)
         #self.recorder_save_dir.connect('current-folder-changed', self.recorder_save_dir_changed)
+
+        self.camera_save_dir.connect('changed', self.camera_save_dir_changed)
+        self.recorder_save_dir.connect('changed', self.recorder_save_dir_changed)
 
         self.camera_save_name.connect('changed', self.camera_save_name_changed)
         self.recorder_save_name.connect('changed', self.recorder_save_name_changed)

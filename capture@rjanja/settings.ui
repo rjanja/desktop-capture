@@ -211,7 +211,6 @@
                       <object class="GtkEntry" id="camera_save_dir">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="editable">False</property>
                         <property name="invisible_char">•</property>
                       </object>
                       <packing>
@@ -713,7 +712,6 @@ Image data: Uses a helper script to store entire image in clipboard.</property>
                       <object class="GtkEntry" id="recorder_save_dir">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="editable">False</property>
                         <property name="invisible_char">•</property>
                         <property name="invisible_char_set">True</property>
                       </object>
