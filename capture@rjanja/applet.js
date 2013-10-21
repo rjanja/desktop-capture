@@ -363,10 +363,78 @@ MyApplet.prototype = {
       this._onSettingsChanged();
    },
 
+   /*_onKeybindingChanged: function(key, oldVal, newVal, type, index) {
+      Main.keybindingManager.addHotKey(key, newVal, Lang.bind(this, function(e) {
+         return this.run_cinnamon_camera(type, e, index);
+      }));
+   },*/
+
+   _onKeybindingChanged: function(key, oldVal, newVal) {
+      global.log('binding change for '+key+' to '+newVal);
+      Main.keybindingManager.addHotKey(key, newVal, Lang.bind(this, function(e) {
+         global.log('called bindFn with key '+key);
+         global.log(typeof this._bindFns[key]);
+         return this._bindFns[key]();
+      }));
+   },
+
+   registerKeyBinding: function(key, captureType, index) {
+      global.log('registering key binding for '+key);
+      this._bindFns[key] = Lang.bind(this, function() {
+         global.log('bindFn running for type ' + captureType);
+         return this.run_cinnamon_camera(captureType, null, index);
+      });
+      
+      // Read current value and if set, add the hotkey
+      var curVal = this.settings.getValue(key);
+      if (curVal != '' && curVal != null)
+      {
+         this._onKeybindingChanged(key, null, curVal);
+      }
+
+      // Rebind with any future changes
+      this.settings.connect("changed::"+key, Lang.bind(this, this._onKeybindingChanged));
+   },
+
+   _registerKeyBindings: function() {
+      if (this._localSettings) return;
+
+      if (this.has_camera()) {
+         if (this.get_camera_program() == 'cinnamon') {
+            this.registerKeyBinding('kb-cs-window', Screenshot.SelectionType.WINDOW);
+            this.registerKeyBinding('kb-cs-area', Screenshot.SelectionType.AREA);
+            this.registerKeyBinding('kb-cs-ui', Screenshot.SelectionType.CINNAMON);
+            this.registerKeyBinding('kb-cs-screen', Screenshot.SelectionType.SCREEN);
+            //this.registerKeyBinding('cs-monitor', Screenshot.SelectionType.MONITOR);
+
+            if (Main.layoutManager.monitors.length > 1) {
+               Main.layoutManager.monitors.forEach(function(monitor, index) {
+                  this.registerKeyBinding('kb-cs-monitor-' + index, Screenshot.SelectionType.MONITOR, index);
+               });
+            }
+
+            /*this.settings.connect("changed::kb-cs-window", Lang.bind(this. this._onKeybindingChanged,
+              Screenshot.SelectionType.WINDOW));
+            this.settings.connect("changed::kb-cs-area", Lang.bind(this. this._onKeybindingChanged,
+              Screenshot.SelectionType.AREA));
+            this.settings.connect("changed::kb-cs-ui", Lang.bind(this. this._onKeybindingChanged,
+              Screenshot.SelectionType.CINNAMON));
+            this.settings.connect("changed::kb-cs-screen", Lang.bind(this. this._onKeybindingChanged,
+              Screenshot.SelectionType.SCREEN));
+            this.settings.connect("changed::kb-cs-window", Lang.bind(this. this._onKeybindingChanged,
+              Screenshot.SelectionType.MONITOR));
+
+            if (Main.layoutManager.monitors.length > 1) {
+               Main.layoutManager.monitors.forEach(function(monitor, index) {
+                  this.settings.connect("changed::kb-cs-monitor-" + index, Lang.bind(this. this._onKeybindingChanged,
+                     Screenshot.SelectionType.MONITOR, index));
+            }*/
+         }
+      }
+   },
+
    _onSettingsChanged: function(evt, type) {
-      //global.a = arguments;
-      this.log('_onSettingsChanged('+type+')');
-      //this.log('_onSettingsChanged');
+      //this.log('_onSettingsChanged('+type+')');
       this._includeCursor = this.settings.getValue('include-cursor');
       this._openAfter = this.settings.getValue('open-after');
       this._delay = this.settings.getValue('delay-seconds');
@@ -470,7 +538,7 @@ MyApplet.prototype = {
    },
 
    _onRuntimeChanged: function(settingsObj, key, oldVal, newVal) {
-      this.log('runtimeChanged: ' + oldVal + ', ' + newVal);
+      //this.log('runtimeChanged: ' + oldVal + ', ' + newVal);
       this._shouldRedraw = true;
    },
 
@@ -519,6 +587,7 @@ MyApplet.prototype = {
       try {
          this._programs = {};
          this._programSupport = {};
+         this._bindFns = {};
          this._includeCursor = false;
          this._openAfter = false;
          this._delay = 0;
@@ -559,6 +628,8 @@ MyApplet.prototype = {
             global.logError("Could not parse Desktop Capture's support.json!")
             global.logError(e);
          }
+
+         this._registerKeyBindings();
 
          //this.detect_programs();
          let xfixesCursor = Cinnamon.XFixesCursor.get_for_stage(global.stage);
@@ -1425,7 +1496,7 @@ function main(metadata, orientation, panelHeight, instanceId) {
    Capture = imports.ui.appletManager.applets[metadata.uuid];
    Screenshot = Capture.screenshot;
    AppletDir = imports.ui.appletManager.appletMeta[metadata.uuid].path;
-   global.log(AppletDir);
+   //global.log(AppletDir);
    SUPPORT_FILE = AppletDir + '/support.json';
    ICON_FILE = AppletDir + '/desktop-capture.png';
    ICON_FILE_ACTIVE = AppletDir + '/desktop-capture-active.png';

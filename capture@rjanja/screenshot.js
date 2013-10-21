@@ -140,8 +140,7 @@ ImgurDialog.prototype = {
    copyToClipboard: function(button, event) {
       if (this._selectedText != "") {
          St.Clipboard.get_default().set_text(this._selectedText);
-         //global.cancel_theme_sound(SOUND_ID);
-         //global.play_theme_sound(SOUND_ID, 'bell');
+         this.playSound('bell');
          this.close();
       }
       return true;
@@ -685,6 +684,18 @@ ScreenshotHelper.prototype = {
       }
    },
 
+   playSound: function(effect) {
+      // @todo: Maybe check against GLib.getenv("CINNAMON_VERSION") instead.
+      if ("cancel_theme_sound" in global) {
+         global.cancel_theme_sound(SOUND_ID);
+      }
+      else {
+         global.cancel_sound(SOUND_ID);
+      }
+
+      global.play_theme_sound(SOUND_ID, effect);
+   },
+
    setOptions: function(params) {
       if (params != undefined) {
          this._params = Params.parse(params, this._params);
@@ -731,7 +742,7 @@ ScreenshotHelper.prototype = {
          this._fadeOutTimer();
 
          if (options.playTimerSound)
-            global.play_theme_sound(0, options.soundTimerInterval);
+            this.playSound(options.soundTimerInterval);
 
          let timeoutId = Mainloop.timeout_add(1000, Lang.bind(this, function() {
             this._timeout--;
@@ -751,12 +762,12 @@ ScreenshotHelper.prototype = {
                this._timer.set_text('' + timeoutText);
 
                if (options.playTimerSound)
-                  global.play_theme_sound(0, options.soundTimerInterval);
+                  this.playSound(options.soundTimerInterval)
 
                this._fadeOutTimer();
             } else {
                //if (options.playShutterSound)
-               //   global.play_theme_sound(0, options.soundShutter);
+               //   this.playSound(options.soundShutter);
 
                Mainloop.source_remove(timeoutId);
                onFinished();
@@ -1441,8 +1452,7 @@ ScreenshotHelper.prototype = {
       }
 
       if (screenshot.options.playShutterSound) {
-         global.cancel_theme_sound(SOUND_ID);
-         global.play_theme_sound(SOUND_ID, 'camera-shutter');
+         this.playSound('camera-shutter');
       }
 
       if (this._interactive) {
@@ -1460,8 +1470,9 @@ ScreenshotHelper.prototype = {
                   if (screenshot.options.copyToClipboard) {
                      St.Clipboard.get_default().set_text(json.links.original);
                   }
-                  global.cancel_theme_sound(SOUND_ID);
-                  global.play_theme_sound(SOUND_ID, 'bell');
+
+                  this.playSound('bell')
+                  
                }
             });
          }
@@ -1480,8 +1491,7 @@ ScreenshotHelper.prototype = {
                this.runProgram('python '+screenshot.options.clipboardHelper+' '+screenshot.file);
             }
             
-            //global.cancel_theme_sound(SOUND_ID);
-            //global.play_theme_sound(SOUND_ID, 'bell');
+            //this.playSound('bell');
          }
 
          if (screenshot.options.sendNotification) {
@@ -2254,6 +2264,7 @@ ScreenshotHelper.prototype = {
    },
 
    runProgram: function(cmd) {
+      global.log(cmd);
       try {
          let success, argc, argv, pid, stdin, stdout, stderr;
          [success,argv] = GLib.shell_parse_argv(cmd);

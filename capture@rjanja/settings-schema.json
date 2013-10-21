@@ -81,20 +81,35 @@
       "type": "header",
       "description": "Cinnamon Screenshot"
    },
-   "keybinding-window" : {
+   "kb-cs-window" : {
       "type" : "keybinding",
-      "description" : "Set the keybinding here to capture a window: ",
+      "description" : "Keybinding to capture a window: ",
+      "default" : "<Control>F5"
+   },
+   "kb-cs-area" : {
+      "type" : "keybinding",
+      "description" : "Keybinding to capture an area: ",
+      "default" : "<Control>F6"
+   },
+   "kb-cs-ui" : {
+      "type" : "keybinding",
+      "description" : "Keybinding to capture a UI element: ",
+      "default" : "<Control>F7"
+   },
+   "kb-cs-screen" : {
+      "type" : "keybinding",
+      "description" : "Keybinding to capture the screen: ",
       "default" : "<Control>F8"
    },
-   "keybinding-area" : {
+   "kb-cs-monitor-0" : {
       "type" : "keybinding",
-      "description" : "Set the keybinding here to capture an area: ",
-      "default" : "<Control>F8"
-   }
+      "description" : "Keybinding to capture monitor 1: ",
+      "default" : "<Control>F9"
+   },
    "capture-window-as-area": {
-      "default": false,
+      "default": true,
       "type": "checkbox",
-      "description": "Capture window as area",
+      "description": "Capture window as area (suggested, or shots may be black or distorted)",
       "tooltip": "Whether to use area selection for window captures"
    },
    "include-window-frame": {
