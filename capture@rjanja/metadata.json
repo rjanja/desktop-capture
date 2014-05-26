@@ -2,7 +2,7 @@
    "uuid": "capture@rjanja",
    "name": "Desktop Capture",
    "description": "Screenshot and screencasting tools",
-   "icon": "retro-icon-mint.png",
+   "icon": "camera-photo-symbolic",
    "homepage": "https://github.com/rjanja/desktop-capture",
    "version": "1.0",
    "hide-configuration": false

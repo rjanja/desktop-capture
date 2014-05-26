@@ -34,14 +34,15 @@
       "default": "~/Pictures/screenshots",
       "type": "filechooser",
       "select-dir": true,
-      "description": "Save location for screen grabs",
+      "description": "Save location",
+      "tooltip": "Folder to save new screenshots",
       "allow-none": true
    },
    "camera-save-prefix": {
       "default": "screenshot-%TYPE-%Y-%M-%D-%H%I%S",
       "type": "entry",
       "description": "Filename format",
-      "tooltip": "Filename format for screen grabs"
+      "tooltip": "Don't include file extension. %TYPE is area, window, etc. E.g. %Y-%M-%D-%H%I = 2014-05-25-1848.png. Use %S for seconds, %m for milliseconds"
    },
    "include-cursor": {
       "default": false,
@@ -60,7 +61,7 @@
       "type": "spinbutton",
       "min": 0,
       "max": 600,
-      "units": 1,
+      "units": "seconds",
       "step": 1,
       "description": "Capture delay",
       "tooltip": "How many seconds to wait before taking a screenshot",
@@ -134,7 +135,7 @@
       "tooltip": "Whether to include CSS selection styles in Cinnamon UI screenshots"
    },
    "use-symbolic-icon": {
-      "default": true,
+      "default": false,
       "type": "checkbox",
       "description": "Use symbolic (black and white) icon for applet",
       "tooltip": "Whether to use symbolic (black and white) icon for applet"
@@ -197,14 +198,16 @@
       "default": "~/Videos/screencasts",
       "type": "filechooser",
       "select-dir": true,
-      "description": "Save location for screen recordings",
+      "description": "Save location",
+	  "tooltip": "Folder for new screen recordings",
       "allow-none": true
    },
    
    "recorder-save-prefix": {
       "default": "screencast-%Y-%M-%D-%H%I%S",
       "type": "entry",
-      "description": "Filename format for screen recordings"
+      "description": "Filename format",
+      "tooltip": "Format for built-in recorder. E.g. %Y-%M-%D-%H%I = 2014-05-25-1848.webm. Use %S for seconds, %m for milliseconds"
    },
 
    

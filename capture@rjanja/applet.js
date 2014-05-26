@@ -934,7 +934,20 @@ MyApplet.prototype = {
 
    redo_cinnamon_camera: function(event) {
       if (this.lastCapture) {
-         this.lastCapture.options.filename = this._cameraSaveDir + '/' + this.get_camera_filename(this.lastCapture.selectionType) + '.png';
+         let filename;
+         try {
+            filename = this._getCreateFilePath(this._cameraSaveDir, this.get_camera_filename(this.lastCapture.selectionType), 'png');
+         }
+         catch (e) {
+            filename = false;
+            global.log(e);
+         }
+
+         if (false == filename) {
+            return false;
+         }
+
+         this.lastCapture.options.filename = filename;
 
          this.maybeCloseMenu();
          let camera = new Screenshot.ScreenshotHelper(null, null, this.lastCapture.options);
@@ -977,6 +990,19 @@ MyApplet.prototype = {
    run_cinnamon_camera: function(type, event, index) {
       let enableTimer = (this._useTimer && this._delay > 0);
 
+      let filename;
+      try {
+         filename = this._getCreateFilePath(this._cameraSaveDir, this.get_camera_filename(type), 'png');
+      }
+      catch (e) {
+         filename = false;
+         global.log(e);
+      }
+
+      if (false == filename) {
+         return false;
+      }
+
       let fnCapture = Lang.bind(this, function() {
          new Screenshot.ScreenshotHelper(type, Lang.bind(this, this.cinnamon_camera_complete),
          { 
@@ -993,7 +1019,7 @@ MyApplet.prototype = {
             soundTimerInterval: 'dialog-warning',
             soundShutter: 'camera-shutter',
             sendNotification: this._sendNotification,
-            filename: this._cameraSaveDir + '/' + this.get_camera_filename(type) + '.png',
+            filename: filename,
             uploadToImgur: this._uploadToImgur,
             useIndex: index,
             openAfter: this._openAfter,
@@ -1044,6 +1070,46 @@ MyApplet.prototype = {
       label.set_text(newLabel);
    },
 
+   _getCreateFilePath: function(folderPath, fileName, fileExtension) {
+      let folder = Gio.file_new_for_path(folderPath);
+      if (true != folder.query_exists(null)) {
+         try {
+            folder.make_directory(null);
+         }
+         catch (e) {
+            global.log("Save folder does not exist: " + folder.get_path() + ", aborting");
+            return false;
+         }
+      }
+      else {
+         let fileType = folder.query_file_type(Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, null);
+         /* Don't restrict to only directories, just exclude normal files */
+         if (Gio.FileType.REGULAR == fileType) {
+            global.log("Cannot write to " + folder.get_path() + ", not a directory, aborting");
+            return false;
+         }
+         
+      }
+
+      let file = Gio.file_new_for_path(folderPath + '/' + fileName + '.' + fileExtension);
+      let desiredFilepath = file.get_path();
+      try {
+         if (file.create(Gio.FileCreateFlags.NONE, null)) {
+            file.delete(null);
+         }
+         else {
+            global.log("Could not create file " + file.get_path() + ", aborting");
+            return false;
+         }
+      }
+      catch (e) {
+         global.log('Cannot open ' + desiredFilepath + ' for writing, aborting');
+         return false;
+      }
+
+      return desiredFilepath;
+   },
+
    _toggle_cinnamon_recorder: function(actor, event) {
       if (this.cRecorder.is_recording()) {
          this.cRecorder.pause();
@@ -1054,9 +1120,24 @@ MyApplet.prototype = {
          }
       }
       else {
+         let filename;
+
+         try {
+            filename = this._getCreateFilePath(this._recorderSaveDir, this.get_recorder_filename(), this._crFileExtension);
+         }
+         catch (e) {
+            filename = false;
+            global.log(e);
+         }
+
+         if (false == filename) {
+            return false;
+         }
+
+         this.cRecorder.set_filename(filename);
+         global.log("Capturing screencast to " + filename);
+
          this.cRecorder.set_framerate(this._crFrameRate);
-         this.cRecorder.set_filename(this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
-         global.log("Capturing screencast to " + this._recorderSaveDir + '/' + this.get_recorder_filename() + '.' + this._crFileExtension);
 
          let pipeline = this._crPipeline;
          global.log("Pipeline is " + pipeline);
