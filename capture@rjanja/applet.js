@@ -1052,7 +1052,7 @@ MyApplet.prototype = {
             filename: filename,
             uploadToImgur: this._uploadToImgur,
             useIndex: index,
-            openAfter: this._openAfter,
+            openAfter: this._copyData ? false : this._openAfter,
             clipboardHelper: CLIPBOARD_HELPER
          });
       });
