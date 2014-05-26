@@ -155,7 +155,6 @@
    },
    "copy-to-clipboard": {
       "default": true,
-      "type": "checkbox",
       "type": "combobox",
       "options": {
          "Off": 0,
@@ -166,6 +165,24 @@
       },
       "description": "Copy to clipboard",
       "tooltip": "Whether to copy path/filename of screenshots to clipboard after capture"
+   },
+   "show-copy-toggle": {
+      "default": true,
+      "type": "checkbox",
+      "description": "Show toggle button for copying image to clipboard",
+      "tooltip": "Whether to show another toggle button in the menu for copying image to clipboard"
+   },
+   "copy-data-auto-off": {
+      "default": true,
+      "type": "checkbox",
+      "description": "Turn off copy image toggle after capture",
+      "tooltip": "When set, the copy image to clipboard toggle button override will be turned off after a successful capture"
+   },
+   "copy-data": {
+      "default": false,
+      "type": "generic",
+      "description": "Copy image data to clipboard (toggle)",
+      "tooltip": "This overrides the 'Copy to clipboard' setting"
    },
    "upload-to-imgur": {
       "default": false,

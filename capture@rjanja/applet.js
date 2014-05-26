@@ -359,6 +359,7 @@ MyApplet.prototype = {
       this.settings.connect("changed::camera-program", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::recorder-program", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::use-symbolic-icon", Lang.bind(this, this._onRuntimeChanged));
+      this.settings.connect("changed::show-copy-toggle", Lang.bind(this, this._onRuntimeChanged));
 
       this._onSettingsChanged();
    },
@@ -473,6 +474,9 @@ MyApplet.prototype = {
       this._playShutterSound = this.settings.getValue('play-shutter-sound');
       this._playIntervalSound = this.settings.getValue('play-timer-interval-sound');
       this._copyToClipboard = this.settings.getValue('copy-to-clipboard');
+      this._copyData = this.settings.getValue('copy-data');
+      this._showCopyToggle = this.settings.getValue('show-copy-toggle');
+      this._copyDataAutoOff = this.settings.getValue('copy-data-auto-off');
       this._sendNotification = this.settings.getValue('send-notification');
       this._includeStyles = this.settings.getValue('include-styles');
       this._uploadToImgur = this.settings.getValue('upload-to-imgur');
@@ -592,6 +596,9 @@ MyApplet.prototype = {
          this._openAfter = false;
          this._delay = 0;
          this._useTimer = false;
+         this._copyData = false;
+         this._showCopyToggle = true;
+         this._copyDataAutoOff = true;
          this._recordSound = true;
          this.orientation = orientation;
          this.cRecorder = null;
@@ -807,7 +814,7 @@ MyApplet.prototype = {
          let optionSwitch = new StubbornSwitchMenuItem(this.indent(_("Include cursor")), this._includeCursor, { style_class: 'bin' });
          optionSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
             this._includeCursor = v;
-            this.setSettingsKey('include-cursor', v);
+            this.setSettingValue('include-cursor', v);
             
             if (this.get_camera_program() == CAMERA_PROGRAM_GNOME
              && null !== this._ssSettings) {
@@ -822,11 +829,28 @@ MyApplet.prototype = {
          let timerSwitch = new StubbornSwitchMenuItem(this.indent(_("Use timer")), this._useTimer, { style_class: 'bin' });
          timerSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
             this._useTimer = v;
-            this.setSettingsKey('use-timer', v);
+            this.setSettingValue('use-timer', v);
             this.menu._animateClose = v; // Tell the menu not to animate while timer is off
             return false;
          }));
          this.menu.addMenuItem(timerSwitch);
+
+         if (this.get_camera_program() == 'cinnamon') {
+            if (this._showCopyToggle) {
+               let copyDataSwitch = new StubbornSwitchMenuItem(this.indent(_("Copy image")), this._copyData, { style_class: 'bin' });
+               copyDataSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
+                  this._copyData = v;
+                  this.setSettingValue('copy-data', v);
+                  return false;
+               }));
+               this.menu.addMenuItem(copyDataSwitch);
+            }
+            else {
+               // Turn off our hidden setting since the UI can't.
+               this._copyData = false;
+               this.setSettingValue('copy-data', false);
+            }
+         }
       }
 
       if (this.has_recorder())
@@ -857,7 +881,7 @@ MyApplet.prototype = {
                   let soundSwitch = new StubbornSwitchMenuItem(this.indent(_("Record sound")), this._recordSound, { style_class: 'bin' });
                   soundSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
                      this._recordSound = v;
-                     this.setSettingsKey('record-sound', v);
+                     this.setSettingValue('record-sound', v);
                      
                      return false;
                   }));
@@ -975,6 +999,8 @@ MyApplet.prototype = {
                break;
          }
       }
+
+      return true;
    },
 
    cinnamon_camera_complete: function(screenshot) {
@@ -984,6 +1010,10 @@ MyApplet.prototype = {
       }
       else {
          this._redoMenuItem.actor.hide();
+      }
+      if (this._copyData && this._copyDataAutoOff) {
+         this._copyData = false;
+         this.draw_menu();
       }
    },
 
@@ -1011,7 +1041,7 @@ MyApplet.prototype = {
             includeFrame: this._includeWindowFrame,
             includeStyles: this._includeStyles,
             windowAsArea: this._windowAsArea,
-            copyToClipboard: this._copyToClipboard,
+            copyToClipboard: this._copyData ? 4 : this._copyToClipboard,
             playShutterSound: this._playShutterSound,
             useTimer: enableTimer,
             playTimerSound: this._playIntervalSound,
@@ -1156,6 +1186,8 @@ MyApplet.prototype = {
       }
 
       this._update_cinnamon_recorder_status(actor);
+
+      return true;
    },
 
    _launch_settings: function() {
