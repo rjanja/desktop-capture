@@ -360,6 +360,7 @@ MyApplet.prototype = {
       this.settings.connect("changed::recorder-program", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::use-symbolic-icon", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::show-copy-toggle", Lang.bind(this, this._onRuntimeChanged));
+      this.settings.connect("changed::show-upload-toggle", Lang.bind(this, this._onRuntimeChanged));
 
       this._onSettingsChanged();
    },
@@ -409,9 +410,9 @@ MyApplet.prototype = {
             //this.registerKeyBinding('cs-monitor', Screenshot.SelectionType.MONITOR);
 
             if (Main.layoutManager.monitors.length > 1) {
-               Main.layoutManager.monitors.forEach(function(monitor, index) {
+               Main.layoutManager.monitors.forEach(Lang.bind(this, function(monitor, index) {
                   this.registerKeyBinding('kb-cs-monitor-' + index, Screenshot.SelectionType.MONITOR, index);
-               });
+               }));
             }
 
             /*this.settings.connect("changed::kb-cs-window", Lang.bind(this. this._onKeybindingChanged,
@@ -479,6 +480,8 @@ MyApplet.prototype = {
       this._copyDataAutoOff = this.settings.getValue('copy-data-auto-off');
       this._sendNotification = this.settings.getValue('send-notification');
       this._includeStyles = this.settings.getValue('include-styles');
+      this._showUploadToggle = this.settings.getValue('show-copy-toggle');
+      this._uploadAutoOff = this.settings.getValue('upload-auto-off');
       this._uploadToImgur = this.settings.getValue('upload-to-imgur');
       this._useSymbolicIcon = this.settings.getValue('use-symbolic-icon');
       this._recordSound = this.settings.getValue('record-sound');
@@ -599,6 +602,9 @@ MyApplet.prototype = {
          this._copyData = false;
          this._showCopyToggle = true;
          this._copyDataAutoOff = true;
+         this._showUploadToggle = false;
+         this._uploadToImgur = false;
+         this._uploadAutoOff = true;
          this._recordSound = true;
          this.orientation = orientation;
          this.cRecorder = null;
@@ -612,10 +618,10 @@ MyApplet.prototype = {
          this._uuid = metadata.uuid;
          this._shouldRedraw = false;
 
+         this.maybeRegisterRole("screenshot", metadata.uuid);
+
          // Load up our settings
          this._initSettings();
-
-         
 
          // GNOME Screenshot settings, we only write cursor option,
          // don't need to read anything from it.
@@ -850,6 +856,21 @@ MyApplet.prototype = {
                this._copyData = false;
                this.setSettingValue('copy-data', false);
             }
+
+            if (this._showUploadToggle) {
+               let uploadSwitch = new StubbornSwitchMenuItem(this.indent(_("Upload to imgur")), this._copyData, { style_class: 'bin' });
+               uploadSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
+                  this._uploadToImgur = v;
+                  this.setSettingValue('upload-to-imgur', v);
+                  return false;
+               }));
+               this.menu.addMenuItem(uploadSwitch);
+            }
+            else {
+               // Turn off our hidden setting since the UI can't.
+               this._uploadToImgur = false;
+               this.setSettingValue('upload-to-imgur', false);
+            }
          }
       }
 
@@ -910,7 +931,7 @@ MyApplet.prototype = {
          prefix = prefix.replace('%TYPE-', '');
          prefix = prefix.replace('%TYPE', '');
       }
-      return str_replace(
+      return this.replaceTokens(
          ['%Y',
          '%M',
          '%D',
@@ -933,7 +954,7 @@ MyApplet.prototype = {
 
    get_recorder_filename: function(type) {
       let date = new Date();
-      return str_replace(
+      return this.replaceTokens(
          ['%Y',
          '%M',
          '%D',
@@ -1013,6 +1034,10 @@ MyApplet.prototype = {
       }
       if (this._copyData && this._copyDataAutoOff) {
          this._copyData = false;
+         this.draw_menu();
+      }
+      else if (this._uploadToImgur && this._uploadAutoOff) {
+         this._uploadToImgur = false;
          this.draw_menu();
       }
    },
@@ -1330,7 +1355,7 @@ MyApplet.prototype = {
 
       let sDimensions = global.screen_width + 'x' + global.screen_height;
       // Replace tokens from our json support command arguments
-      return str_replace(
+      return this.replaceTokens(
          ['{DELAY}', '{CURSOR}', '{SCREEN_DIMENSIONS}', '{RECORDER_DIR}', '{SCREENSHOT_DIR}'],
          [sDelay, sCursor, sDimensions, this._recorderSaveDir, this._cameraSaveDir],
          cmd);
@@ -1603,6 +1628,41 @@ MyApplet.prototype = {
    on_applet_clicked: function(event) {
       this.menu.toggle();
    },
+
+   on_applet_removed_from_panel: function() {
+      // Applet roles introduced in Cinnamon 2.2
+      this.maybeUnregisterRole();
+   },
+
+   replaceTokens: function(tokens, replacements, subject)
+   {
+      if (tokens.length == replacements.length) {
+         var i, t, p;
+         for (i = 0; i < tokens.length; i++) {
+            t = tokens[i];
+            r = replacements[i];
+            while (-1 != (p = subject.indexOf(t))) {
+               subject = subject.replace(t, r);
+            }
+         }
+      }
+
+      return subject;
+   },
+
+   maybeRegisterRole: function() {
+      try {
+         Main.systrayManager.registerRole("screenshot", this._uuid);
+      }
+      catch (e) {}
+   },
+
+   maybeUnregisterRole: function() {
+      try {
+         Main.systrayManager.unregisterRole("screenshot", this._uuid);
+      }
+      catch (e) {}
+   },
 };
 
 function main(metadata, orientation, panelHeight, instanceId) {
@@ -1617,58 +1677,4 @@ function main(metadata, orientation, panelHeight, instanceId) {
 
    let myApplet = new MyApplet(metadata, orientation, panelHeight, instanceId);
    return myApplet;
-}
-
-function str_replace (search, replace, subject, count) {
-    // http://kevin.vanzonneveld.net
-    // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +   improved by: Gabriel Paderni
-    // +   improved by: Philip Peterson
-    // +   improved by: Simon Willison (http://simonwillison.net)
-    // +    revised by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
-    // +   bugfixed by: Anton Ongson
-    // +      input by: Onno Marsman
-    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +    tweaked by: Onno Marsman
-    // +      input by: Brett Zamir (http://brett-zamir.me)
-    // +   bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +   input by: Oleg Eremeev
-    // +   improved by: Brett Zamir (http://brett-zamir.me)
-    // +   bugfixed by: Oleg Eremeev
-    // %          note 1: The count parameter must be passed as a string in order
-    // %          note 1:  to find a global variable in which the result will be given
-    // *     example 1: str_replace(' ', '.', 'Kevin van Zonneveld');
-    // *     returns 1: 'Kevin.van.Zonneveld'
-    // *     example 2: str_replace(['{name}', 'l'], ['hello', 'm'], '{name}, lars');
-    // *     returns 2: 'hemmo, mars'
-    var i = 0,
-        j = 0,
-        temp = '',
-        repl = '',
-        sl = 0,
-        fl = 0,
-        f = [].concat(search),
-        r = [].concat(replace),
-        s = subject,
-        ra = Object.prototype.toString.call(r) === '[object Array]',
-        sa = Object.prototype.toString.call(s) === '[object Array]';
-    s = [].concat(s);
-    if (count) {
-        this.window[count] = 0;
-    }
-
-    for (i = 0, sl = s.length; i < sl; i++) {
-        if (s[i] === '') {
-            continue;
-        }
-        for (j = 0, fl = f.length; j < fl; j++) {
-            temp = s[i] + '';
-            repl = ra ? (r[j] !== undefined ? r[j] : '') : r[0];
-            s[i] = (temp).split(f[j]).join(repl);
-            if (count && s[i] !== temp) {
-                this.window[count] += (temp.length - s[i].length) / f[j].length;
-            }
-        }
-    }
-    return sa ? s : s[0];
 }

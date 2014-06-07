@@ -184,6 +184,26 @@
       "description": "Copy image data to clipboard (toggle)",
       "tooltip": "This overrides the 'Copy to clipboard' setting"
    },
+
+   "show-upload-toggle": {
+      "default": true,
+      "type": "checkbox",
+      "description": "Show toggle button for uploading image to imgur.com",
+      "tooltip": "Whether to show another toggle button in the menu for automatically uploading"
+   },
+   "upload-auto-off": {
+      "default": true,
+      "type": "checkbox",
+      "description": "Turn off image upload toggle after capture",
+      "tooltip": "When set, the upload to imgur toggle button will be turned off after a successful capture"
+   },
+   "upload-imgur": {
+      "default": false,
+      "type": "generic",
+      "description": "Upload image to imgur.com (toggle)",
+      "tooltip": "This is an override setting"
+   },
+
    "upload-to-imgur": {
       "default": false,
       "type": "generic",
