@@ -19,6 +19,7 @@ const Switch = imports.ui.popupMenu.Switch;
 const Clutter = imports.gi.Clutter;
 const Lightbox = imports.ui.lightbox;
 const Settings = imports.ui.settings;
+const MessageTray = imports.ui.messageTray;
 const Signals = imports.signals;
 
 const Util = imports.misc.util;
@@ -38,7 +39,20 @@ const KEY_RECORDER_FRAMERATE = "framerate";
 const KEY_RECORDER_FILE_EXTENSION = "file-extension";
 const KEY_RECORDER_PIPELINE = "pipeline";
 
+// Uploading
+const Soup = imports.gi.Soup
 const IMGUR_CRED = "85a61980ca1cc59f329ee172245ace84";
+let session = new Soup.SessionAsync();
+Soup.Session.prototype.add_feature.call(session, new Soup.ProxyResolverDefault());
+
+const ClipboardCopyType = {
+   OFF: 0,
+   DEFAULT: 1,
+   PATH: 1,
+   DIRECTORY: 2,
+   FILENAME: 3,
+   IMAGEDATA: 4
+}
 
 // Globals we'll set once we have metadata in main()
 let Capture;
@@ -49,6 +63,199 @@ let SETTINGS_FILE;
 let ICON_FILE;
 let ICON_FILE_ACTIVE;
 let CLIPBOARD_HELPER;
+
+// We use an altered URLHighlighter because /tmp looks better than file://tmp/,
+// and I'm a picky SOB.
+function URLHighlighter(text, lineWrap, allowMarkup) {
+   this._init(text, lineWrap, allowMarkup);
+}
+URLHighlighter.prototype = {
+   __proto__: MessageTray.URLHighlighter.prototype,
+
+   _init: function(text, lineWrap, allowMarkup) {
+      MessageTray.URLHighlighter.prototype._init.call(this, text, lineWrap, allowMarkup);
+   },
+
+   // _shortenUrl doesn't exist in base class
+   _shortenUrl: function(url) {
+      if (url.substring(0, 7) == 'http://') {
+         return url.substring(7);
+      }
+      else if (url.substring(0, 7) == 'file://') {
+         return url.substring(7);
+      }
+      return url;
+   },
+
+   _highlightUrls: function() {
+        // text here contain markup
+        let urls = Util.findUrls(this._text);
+        let markup = '';
+        let pos = 0;
+        for (let i = 0; i < urls.length; i++) {
+            let url = urls[i];
+            let str = this._text.substr(pos, url.pos - pos);
+            let shortUrl = this._shortenUrl(url.url);
+
+            markup += str + '<span foreground="' + this._linkColor + '"><u>' + shortUrl + '</u></span>';
+            pos = url.pos + url.url.length;
+
+            if (shortUrl != url.url) {
+               // Save the altered match position
+               this._urls[i].pos -= url.url.length - shortUrl.length;
+            }
+        }
+        markup += this._text.substr(pos);
+        this.actor.clutter_text.set_markup(markup);
+    },
+}
+
+function Source(sourceId, screenshot) {
+    this._init(sourceId, screenshot);
+}
+
+Source.prototype = {
+   ICON_SIZE: 24,
+
+   __proto__ : MessageTray.Source.prototype,
+
+   _init: function(sourceId, screenshot) {
+      MessageTray.Source.prototype._init.call(this, sourceId);
+
+      // @todo summary items
+      /*let icon_file = Gio.file_new_for_path(ICON_FILE);
+      let icon_uri = icon_file.get_uri();
+      let icon_texture = St.TextureCache.get_default().load_uri_async(icon_uri, this.ICON_SIZE, this.ICON_SIZE);
+      this._setSummaryIcon(this.createNotificationIcon());*/
+   },
+
+   createNotificationIcon: function() {
+      let icon_file = Gio.file_new_for_path(ICON_FILE_ACTIVE);
+      let icon_uri = icon_file.get_uri();
+      return St.TextureCache.get_default().load_uri_async(icon_uri, this.ICON_SIZE, this.ICON_SIZE);
+   }
+}
+
+function ScreenshotNotification(source, title, banner, params) {
+   this._init(source, title, banner, params);
+}
+ScreenshotNotification.prototype = {
+   __proto__: MessageTray.Notification.prototype,
+   _delayedResident: null,
+   _cursorChanged: false,
+
+   _init: function(source, title, banner, params) {
+      MessageTray.Notification.prototype._init.call(this, source, title, banner, params);
+   },
+
+   // We override setImage so we can change row_span from 2->1.
+   setImage: function(image) {
+      if (this._imageBin)
+         this.unsetImage();
+
+      // Make our bin reactive so we can click on it
+      this._imageBin = new St.Bin({ reactive: true, style_class: 'screenshot-thumbnail' });
+      this._imageBin.child = image;
+      this._imageBin.opacity = 230;
+
+      
+
+      this._table.add_style_class_name('multi-line-notification');
+      // Only show expanded image style if we also have actions to display
+      this._actionArea && this._table.add_style_class_name('notification-with-image');
+      this._addBannerBody();
+      this._updateLastColumnSettings();
+      this._table.add(this._imageBin, { row: 1,
+                                       col: 1,
+                                       row_span: 2,
+                                       x_expand: true,
+                                       y_expand: true,
+                                       x_fill: true,
+                                       y_fill: true });
+
+      // Make the image thumbnail interactive
+      this._imageBin.connect('button-press-event', Lang.bind(this, this._onImageButtonPressed));
+      this._imageBin.connect('motion-event', Lang.bind(this, function(actor, event) {
+         if (!actor.visible || actor.get_paint_opacity() == 0)
+             return false;
+
+         global.set_cursor(Cinnamon.Cursor.POINTING_HAND);
+         this._cursorChanged = true;
+         this._imageBin.add_style_class_name('screenshot-thumbnail-hover');
+         return false;
+      }));
+      this._imageBin.connect('leave-event', Lang.bind(this, function() {
+         if (!this._imageBin.visible || this._imageBin.get_paint_opacity() == 0)
+            return;
+
+         if (this._cursorChanged) {
+            this._cursorChanged = false;
+            global.unset_cursor();
+            this._imageBin.remove_style_class_name('screenshot-thumbnail-hover');
+         }
+      }));
+   },
+
+   _onImageMouseover: function(actor, event) {
+      global.log('mouseover!!');
+   },
+
+   // Expose the clicks now and maybe we'll allow configurable behavior later
+   _onImageButtonPressed: function(actor, event) {
+      if (event.get_button() == 1) {
+         this.emit('image-left-clicked');
+         return true;
+      }
+      else if (event.get_button() == 3) {
+         this.emit('image-right-clicked');
+      }
+      else if (event.get_button() == 2) {
+         this.emit('image-middle-clicked');
+      }
+
+      return false;
+   },
+
+   // Similarly we need to change the action area to spn both columns.
+   _updateLastColumnSettings: function() {
+        if (this._scrollArea)
+            this._table.child_set(this._scrollArea, { col: 2,
+                                                      col_span: 1 });
+        if (this._actionArea)
+            this._table.child_set(this._actionArea, { row: 3, col: 1,
+                                                      row_span: 1,
+                                                      col_span: 2,
+                                                      x_fill: false,
+                                                      x_expand: false });
+   },
+
+   // Set resident->nonresident when action is clicked
+   setDelayedResident: function(isResident) {
+      this._delayedResident = isResident;
+   },
+
+   _onActionInvoked: function(actor, mouseButtonClicked, id) {
+      this.emit('action-invoked', id);
+      if (!this.resident) {
+         this.emit('done-displaying');
+         this.destroy();
+      }
+
+      if (this._delayedResident != null) {
+         true == this._delayedResident && this.emit('done-displaying');
+         this.setDelayedResident(this._delayedResident);
+         this._delayedResident = null;
+      }
+   },
+
+   addBody: function(text, markup, style) {
+      let label = new URLHighlighter(text, true, markup);
+
+      this.addActor(label.actor, style);
+      return label.actor;
+   }
+}
+
 
 function StubbornSwitchMenuItem() {
     this._init.apply(this, arguments);
@@ -331,6 +538,9 @@ function MyApplet(metadata, orientation, panelHeight, instanceId) {
 MyApplet.prototype = {
    __proto__: Applet.IconApplet.prototype,
 
+   _notificationImageSize: 128,
+   _notificationIconSize: 24,
+
    log: function(msg) {
       //return;
       if (typeof msg == 'object') {
@@ -480,11 +690,16 @@ MyApplet.prototype = {
       this._copyDataAutoOff = this.settings.getValue('copy-data-auto-off');
       this._sendNotification = this.settings.getValue('send-notification');
       this._includeStyles = this.settings.getValue('include-styles');
-      this._showUploadToggle = this.settings.getValue('show-copy-toggle');
+      this._showUploadToggle = this.settings.getValue('show-upload-toggle');
       this._uploadAutoOff = this.settings.getValue('upload-auto-off');
       this._uploadToImgur = this.settings.getValue('upload-to-imgur');
       this._useSymbolicIcon = this.settings.getValue('use-symbolic-icon');
       this._recordSound = this.settings.getValue('record-sound');
+      this._notificationBehavior = this.settings.getValue('notification-behavior');
+      this._showDeleteAction = this.settings.getValue('show-delete-action');
+      this._showUploadAction = this.settings.getValue('show-upload-action');
+      this._showCopyPathAction = this.settings.getValue('show-copy-path-action');
+      this._showCopyDataAction = this.settings.getValue('show-copy-data-action');
 
       if (this._cameraProgram == 'none')
       {
@@ -501,15 +716,17 @@ MyApplet.prototype = {
          this._shouldRedraw = false;
       }
 
+      this._checkPaths();
+
       return false;
    },
 
    getSettingValue: function(key) {
-      return this.settings.getValue(settings_key);
+      return this.settings.getValue(key);
    },
 
    setSettingValue: function(key, value) {
-      return this.settings.setValue(settings.key, value);
+      return this.settings.setValue(key, value);
    },
 
    getModifier: function(symbol) {
@@ -533,7 +750,7 @@ MyApplet.prototype = {
       return false;
    },
 
-    _onMenuKeyPress: function(actor, event) {
+   _onMenuKeyPress: function(actor, event) {
       let symbol = event.get_key_symbol();
       
       if (symbol == Clutter.Shift_L)
@@ -547,34 +764,6 @@ MyApplet.prototype = {
    _onRuntimeChanged: function(settingsObj, key, oldVal, newVal) {
       //this.log('runtimeChanged: ' + oldVal + ', ' + newVal);
       this._shouldRedraw = true;
-   },
-
-   _settingsChanged: function(key) {
-      let oldCamera = this._cameraProgram;
-      let oldRecorder = this._recorderProgram;
-      let oldIcon = this._useSymbolicIcon;
-
-      if (this._cameraProgram == 'none')
-      {
-         this._cameraProgram = null;
-      }
-
-      if (this._recorderProgram == 'none')
-      {
-         this._recorderProgram = null;
-      }
-
-      // Were we called due to a settings change, or by init?
-      if (oldCamera != this._cameraProgram || oldRecorder != this._recorderProgram
-      || oldIcon != this._useSymbolicIcon)
-      {
-         if (this._programSupport['camera'] !== undefined)
-         {
-            this.draw_menu();
-         }
-      }
-
-      return false;
    },
 
     _crSettingsChanged: function(settings, key) {
@@ -619,6 +808,17 @@ MyApplet.prototype = {
          this._shouldRedraw = false;
 
          this.maybeRegisterRole("screenshot", metadata.uuid);
+
+         // Create our right-click menus first, they'll be modified once
+         // settings are loaded in the event one or both the save folders
+         // do not exist or are not writeable
+         this.openScreenshotsFolderItem = new Applet.MenuItem(_("Open screenshots folder"),
+            'folder', Lang.bind(this, this._openScreenshotsFolder));
+         this._applet_context_menu.addMenuItem(this.openScreenshotsFolderItem);
+         
+         this.openRecordingsFolderItem = new Applet.MenuItem(_("Open recordings folder"),
+            'folder', Lang.bind(this, this._openRecordingsFolder));
+         this._applet_context_menu.addMenuItem(this.openRecordingsFolderItem);
 
          // Load up our settings
          this._initSettings();
@@ -665,11 +865,39 @@ MyApplet.prototype = {
 
             this._applet_context_menu.addMenuItem(this.settingsItem);
          }
-         
+
+         this._checkPaths();
       }
       catch (e) {
          global.logError(e);
       }
+   },
+
+   _checkPaths: function() {
+      this.openScreenshotsFolderItem.setSensitive(
+         false != this._getCreateFolder(this._cameraSaveDir, false));
+
+      this.openRecordingsFolderItem.setSensitive(
+         false != this._getCreateFolder(this._recorderSaveDir, false));
+   },
+
+   _doRunHandler: function(uri, context) {
+      try {
+         Gio.app_info_launch_default_for_uri(uri,
+            this._getLaunchContext(context));
+      }
+      catch (e) {
+         global.log('Spawning xdg-open ' + uri);
+         Util.spawn(['xdg-open', uri]);
+      }
+   },
+
+   _openScreenshotsFolder: function() {
+      this._doRunHandler('file://' + this._cameraSaveDir);
+   },
+
+   _openRecordingsFolder: function() {
+      this._doRunHandler('file://' + this._recorderSaveDir);
    },
 
    /**
@@ -743,6 +971,7 @@ MyApplet.prototype = {
             this.menu.addAction(this.indent(_("Interactive")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
             }));
+
             this._redoMenuItem = this.menu.addAction(this.indent(_("Redo last")), Lang.bind(this, this.redo_cinnamon_camera));
             
             if (this.lastCapture === null) {
@@ -858,7 +1087,7 @@ MyApplet.prototype = {
             }
 
             if (this._showUploadToggle) {
-               let uploadSwitch = new StubbornSwitchMenuItem(this.indent(_("Upload to imgur")), this._copyData, { style_class: 'bin' });
+               let uploadSwitch = new StubbornSwitchMenuItem(this.indent(_("Upload to imgur")), this._uploadToImgur, { style_class: 'bin' });
                uploadSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
                   this._uploadToImgur = v;
                   this.setSettingValue('upload-to-imgur', v);
@@ -873,6 +1102,13 @@ MyApplet.prototype = {
             }
          }
       }
+
+      /*if (this._uuid == 'capture-dev@rjanja') {
+         this.menu.addAction(this.indent(_("Test Notification")), Lang.bind(this, function(e) {
+            this._send_test_notification();
+         }));
+      }*/
+      
 
       if (this.has_recorder())
       {
@@ -1025,21 +1261,254 @@ MyApplet.prototype = {
    },
 
    cinnamon_camera_complete: function(screenshot) {
+      screenshot.uploaded = false;
+      screenshot.uploadLinks = null;
       this.lastCapture = screenshot;
-      if (this.lastCapture.selectionType != Screenshot.SelectionType.SCREEN) {
-         this._redoMenuItem.actor.show();
-      }
-      else {
-         this._redoMenuItem.actor.hide();
+
+      // We only support re-do of capture when we're using our own (for now)
+      if (this.get_camera_program() == 'cinnamon')
+      {
+         if (this.lastCapture.selectionType != Screenshot.SelectionType.SCREEN) {
+            this._redoMenuItem.actor.show();
+         }
+         else {
+            this._redoMenuItem.actor.hide();
+         }
       }
       if (this._copyData && this._copyDataAutoOff) {
          this._copyData = false;
          this.draw_menu();
       }
       else if (this._uploadToImgur && this._uploadAutoOff) {
+         this.setSettingValue('upload-to-imgur', false);
          this._uploadToImgur = false;
          this.draw_menu();
       }
+
+      var clipboardMessage = '';
+
+      if (screenshot.options.uploadToImgur) {
+         global.log('Uploading image to imgur..');
+         this.uploadToImgur(screenshot.file, Lang.bind(this, function(success, json) {
+            if (success) {
+               screenshot.uploaded = true;
+               screenshot.uploadLinks = json.links;
+
+               screenshot.extraActionMessage = _('Screenshot has been uploaded as %s') % json.links.original;
+
+               if (screenshot.options.copyToClipboard) {
+                  St.Clipboard.get_default().set_text(json.links.original);
+                  clipboardMessage = _('Link has been copied to clipboard');
+               }
+
+               this.maybeSendNotification(screenshot);
+            }
+            else {
+               screenshot.extraActionMessage = _('Screenshot could not be uploaded due to an error.');
+            }
+         }));
+
+         return false;
+      }
+      else if (screenshot.options.copyToClipboard) {
+         if (ClipboardCopyType.PATH == screenshot.options.copyToClipboard) {
+            St.Clipboard.get_default().set_text(screenshot.file);
+            clipboardMessage = _('Path has been copied to clipboard.');
+         }
+         else if (ClipboardCopyType.FILENAME == screenshot.options.copyToClipboard) {
+            St.Clipboard.get_default().set_text(screenshot.outputFilename);
+            clipboardMessage = _('Filename has been copied to clipboard.');
+         }
+         else if (ClipboardCopyType.DIRECTORY == screenshot.options.copyToClipboard) {
+            St.Clipboard.get_default().set_text(screenshot.outputDirectory);
+            clipboardMessage = _('Directory has been copied to clipboard.');
+         }
+         else if (ClipboardCopyType.IMAGEDATA == screenshot.options.copyToClipboard
+               && CLIPBOARD_HELPER) {
+            this.runProgram('python ' + CLIPBOARD_HELPER + ' ' + screenshot.file);
+            clipboardMessage = _('Image data has been copied to clipboard.');
+         }
+      }
+
+      screenshot.options.clipboardMessage = clipboardMessage;
+
+      this.maybeSendNotification(screenshot);
+
+      
+
+      // open-after is deprecated now that we have notification options
+      /*if (screenshot.options.openAfter) {
+         try {
+            Gio.app_info_launch_default_for_uri('file://' + screenshot.outputDirectory,
+               this._getLaunchContext(screenshot));
+         }
+         catch (e) {
+            global.log('Spawning gvfs-open ' + screenshot.outputDirectory);
+            Util.spawn(['gvfs-open', screenshot.outputDirectory]);
+         }
+      }*/
+      
+   },
+
+   maybeSendNotification: function(screenshot) {
+      if (screenshot.options.sendNotification) {
+         let source = new Source('capture-rjanja', screenshot);
+         Main.messageTray.add(source);
+
+         // Load our icon into a texture for later use in notifications
+         let icon_file = Gio.file_new_for_path(ICON_FILE_ACTIVE);
+         let icon_uri = icon_file.get_uri();
+         let icon_texture = St.TextureCache.get_default().load_uri_async(icon_uri, this._notificationIconSize, this._notificationIconSize);
+
+         let image_file = Gio.file_new_for_path(screenshot.file);
+         let image_uri = image_file.get_uri();
+         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+         let image_texture = St.TextureCache.get_default().load_uri_sync(
+            St.TextureCachePolicy.NONE,
+            image_uri, 
+            this._notificationImageSize, this._notificationImageSize, 
+            scaleFactor);
+
+         //global.tex = image_texture;
+
+         let body = 'Screenshot has been saved to: \n' + image_file.get_parent().get_uri()
+           + (screenshot.extraActionMessage ? "\n\n" + screenshot.extraActionMessage : "")
+           + (screenshot.clipboardMessage ? "\n\n" + screenshot.clipboardMessage : "");
+
+         let notification = new ScreenshotNotification(source,
+            _("Screenshot captured!"), null,
+            { body: body,
+              customContent: true, bodyMarkup: true });
+         notification.setResident(true);
+         notification.setImage(image_texture);
+
+         if (this._showDeleteAction) {
+            notification.addButton('delete-file', _('Delete'));
+         }
+
+         if (this._showCopyDataAction) {
+            notification.addButton('copy-data', _('Copy Data'));
+         }
+
+         if (this._showCopyPathAction) {
+            notification.addButton('copy-path', _('Copy Path'));
+         }
+
+         if (screenshot.uploaded) {
+            notification.addButton('open-link', _('Open Link'));
+         }
+         else if (this._showUploadAction) {
+            notification.addButton('upload', _('Upload'));
+         }
+
+         //if (this._customActionLabel && this._customActionCmd) {
+            //notification.addButton('custom', this._customActionLabel);
+         //}
+
+         notification.connect('action-invoked', Lang.bind(this, function(n, action_id) { 
+            global.log('Action invoked from notification: ' + action_id);
+            
+            if (true == screenshot.demo) {
+               n.setResident(false);
+            }
+            else {
+               return this.handleNotificationResponse(screenshot, action_id, n);
+            }
+         }));
+
+         notification.connect('image-left-clicked', Lang.bind(this, function(n, s) {
+            this._doRunHandler('file://' + screenshot.file);
+         }));
+
+         if ('dismiss' != this._notificationBehavior) {
+            let path = 'open-file' == this._notificationBehavior 
+              ? screenshot.file : screenshot.outputDirectory;
+
+            notification.connect('clicked', Lang.bind(this,
+               function() {
+                  this._doRunHandler('file://' + path);
+            }));
+         }
+
+         source.notify(notification);
+      }
+
+      return true;
+   },
+
+   handleNotificationResponse: function(screenshot, action, notification) {
+      if ('open-folder' == action) {
+         this._doRunHandler('file://' + screenshot.outputDirectory);
+      }
+      else if ('open-file' == action) {
+         this._doRunHandler('file://' + screenshot.file);
+      }
+      else if ('copy-data' == action) {
+         this.runProgram('python ' + CLIPBOARD_HELPER + ' ' + screenshot.file);
+      }
+      else if ('copy-path' == action) {
+         St.Clipboard.get_default().set_text(screenshot.file);
+      }
+      else if ('open-link' == action) {
+         this._doRunHandler(screenshot.uploadLinks.imgur_page);
+      }
+      else if ('custom' == action) {
+         this.runProgram(this._customActionCmd + ' ' + screenshot.file);
+      }
+      else if ('delete-file' == action && !screenshot.demo) {
+         let file = Gio.file_new_for_path(screenshot.file);
+         try {
+            file.delete(null);
+            /*notification.unsetImage();
+            let box = new St.BoxLayout({ name: 'notification-actions' });
+            notification.setActionArea(box, { row: 2, col: 1,
+                                                      row_span: 1,
+                                                      col_span: 2,
+                                                      x_fill: false,
+                                                      x_expand: false });*/
+            let icon_file = Gio.file_new_for_path(ICON_FILE_ACTIVE);
+            let icon_uri = icon_file.get_uri();
+            let icon_texture = St.TextureCache.get_default().load_uri_async(icon_uri, this._notificationIconSize, this._notificationIconSize);
+
+            //notification.setDelayedResident(true);
+            //notification.setTransient(true);
+            global.log('is transient?');
+            global.log(notification.isTransient);
+
+            notification.update('Screenshot deleted', _("The screenshot at %s was removed from disk.") % screenshot.file,
+               { body: _("The screenshot at %s was removed from disk.") % screenshot.file,
+                 icon: icon_texture, customContent: true, clear: true });
+
+            Mainloop.timeout_add(1000, Lang.bind(this, function() {
+               notification.destroy();
+            }));
+         }
+         catch (e) {
+            global.log(e);
+            global.log("Could not delete file " + file.get_path());
+         }
+
+      }
+      else if ('run-tools' == action) {
+         // @wishlist better interactive post-capture tools
+      }
+      else if ('upload' == action && !screenshot.demo) {
+         this.uploadToImgur(screenshot.file, Lang.bind(this, function(success, json) {
+            if (success) {
+               this._doRunHandler(json.links.imgur_page);
+
+               if (screenshot.options.copyToClipboard) {
+                  St.Clipboard.get_default().set_text(json.links.original);
+                  clipboardMessage = _('Link has been copied to clipboard');
+               }
+            }
+            else {
+               screenshot.extraActionMessage = _('Screenshot could not be uploaded due to an error.');
+            }
+         }));
+      }
+
+      return true;
    },
 
    run_cinnamon_camera: function(type, event, index) {
@@ -1066,7 +1535,7 @@ MyApplet.prototype = {
             includeFrame: this._includeWindowFrame,
             includeStyles: this._includeStyles,
             windowAsArea: this._windowAsArea,
-            copyToClipboard: this._copyData ? 4 : this._copyToClipboard,
+            //copyToClipboard: this._copyData ? 4 : this._copyToClipboard,
             playShutterSound: this._playShutterSound,
             useTimer: enableTimer,
             playTimerSound: this._playIntervalSound,
@@ -1078,7 +1547,7 @@ MyApplet.prototype = {
             uploadToImgur: this._uploadToImgur,
             useIndex: index,
             openAfter: this._copyData ? false : this._openAfter,
-            clipboardHelper: CLIPBOARD_HELPER
+            //clipboardHelper: CLIPBOARD_HELPER
          });
       });
 
@@ -1125,10 +1594,16 @@ MyApplet.prototype = {
       label.set_text(newLabel);
    },
 
-   _getCreateFilePath: function(folderPath, fileName, fileExtension) {
+   _getCreateFolder: function(folderPath, dontCreate) {
       let folder = Gio.file_new_for_path(folderPath);
+
       if (true != folder.query_exists(null)) {
          try {
+            if (dontCreate == false) {
+               global.log("Save folder does not exist: " + folder.get_path() + ", aborting");
+               return false;
+            }
+
             folder.make_directory(null);
          }
          catch (e) {
@@ -1143,9 +1618,17 @@ MyApplet.prototype = {
             global.log("Cannot write to " + folder.get_path() + ", not a directory, aborting");
             return false;
          }
-         
       }
 
+      return true;
+   },
+
+   _getCreateFilePath: function(folderPath, fileName, fileExtension) {
+      if (false == this._getCreateFolder(folderPath, false))
+      {
+         return false;
+      }
+      
       let file = Gio.file_new_for_path(folderPath + '/' + fileName + '.' + fileExtension);
       let desiredFilepath = file.get_path();
       try {
@@ -1629,6 +2112,79 @@ MyApplet.prototype = {
       this.menu.toggle();
    },
 
+   _send_test_notification: function() {
+      var enableTimer = (this._useTimer && this._delay > 0);
+      var options = {
+         includeCursor: this._includeCursor,
+         useFlash: this._useCameraFlash,
+         includeFrame: this._includeWindowFrame,
+         includeStyles: this._includeStyles,
+         windowAsArea: this._windowAsArea,
+         //copyToClipboard: this._copyData ? 4 : this._copyToClipboard,
+         playShutterSound: this._playShutterSound,
+         useTimer: enableTimer,
+         playTimerSound: this._playIntervalSound,
+         timerDuration: this._delay,
+         soundTimerInterval: 'dialog-warning',
+         soundShutter: 'camera-shutter',
+         sendNotification: this._sendNotification,
+         filename: 'test.png',
+         uploadToImgur: this._uploadToImgur,
+         useIndex: 0,
+         openAfter: this._copyData ? false : this._openAfter,
+         //clipboardHelper: CLIPBOARD_HELPER
+      };
+      var screenshot = {
+         selectionType: Screenshot.SelectionType.WINDOW,
+         outputFilename: '',
+         outputDirectory: '',
+         file: '',
+         options: options
+      };
+
+      this.cinnamon_camera_complete(screenshot);
+   },
+
+   on_config_demo_notification: function() {
+      //return this._send_test_notification();
+
+      var enableTimer = (this._useTimer && this._delay > 0);
+      var options = {
+         includeCursor: this._includeCursor,
+         useFlash: this._useCameraFlash,
+         includeFrame: this._includeWindowFrame,
+         includeStyles: this._includeStyles,
+         windowAsArea: this._windowAsArea,
+         //copyToClipboard: this._copyData ? 4 : this._copyToClipboard,
+         playShutterSound: this._playShutterSound,
+         useTimer: enableTimer,
+         playTimerSound: this._playIntervalSound,
+         timerDuration: this._delay,
+         soundTimerInterval: 'dialog-warning',
+         soundShutter: 'camera-shutter',
+         sendNotification: this._sendNotification,
+         filename: 'test.png',
+         uploadToImgur: this._uploadToImgur,
+         useIndex: 0,
+         openAfter: this._copyData ? false : this._openAfter,
+         //clipboardHelper: CLIPBOARD_HELPER
+      };
+      var screenshot = {
+         selectionType: Screenshot.SelectionType.WINDOW,
+         outputFilename: 'desktop-capture.png',
+         outputDirectory: this._cameraSaveDir,
+         file: ICON_FILE,
+         options: options,
+         demo: true
+      };
+
+      this.cinnamon_camera_complete(screenshot);
+
+      let timeoutId = Mainloop.timeout_add(3000, Lang.bind(this, function() {
+         this.on_settings_changed();
+      }));
+    },
+
    on_applet_removed_from_panel: function() {
       // Applet roles introduced in Cinnamon 2.2
       this.maybeUnregisterRole();
@@ -1637,7 +2193,7 @@ MyApplet.prototype = {
    replaceTokens: function(tokens, replacements, subject)
    {
       if (tokens.length == replacements.length) {
-         var i, t, p;
+         var i, t, p, r;
          for (i = 0; i < tokens.length; i++) {
             t = tokens[i];
             r = replacements[i];
@@ -1662,6 +2218,78 @@ MyApplet.prototype = {
          Main.systrayManager.unregisterRole("screenshot", this._uuid);
       }
       catch (e) {}
+   },
+
+   runProgram: function(cmd) {
+      global.log('Running: ' + cmd);
+      try {
+         let success, argc, argv, pid, stdin, stdout, stderr;
+         [success,argv] = GLib.shell_parse_argv(cmd);
+         [success,pid,stdin,stdout,stderr] =
+           GLib.spawn_async_with_pipes(null,argv,null,GLib.SpawnFlags.SEARCH_PATH,null,null);
+      }
+      catch (e)
+      {
+         global.log(e);
+      }
+
+      return true;
+   },
+
+   uploadToImgur: function(filename, callback) {
+      let f = Gio.file_new_for_path(filename);
+      let dir = f.get_parent().get_path();
+      let imgLogFile = Gio.file_new_for_path(dir + '/imgur.log');
+      let imgLog = imgLogFile.append_to(0, null);
+
+      f.load_contents_async(null, function(f, res) {
+         let contents;
+         try {
+            contents = f.load_contents_finish(res)[1];
+         } catch (e) {
+            log("*** ERROR: " + e.message);
+            callback(false, null);
+         }
+         
+         let buffer = new Soup.Buffer.new(contents, contents.length);
+         let multiPart = new Soup.Multipart.new(Soup.FORM_MIME_TYPE_MULTIPART);
+         multiPart.append_form_string('key', IMGUR_CRED);
+         multiPart.append_form_file('image', filename, 'image/png', buffer);
+
+         var message = Soup.form_request_new_from_multipart(
+            'http://api.imgur.com/2/upload.json', multiPart);
+         session.queue_message(message, function(session, response) {
+            if (response.status_code !== 200) {
+               global.log("Error during upload: response code " + response.status_code
+                  + ": " + response.reason_phrase + " - " + response.response_body.data);
+               
+               callback(false, null);
+
+               return true;
+            }
+
+            try {
+               var imgur = JSON.parse(response.response_body.data);
+               let imgurLinksText = 't=' + Main.formatTime(new Date(new Date().getTime()))
+                 + ': ' + imgur.upload.links.imgur_page + ' ' 
+                 + imgur.upload.links.delete_page + '\n';
+               imgLog.write(imgurLinksText, null);
+            }
+            catch (e) {
+               global.logError("Imgur seems to be down. Error was:");
+               global.logError(e);
+               callback(false, null);
+               return true;
+            }
+
+            callback(true, imgur.upload);
+            return true;
+         });
+
+         return true;
+      }, null);
+      
+      return true;
    },
 };
 

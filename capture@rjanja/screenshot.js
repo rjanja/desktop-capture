@@ -14,7 +14,7 @@ const Params = imports.misc.params;
 const Clutter = imports.gi.Clutter;
 
 const Flashspot = imports.ui.flashspot;
-const Lightbox = imports.ui.lightbox;
+//const Lightbox = imports.ui.lightbox;
 const Util = imports.misc.util;
 const Tweener = imports.ui.tweener;
 
@@ -22,33 +22,13 @@ const Lang = imports.lang;
 const St = imports.gi.St;
 const Gio = imports.gi.Gio;
 
-// Modal
-const ModalDialog = imports.ui.modalDialog;
-const Pango = imports.gi.Pango;
-const _DIALOG_ICON_SIZE = 32;
-const PopupMenu = imports.ui.popupMenu;
-const CheckBox = imports.ui.checkBox;
-const RadioButton = imports.ui.radioButton;
-let _captureDialog = null;
-let _previewDialog = null;
-let _imgurDialog = null;
-
-// Uploading
-const Soup = imports.gi.Soup
-const IMGUR_CRED = "85a61980ca1cc59f329ee172245ace84";
-let session = new Soup.SessionAsync();
-Soup.Session.prototype.add_feature.call(session, new Soup.ProxyResolverDefault());
-
-const MessageTray = imports.ui.messageTray;
-
 const SelectionType = {
    ALL_WORKSPACES: 0,  /* @todo */
    SCREEN: 1,
    MONITOR: 2,
    WINDOW: 3,
    AREA: 4,
-   CINNAMON: 5,
-   INTERACTIVE: 6
+   CINNAMON: 5
 }
 
 const SOUND_ID = 1;
@@ -59,584 +39,7 @@ const SelectionTypeStr = {
    2: "monitor",
    3: "window",
    4: "area",
-   5: "cinnamon",
-   6: "interactive"
-}
-
-const ClipboardCopyType = {
-   OFF: 0,
-   DEFAULT: 1,
-   PATH: 1,
-   DIRECTORY: 2,
-   FILENAME: 3,
-   IMAGEDATA: 4
-}
-
-function ImgurDialog(upload) {
-   if (_imgurDialog == null) {
-      this._init(upload);
-      _imgurDialog = null;
-   }
-   else {
-      _imgurDialog._upload = upload;
-   }
-
-   return _imgurDialog;
-}
-
-ImgurDialog.prototype = {
-   __proto__: ModalDialog.ModalDialog.prototype,
-
-   _init: function(upload) {
-      this._selectedText = "";
-      this._upload = upload;
-
-      ModalDialog.ModalDialog.prototype._init.call(this, { styleClass: 'imgur-dialog' });
-      this.connect('destroy',
-                  Lang.bind(this, this._onDestroy));
-      this.connect('opened',
-                  Lang.bind(this, this._onOpened));
-
-      this.contentLayout.destroy_all_children();
-
-      this.setButtons(
-         [
-          { label:  _("Cancel"),
-            action: Lang.bind(this, this._onCloseButtonPressed)
-          },
-          { label:  _("Open in browser"),
-            action: Lang.bind(this, this.openInBrowser)
-          },
-          { label:  _("Copy to clipboard"),
-            action: Lang.bind(this, this.copyToClipboard)
-          }
-         ]);
-
-      let message = _("Imgur Upload Successful!");
-      this._descriptionLabel = new St.Label({ text: message, style_class: 'imgur-dialog-title' });
-      
-      this.contentLayout.add(this._descriptionLabel,
-                            { y_fill:  true,
-                              y_align: St.Align.START });
-
-      let instructions = _("Select a link to copy to clipboard or open in browser.");
-      this._subLabel = new St.Label({ text: instructions, style_class: 'imgur-dialog-instructions' });
-      this.contentLayout.add(this._subLabel, { y_fill: true, y_align: St.Align.START });
-
-      this.radioGroup = new RadioButton.RadioButtonGroup("imgurLink");
-      this.radioGroup.addButton('original', _("Original image") + " " + upload.links.original);
-      this.radioGroup.addButton('imgur_page', _("Imgur page") + " " + upload.links.imgur_page);
-      this.radioGroup.addButton('delete_page', _("Delete page") + " " + upload.links.delete_page);
-      this.radioGroup.addButton('small_square', _("Small square") + " " + upload.links.small_square);
-      this.radioGroup.setActive('large_thumbnail', _("Large thumbnail") + " " + upload.links.large_thumbnail);
-      this.radioGroup.connect("radio-changed", Lang.bind(this, function() {
-         this._selectedLink = this.radioGroup.getActive();
-         this._selectedText = this._upload.links[this._selectedLink];
-      }));
-      this.radioGroup.setActive('original');
-      this.contentLayout.add(this.radioGroup.actor);
-   },
-
-   copyToClipboard: function(button, event) {
-      if (this._selectedText != "") {
-         St.Clipboard.get_default().set_text(this._selectedText);
-         this.playSound('bell');
-         this.close();
-      }
-      return true;
-   },
-
-   openInBrowser: function(button, event) {
-      if (this._selectedText != "") {
-         this.close();
-         Main.Util.spawnCommandLine('xdg-open ' + this._selectedText);
-      }
-      return true;
-   },
-
-   addButton: function(label, action) {
-      let button = new St.Button({ style_class: 'modal-dialog-button',
-                        reactive:    true,
-                        can_focus:   true,
-                        label:       label });
-      this.copyLayout.add(button, {
-          expand: true,
-          x_fill: false,
-          y_fill: false,
-          x_align: St.Align.MIDDLE,
-          y_align: St.Align.MIDDLE
-      });
-      button.connect('clicked', action);
-
-      return button;
-   },
-
-   _onCloseButtonPressed: function(button, event) {
-      this.close(global.get_current_time());
-   },
-
-   _onOpened: function() {
-
-   },
-
-   _onDestroy: function() {
-      
-   },
-
-   close: function() {
-      ModalDialog.ModalDialog.prototype.close.call(this);
-   },
-
-   cancel: function() {
-      this.close(global.get_current_time());
-   }
-}
-
-function PreviewDialog(helper, screenshot) {
-   if (_previewDialog == null) {
-       this._init(helper, screenshot);
-       _previewDialog = this;
-   }
-
-   return _previewDialog;
-}
-
-PreviewDialog.prototype = {
-   __proto__: ModalDialog.ModalDialog.prototype,
-
-   _init: function(helper, screenshot) {
-      this._selectionType = null;
-      this.helper = helper;
-      this._useTimer = null;
-      this._timerDuration = null;
-      this._includeFrame = null;
-      this._includeCursor = null;
-      
-      ModalDialog.ModalDialog.prototype._init.call(this, { styleClass: 'capture-dialog' });
-
-      this.connect('destroy',
-                  Lang.bind(this, this._onDestroy));
-      this.connect('opened',
-                  Lang.bind(this, this._onOpened));
-   },
-
-   showPreview: function(screenshot) {
-      this.contentLayout.destroy_all_children();
-      this._screenshot = screenshot;
-
-      global.log("Preview init!");
-
-      let captureType = screenshot.selectionTypeVerbose.charAt(0).toUpperCase()
-        + screenshot.selectionTypeVerbose.slice(1);
-
-      let message = captureType + " " + _("Capture");
-      this._descriptionLabel = new St.Label({ text: message, style_class: 'capture-dialog-title' });
-      
-      this.contentLayout.add(this._descriptionLabel,
-                            { y_fill:  true,
-                              y_align: St.Align.START });
-
-      let titleContentLayout = new St.BoxLayout({ style_class: 'tmp', vertical: false });
-      this.contentLayout.add(titleContentLayout,
-                            { style_class: 'tmp', x_fill: true,
-                              y_fill: false });
-
-      this.setInitialKeyFocus(titleContentLayout);
-
-      this.setButtons(
-         [
-          { label:  _("Redo"),
-            action: Lang.bind(this, this._onRedoButtonPressed)
-          },
-          { label: _("Upload.."),
-            action: Lang.bind(this, this._onUploadButtonPressed)
-          },
-          { label: _("Copy to clipboard"),
-            action: Lang.bind(this, this._onCopyButtonPressed)
-          },
-          { label: _("Open directory"),
-            action: Lang.bind(this, this._onOpenDirectoryButtonPressed)
-          },
-          { label: _("Open file"),
-            action: Lang.bind(this, this._onOpenFileButtonPressed)
-          },
-          { label: _("Close"),
-            action: Lang.bind(this, this._onCloseButtonPressed),
-            key:    Clutter.Escape
-          }
-         ]);
-
-      let image = St.TextureCache.get_default().load_uri_async(
-         GLib.filename_to_uri(screenshot.file, null),
-         600, 240);
-
-      this._previewBin = new St.Bin({ style_class: 'image-preview' });
-      this._previewBin.child = image;
-      this._previewBin.show();
-
-      this.previewLayout = new St.BoxLayout();
-      this.contentLayout.add(this.previewLayout, {
-         x_align: St.Align.START,
-         y_align: St.Align.START
-      });
-
-      this.previewLayout.add(this._previewBin, { 
-         x_align: St.Align.START,
-         y_align: St.Align.START,
-         x_fill: false,
-         y_fill: false });
-
-      this._filenameLabel = new St.Label({ text: screenshot.outputFilename, style_class: 'image-filename' });
-      this.contentLayout.add(this._filenameLabel,
-                            { y_fill:  true,
-                              y_align: St.Align.START });
-
-      if (screenshot['width'] != undefined) {
-         this._dimensionsLabel = new St.Label({ text: "" + screenshot.width + " \u00D7 " + screenshot.height, 
-             style_class: 'image-dimensions' });
-         this.contentLayout.add(this._dimensionsLabel,
-                               { y_fill:  true,
-                                 y_align: St.Align.START });
-      }
-
-      this.previewDetailsLayout = new St.BoxLayout({ vertical: true });
-      this.previewLayout.add(this.previewDetailsLayout, {
-         x_align: St.Align.START,
-         y_align: St.Align.START });
-
-      this.open();
-   },
-
-   _onRedoButtonPressed: function(button, event) {
-      this.helper.setOptions(this._screenshot.options);
-      let timeoutId = Mainloop.timeout_add(300, Lang.bind(this, function() {
-         Mainloop.source_remove(timeoutId);
-         this.helper.runCaptureMode(this._screenshot.selectionType);
-         return false;
-      }));
-      
-      this._onCloseButtonPressed(button, event);
-   },
-
-   _onUploadButtonPressed: function(button, event) {
-      this.helper.uploadToImgur(this._screenshot.file, Lang.bind(this, function(result, upload) {
-         if (result) {
-            let dialog = new ImgurDialog(upload);
-            dialog.open(global.get_current_time());
-         }
-      }));
-   },
-
-   _onOpenFileButtonPressed: function(button, event) {
-      Main.Util.spawnCommandLine('xdg-open '+this._screenshot.file);
-      this._onCloseButtonPressed(button, event);
-   },
-
-   _onOpenDirectoryButtonPressed: function(button, event) {
-      Main.Util.spawnCommandLine('xdg-open '+this._screenshot.outputDirectory);
-      this._onCloseButtonPressed(button, event);
-   },
-
-   _onCopyButtonPressed: function(button, event) {
-      // As of 2012-08-25, St.Clipboard only allows copying UTF-8 text
-      // and will not handle binary contents. So unlike GNOME-Screenshot,
-      // we will only copy the path and filename.
-      St.Clipboard.get_default().set_text(this._screenshot.file);
-      this._onCloseButtonPressed(button, event);
-   },
-
-   _onCloseButtonPressed: function(button, event) {
-      this.close(global.get_current_time());
-   },
-
-   _onOpened: function() {
-
-   },
-
-   _onDestroy: function() {
-      
-   },
-
-   close: function() {
-      ModalDialog.ModalDialog.prototype.close.call(this);
-   },
-
-   cancel: function() {
-      this.close(global.get_current_time());
-   }
-
-}
-
-function CaptureDialog(helper) {
-   if (_captureDialog == null) {
-       this._init(helper);
-       _captureDialog = this;
-   }
-
-   return _captureDialog;
-}
-
-CaptureDialog.prototype = {
-   __proto__: ModalDialog.ModalDialog.prototype,
-
-   _init: function(helper) {
-      this._selectionType = null;
-      this.helper = helper;
-      this._useTimer = null;
-      this._timerDuration = null;
-      this._includeFrame = null;
-      this._includeCursor = null;
-      this._lastMode = null;
-
-      ModalDialog.ModalDialog.prototype._init.call(this, { styleClass: 'capture-dialog' });
-
-      this.connect('destroy',
-                  Lang.bind(this, this._onDestroy));
-      this.connect('opened',
-                  Lang.bind(this, this._onOpened));
-
-      let message = _("Take Screenshot");
-      this._descriptionLabel = new St.Label({ text: message, style_class: 'capture-dialog-title' });
-
-      this.contentLayout.add(this._descriptionLabel,
-                            { y_fill:  true,
-                              y_align: St.Align.START });
-
-      let titleContentLayout = new St.BoxLayout({ style_class: 'tmp', vertical: false });
-      this.contentLayout.add(titleContentLayout,
-                            { style_class: 'tmp', x_fill: true,
-                              y_fill: false });
-
-      this.setInitialKeyFocus(titleContentLayout);
-
-      this._iconBin = new St.Bin({ width: 50 });
-      titleContentLayout.add(this._iconBin,
-         { width: 50, x_fill: true,
-           y_fill:  false,
-           x_align: St.Align.START,
-           y_align: St.Align.START });
-
-      this.setButtons(
-         [{ label: _("Cancel"),
-            action: Lang.bind(this, this._onButtonPressed),
-            key:    Clutter.Escape
-          },
-          { label:  _("Capture"),
-            action: Lang.bind(this, this._onCaptureButtonPressed)
-          }]);
-
-      
-      this._setIconFromName('camera-photo', 'login-dialog-user-list-item-icon');
-
-      this.radioGroup = new RadioButton.RadioButtonGroup("captureMode");
-      this.radioGroup.addButton(SelectionType.SCREEN, "Grab the whole screen");
-      this.radioGroup.addButton(SelectionType.WINDOW, "Grab a window");
-      this.radioGroup.addButton(SelectionType.CINNAMON, "Grab a UI element");
-      this.radioGroup.addButton(SelectionType.AREA, "Select area to grab");
-      this.radioGroup.connect("radio-changed", Lang.bind(this, function() {
-         this._lastMode = this._selectionType = this.radioGroup.getActive();
-      }));
-
-      if (this._lastMode !== null) {
-         this.radioGroup.setActive(this._lastMode);
-      }
-      else {
-         this.radioGroup.setActive(SelectionType.AREA);
-      }
-      
-      titleContentLayout.add(this.radioGroup.actor);
-
-      this._optionsLabel = new St.Label({ text: "Options", style_class: 'capture-dialog-subtitle' });
-      this.contentLayout.add(this._optionsLabel, { expand: true, x_align: St.Align.START });
-
-      let optionsHContentLayout = new St.BoxLayout({ style_class: 'tmp' });
-      optionsHContentLayout.add(new St.Bin({ width: 50 }),
-                           { width: 50, x_fill: true,
-                             y_fill:  false,
-                             x_align: St.Align.START,
-                             y_align: St.Align.START });
-      this.contentLayout.add(optionsHContentLayout);
-
-      let optionsVContentLayout = new St.BoxLayout({ vertical: true });
-      optionsHContentLayout.add(optionsVContentLayout);
-
-      let timerGroup = new St.BoxLayout({ style_class: 'tmp' });
-
-      this.cbTimer = new CheckBox.CheckBox("Use capture timer", { x_fill: true, y_fill: false, y_align: St.Align.END });
-      timerGroup.add(this.cbTimer.actor, { fill: true, x_fill: true, expand: true, 
-         x_align: St.Align.START, y_align: St.Align.END });
-
-      let timerMenu = new PopupMenu.PopupComboMenu();
-      this._timerCombo = new PopupMenu.PopupComboBoxMenuItem({ style_class: 'tmp2 popup-combo' });
-      timerMenu.addMenuItem(this._timerCombo);
-
-      let item;
-      item = new PopupMenu.PopupMenuItem(_("1 sec"));
-      this._timerCombo.addMenuItem(item);
-      item = new PopupMenu.PopupMenuItem(_("3 sec"));
-      this._timerCombo.addMenuItem(item);
-      item = new PopupMenu.PopupMenuItem(_("5 sec"));
-      this._timerCombo.addMenuItem(item);
-      this._timerCombo.setSensitive(true);
-      this._timerCombo.setActiveItem(0);
-      this._timerCombo.connect('active-item-changed', Lang.bind(this, this._onTimerChanged));
-
-      timerGroup.add(timerMenu.actor, { expand: true, x_align: St.Align.START, y_align: St.Align.END, x_fill: false });
-      optionsVContentLayout.add(timerGroup, {  });
-
-      let cursorGroup = new St.BoxLayout();
-      let cursorLabel = new St.Label({ style_class: 'option-label', text: "Include cursor" });
-
-      this.cbCursor = new CheckBox.CheckBox("Include cursor");
-      cursorGroup.add(this.cbCursor.actor, { expand: true, x_fill: true });
-      optionsVContentLayout.add(cursorGroup, { x_fill: true, x_align: St.Align.END });
-
-      let frameGroup = new St.BoxLayout();
-      this.cbFrame = new CheckBox.CheckBox("Include window frame");
-      frameGroup.add(this.cbFrame.actor, { expand: true, x_fill: true });
-      optionsVContentLayout.add(frameGroup, { x_fill: true, x_align: St.Align.END });
-
-      this.cbFrame.actor.connect("clicked", Lang.bind(this, this._onCheckboxClicked, "_includeFrame"));
-      this.cbCursor.actor.connect("clicked", Lang.bind(this, this._onCheckboxClicked, "_includeCursor"));
-      this.cbTimer.actor.connect("clicked", Lang.bind(this, this._onCheckboxClicked, "_useTimer"));
-   },
-
-   _onCheckboxClicked: function(actor, x, optionName) {
-      this[optionName] = actor.checked === true;
-   },
-
-   _onTimerChanged: function(e, v) {
-      if (v == 2) this._timerDuration = 5;
-      else if (v == 1) this._timerDuration = 3;
-      else this._timerDuration = 1;
-   },
-
-   _onButtonPressed: function(button, event) {
-      this.close(global.get_current_time());
-   },
-
-   _onCaptureButtonPressed: function(button, event) {
-      this.close(global.get_current_time());
-      this.helper.setOptions({
-         includeFrame: this._includeFrame,
-         includeCursor: this._includeCursor,
-         useTimer: this._useTimer,
-         timerDuration: this._timerDuration
-      })
-      let timeoutId = Mainloop.timeout_add(100, Lang.bind(this, function() {
-         Mainloop.source_remove(timeoutId);
-         this.helper.runCaptureMode(this._selectionType);
-         return false;
-      }));
-      
-   },
-
-    _onDestroy: function() {
-        
-    },
-
-    _updateButtons: function() {
-
-    },
-
-    _setIconFromFile: function(iconFile, styleClass) {
-        if (styleClass)
-            this._iconBin.set_style_class_name(styleClass);
-        this._iconBin.set_style(null);
-
-        this._iconBin.child = null;
-        if (iconFile) {
-            this._iconBin.show();
-            this._iconBin.set_style('background-image: url("' + iconFile + '");');
-        } else {
-            this._iconBin.hide();
-        }
-    },
-
-    _setIconFromName: function(iconName, styleClass) {
-        if (styleClass)
-            this._iconBin.set_style_class_name(styleClass);
-        this._iconBin.set_style(null);
-
-        if (iconName != null) {
-            let textureCache = St.TextureCache.get_default();
-            let icon = textureCache.load_icon_name(this._iconBin.get_theme_node(),
-                                                   iconName,
-                                                   St.IconType.SYMBOLIC,
-                                                   _DIALOG_ICON_SIZE);
-
-            this._iconBin.child = icon;
-            this._iconBin.show();
-        } else {
-            this._iconBin.child = null;
-            this._iconBin.hide();
-        }
-    },
-
-    close: function() {
-        ModalDialog.ModalDialog.prototype.close.call(this);
-    },
-
-    cancel: function() {
-        this.close(global.get_current_time());
-    },
-
-   _confirm: function(signal) {
-      this._fadeOutDialog();
-   },
-
-   _onOpened: function() {
-
-   }
-}
-
-function ScreenshotNotification(source, dispatchOp) {
-   this._init(source, dispatchOp);
-}
-ScreenshotNotification.prototype = {
-   __proto__: MessageTray.Notification.prototype,
-
-   _init: function(source, title) {
-      MessageTray.Notification.prototype._init.call(this, source, title, null, { customContent: true });
-      this.setResident(true);
-      this.connect('action-invoked', Lang.bind(this, function(self, action) {
-         switch (action) {
-         case 'decline':
-
-             break;
-         case 'accept':
-
-             break;
-         }
-         this.destroy();
-
-      }));
-   }
-}
-
-function Source(sourceId, app, window) {
-    this._init(sourceId, app, window);
-}
-
-Source.prototype = {
-   __proto__ : MessageTray.Source.prototype,
-
-   _init: function(sourceId, app, screenshot) {
-      MessageTray.Source.prototype._init.call(this, sourceId);
-      this._screenshot = screenshot;
-      this._app = app;
-   },
-
-   createNotificationIcon : function() {
-      return new St.Icon({ icon_name: 'camera-photo-symbolic',
-         icon_type: St.IconType.FULLCOLOR,
-         icon_size: this.ICON_SIZE || 24 });
-   },
-
-   clicked : function() {
-     global.log('source notification clicked');
-     MessageTray.Source.prototype.clicked.call(this);
-   }
+   5: "cinnamon"
 }
 
 function ScreenshotHelper(selectionType, callback, params) {
@@ -650,7 +53,6 @@ ScreenshotHelper.prototype = {
       this._modifiers = {};
       this._timeout  = 0;
       this._interactive = false;
-      this.previewDialog = null;
       this._params = {
          filename: '',
          useFlash: true,
@@ -658,7 +60,6 @@ ScreenshotHelper.prototype = {
          includeCursor: true,
          includeStyles: true,
          windowAsArea: false,
-         copyToClipboard: ClipboardCopyType.DEFAULT,
          playShutterSound: true,
          useTimer: true,
          playTimerSound: true,
@@ -669,7 +70,6 @@ ScreenshotHelper.prototype = {
          uploadToImgur: false,
          useIndex: null,
          openAfter: false,
-         clipboardHelper: null,
          selectionHelper: false
       };
 
@@ -716,10 +116,6 @@ ScreenshotHelper.prototype = {
       }
       else if (mode == SelectionType.SCREEN) {
          this.selectScreen();
-      }
-      else if (mode == SelectionType.INTERACTIVE) {
-         this._interactive = true;
-         this.selectInteractive();
       }
       else if (mode == SelectionType.MONITOR) {
          this.selectMonitor();
@@ -855,18 +251,6 @@ ScreenshotHelper.prototype = {
       let flashspot = new Flashspot.Flashspot({ x : x, y : y, width: width, height: height});
       global.f = flashspot;
       flashspot.fire();
-   },
-
-   selectInteractive: function() {
-      let dialog = new CaptureDialog(this);
-      dialog.open(global.get_current_time());
-   },
-
-   postInteractive: function(capture) {
-      if (this.previewDialog == null) {
-         this.previewDialog = new PreviewDialog(this, capture);
-      }
-      this.previewDialog.showPreview(capture);
    },
 
    selectScreen: function() {
@@ -1447,91 +831,20 @@ ScreenshotHelper.prototype = {
          }
       }
 
-      if (this._callback) {
-         this._callback(screenshot);
-      }
-
       if (screenshot.options.playShutterSound) {
          this.playSound('camera-shutter');
       }
 
-      if (this._interactive) {
-         let timeoutId = Mainloop.timeout_add(300, Lang.bind(this, function() {
-            Mainloop.source_remove(timeoutId);
-            this.postInteractive(screenshot);
-            return false;
-         }));
+      if (this._callback) {
+         this._callback(screenshot);
       }
-      else {
-         if (screenshot.options.uploadToImgur) {
-            this.uploadToImgur(screenshot.file, function(success, json) {
-               if (success)
-               {
-                  if (screenshot.options.copyToClipboard) {
-                     St.Clipboard.get_default().set_text(json.links.original);
-                  }
 
-                  this.playSound('bell')
-                  
-               }
-            });
-         }
-         else if (screenshot.options.copyToClipboard) {
-            if (ClipboardCopyType.PATH == screenshot.options.copyToClipboard) {
-               St.Clipboard.get_default().set_text(screenshot.file);
-            }
-            else if (ClipboardCopyType.FILENAME == screenshot.options.copyToClipboard) {
-               St.Clipboard.get_default().set_text(screenshot.outputFilename);
-            }
-            else if (ClipboardCopyType.DIRECTORY == screenshot.options.copyToClipboard) {
-               St.Clipboard.get_default().set_text(screenshot.outputDirectory);
-            }
-            else if (ClipboardCopyType.IMAGEDATA == screenshot.options.copyToClipboard
-                  && screenshot.options.clipboardHelper) {
-               this.runProgram('python '+screenshot.options.clipboardHelper+' '+screenshot.file);
-            }
-            
-            //this.playSound('bell');
-         }
-
-         if (screenshot.options.sendNotification) {
-            let source = new Source('capture-rjanja', this, screenshot);
-            Main.messageTray.add(source);
-            let notification = new ScreenshotNotification(source,
-               'Screenshot captured!', null,
-               { customContent: true, bodyMarkup: true });
-
-            notification.setResident(true);
-            notification.addBody("<b>" + screenshot.outputFilename + "</b> saved to " + screenshot.outputDirectory, true);
-            notification.connect('action-invoked',
-               Lang.bind(this, function() { global.log('action-invoked'); }));
-
-            notification.connect('clicked', Lang.bind(this,
-               function() {
-                  try {
-                     Gio.app_info_launch_default_for_uri('file://' + screenshot.outputDirectory,
-                        global.create_app_launch_context());
-                  }
-                  catch (e) {
-                     Util.spawn(['gvfs-open', screenshot.outputDirectory]);
-                  }
-            }));
-
-            source.notify(notification);
-         }
-
-         if (screenshot.options.openAfter) {
-            try {
-               Gio.app_info_launch_default_for_uri('file://' + screenshot.outputDirectory,
-                  global.create_app_launch_context());
-            }
-            catch (e) {
-               Util.spawn(['gvfs-open', screenshot.outputDirectory]);
-            }
-         }
-      }
-      
       return true;
+   },
+
+   _getLaunchContext: function(screenshot) {
+      // return global.create_app_launch_context();
+      return new Gio.AppLaunchContext();
    },
 
    abort: function() {
@@ -2205,78 +1518,6 @@ ScreenshotHelper.prototype = {
 
       return true;
 
-   },
-
-   uploadToImgur: function(filename, callback) {
-      let f = Gio.file_new_for_path(filename);
-      let dir = f.get_parent().get_path();
-      let imgLogFile = Gio.file_new_for_path(dir + '/imgur.log');
-      let imgLog = imgLogFile.append_to(0, null);
-
-      f.load_contents_async(null, function(f, res) {
-         let contents;
-         try {
-            contents = f.load_contents_finish(res)[1];
-         } catch (e) {
-            log("*** ERROR: " + e.message);
-            callback(false, null);
-         }
-         
-         let buffer = new Soup.Buffer.new(contents, contents.length);
-         let multiPart = new Soup.Multipart.new(Soup.FORM_MIME_TYPE_MULTIPART);
-         multiPart.append_form_string('key', IMGUR_CRED);
-         multiPart.append_form_file('image', filename, 'image/png', buffer);
-
-         var message = Soup.form_request_new_from_multipart(
-            'http://api.imgur.com/2/upload.json', multiPart);
-         session.queue_message(message, function(session, response) {
-            if (response.status_code !== 200) {
-               global.log("Error during upload: response code " + response.status_code
-                  + ": " + response.reason_phrase + " - " + response.response_body.data);
-               
-               callback(false, null);
-
-               return true;
-            }
-
-            try {
-               var imgur = JSON.parse(response.response_body.data);
-               let imgurLinksText = 't=' + Main.formatTime(new Date(new Date().getTime()))
-                 + ': ' + imgur.upload.links.imgur_page + ' ' 
-                 + imgur.upload.links.delete_page + '\n';
-               imgLog.write(imgurLinksText, null);
-            }
-            catch (e) {
-               global.logError("Imgur seems to be down. Error was:");
-               global.logError(e);
-               callback(false, null);
-               return true;
-            }
-
-            callback(true, imgur.upload);
-            return true;
-         });
-
-         return true;
-      }, null);
-      
-      return true;
-   },
-
-   runProgram: function(cmd) {
-      global.log(cmd);
-      try {
-         let success, argc, argv, pid, stdin, stdout, stderr;
-         [success,argv] = GLib.shell_parse_argv(cmd);
-         [success,pid,stdin,stdout,stderr] =
-           GLib.spawn_async_with_pipes(null,argv,null,GLib.SpawnFlags.SEARCH_PATH,null,null);
-      }
-      catch (e)
-      {
-         global.log(e);
-      }
-
-      return true;
    }
 }
 

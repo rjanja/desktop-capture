@@ -2,6 +2,15 @@ StBoxLayout.applet-box.desktop-capture StBin {
    min-width: 22px;
 }
 
+.screenshot-thumbnail {
+   border: 1px solid #333;
+   padding: 1px;
+}
+
+.screenshot-thumbnail-hover {
+   border: 1px solid #999;
+}
+
 .capture-outline-background {
    background-color: rgba(60, 120, 80, 0.7);
 }
