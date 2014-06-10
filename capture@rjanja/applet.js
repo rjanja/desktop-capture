@@ -1267,7 +1267,10 @@ MyApplet.prototype = {
    cinnamon_camera_complete: function(screenshot) {
       screenshot.uploaded = false;
       screenshot.uploadLinks = null;
+      screenshot.extraActionMessage = '';
+
       this.lastCapture = screenshot;
+      let copyToClipboard = this._copyData ? 4 : this._copyToClipboard;
 
       // We only support re-do of capture when we're using our own (for now)
       if (this.get_camera_program() == 'cinnamon')
@@ -1291,18 +1294,18 @@ MyApplet.prototype = {
 
       var clipboardMessage = '';
 
-      if (screenshot.uploadToImgur && !screenshot.demo) {
+      if (this._uploadToImgur && !screenshot.demo) {
          global.log('Uploading image to imgur..');
          this.uploadToImgur(screenshot.file, Lang.bind(this, function(success, json) {
             if (success) {
                screenshot.uploaded = true;
                screenshot.uploadLinks = json.links;
 
-               screenshot.extraActionMessage = _('Screenshot has been uploaded as %s') % json.links.original;
+               screenshot.extraActionMessage = _('Screenshot has been uploaded as %s').format(json.links.original);
 
-               if (screenshot.options.copyToClipboard) {
+               if (copyToClipboard) {
                   St.Clipboard.get_default().set_text(json.links.original);
-                  clipboardMessage = _('Link has been copied to clipboard');
+                  screenshot.clipboardMessage = _('Link has been copied to clipboard');
                }
 
                this.maybeSendNotification(screenshot);
@@ -1314,20 +1317,20 @@ MyApplet.prototype = {
 
          return false;
       }
-      else if (screenshot.options.copyToClipboard) {
-         if (ClipboardCopyType.PATH == screenshot.options.copyToClipboard) {
+      else if (this._copyToClipboard) {
+         if (ClipboardCopyType.PATH == copyToClipboard) {
             St.Clipboard.get_default().set_text(screenshot.file);
             clipboardMessage = _('Path has been copied to clipboard.');
          }
-         else if (ClipboardCopyType.FILENAME == screenshot.options.copyToClipboard) {
+         else if (ClipboardCopyType.FILENAME == copyToClipboard) {
             St.Clipboard.get_default().set_text(screenshot.outputFilename);
             clipboardMessage = _('Filename has been copied to clipboard.');
          }
-         else if (ClipboardCopyType.DIRECTORY == screenshot.options.copyToClipboard) {
+         else if (ClipboardCopyType.DIRECTORY == copyToClipboard) {
             St.Clipboard.get_default().set_text(screenshot.outputDirectory);
             clipboardMessage = _('Directory has been copied to clipboard.');
          }
-         else if (ClipboardCopyType.IMAGEDATA == screenshot.options.copyToClipboard
+         else if (ClipboardCopyType.IMAGEDATA == copyToClipboard
                && CLIPBOARD_HELPER) {
             this.runProgram('python ' + CLIPBOARD_HELPER + ' ' + screenshot.file);
             clipboardMessage = _('Image data has been copied to clipboard.');
@@ -1474,13 +1477,8 @@ MyApplet.prototype = {
             let icon_uri = icon_file.get_uri();
             let icon_texture = St.TextureCache.get_default().load_uri_async(icon_uri, this._notificationIconSize, this._notificationIconSize);
 
-            //notification.setDelayedResident(true);
-            //notification.setTransient(true);
-            global.log('is transient?');
-            global.log(notification.isTransient);
-
-            notification.update('Screenshot deleted', _("The screenshot at %s was removed from disk.") % screenshot.file,
-               { body: _("The screenshot at %s was removed from disk.") % screenshot.file,
+            notification.update('Screenshot deleted', _("The screenshot at %s was removed from disk.").format(screenshot.file),
+               { body: _("The screenshot at %s was removed from disk.").format(screenshot.file),
                  icon: icon_texture, customContent: true, clear: true });
 
             Mainloop.timeout_add(1000, Lang.bind(this, function() {
