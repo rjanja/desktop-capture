@@ -1291,7 +1291,7 @@ MyApplet.prototype = {
 
       var clipboardMessage = '';
 
-      if (screenshot.options.uploadToImgur && !screenshot.demo) {
+      if (screenshot.uploadToImgur && !screenshot.demo) {
          global.log('Uploading image to imgur..');
          this.uploadToImgur(screenshot.file, Lang.bind(this, function(success, json) {
             if (success) {
@@ -1334,7 +1334,7 @@ MyApplet.prototype = {
          }
       }
 
-      screenshot.options.clipboardMessage = clipboardMessage;
+      screenshot.clipboardMessage = clipboardMessage;
 
       this.maybeSendNotification(screenshot);
 
@@ -1548,7 +1548,6 @@ MyApplet.prototype = {
             soundShutter: 'camera-shutter',
             sendNotification: this._sendNotification,
             filename: filename,
-            uploadToImgur: this._uploadToImgur,
             useIndex: index,
             openAfter: this._copyData ? false : this._openAfter,
             //clipboardHelper: CLIPBOARD_HELPER
@@ -2133,7 +2132,6 @@ MyApplet.prototype = {
          soundShutter: 'camera-shutter',
          sendNotification: this._sendNotification,
          filename: 'test.png',
-         uploadToImgur: this._uploadToImgur,
          useIndex: 0,
          openAfter: this._copyData ? false : this._openAfter,
          //clipboardHelper: CLIPBOARD_HELPER
@@ -2143,6 +2141,7 @@ MyApplet.prototype = {
          outputFilename: '',
          outputDirectory: '',
          file: '',
+         uploadToImgur: this._uploadToImgur,
          options: options
       };
 
@@ -2168,7 +2167,6 @@ MyApplet.prototype = {
          soundShutter: 'camera-shutter',
          sendNotification: this._sendNotification,
          filename: 'test.png',
-         uploadToImgur: this._uploadToImgur,
          useIndex: 0,
          openAfter: this._copyData ? false : this._openAfter,
          //clipboardHelper: CLIPBOARD_HELPER
@@ -2179,6 +2177,7 @@ MyApplet.prototype = {
          outputDirectory: this._cameraSaveDir,
          file: ICON_FILE,
          options: options,
+         uploadToImgur: this._uploadToImgur,
          demo: true
       };
 
