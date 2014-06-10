@@ -1291,7 +1291,7 @@ MyApplet.prototype = {
 
       var clipboardMessage = '';
 
-      if (screenshot.options.uploadToImgur) {
+      if (screenshot.options.uploadToImgur && !screenshot.demo) {
          global.log('Uploading image to imgur..');
          this.uploadToImgur(screenshot.file, Lang.bind(this, function(success, json) {
             if (success) {
