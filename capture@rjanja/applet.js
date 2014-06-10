@@ -669,11 +669,13 @@ MyApplet.prototype = {
       if (this._cameraSaveDir.charAt(0) == '~') {
          input = this._cameraSaveDir.slice(1);
          this._cameraSaveDir = GLib.get_home_dir() + '/' + input;
+         this.settings.setValue('camera-save-dir', this._cameraSaveDir);
       }
 
       if (this._recorderSaveDir.charAt(0) == '~') {
          input = this._recorderSaveDir.slice(1);
          this._recorderSaveDir = GLib.get_home_dir() + '/' + input;
+         this.settings.setValue('recorder-save-dir', this._recorderSaveDir);
       }
 
       this._cameraSavePrefix = this.settings.getValue('camera-save-prefix');
@@ -866,19 +868,21 @@ MyApplet.prototype = {
             this._applet_context_menu.addMenuItem(this.settingsItem);
          }
 
-         this._checkPaths();
+         this._checkPaths(true);
       }
       catch (e) {
          global.logError(e);
       }
    },
 
-   _checkPaths: function() {
+   _checkPaths: function(force) {
+      force = force || false;
+      
       this.openScreenshotsFolderItem.setSensitive(
-         false != this._getCreateFolder(this._cameraSaveDir, false));
+         false != this._getCreateFolder(this._cameraSaveDir, force));
 
       this.openRecordingsFolderItem.setSensitive(
-         false != this._getCreateFolder(this._recorderSaveDir, false));
+         false != this._getCreateFolder(this._recorderSaveDir, force));
    },
 
    _doRunHandler: function(uri, context) {
