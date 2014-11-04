@@ -82,6 +82,17 @@
           "Area (Select)": "#DC_AREA_HELPER# recordmydesktop {SOUND} -x {X} -y {Y} --width {WIDTH} --height {HEIGHT} -o {DIRECTORY}/{FILENAME}.ogv",
           "Stop recording": "killall recordmydesktop"
         }
+      },
+      "byzanz": {
+         "title": "Byzanz",
+         "enabled": true,
+         "-sound-on": "-a",
+         "-sound-off": "",
+         "custom": {
+            "GIF (Window)": "#DC_WINDOW_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.gif",
+            "GIF (Select)": "#DC_AREA_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.gif",
+            "Stop recording": "pkill -nf 'sleep 191449'"
+         }
       }
    }
 }

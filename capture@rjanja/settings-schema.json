@@ -18,7 +18,8 @@
       "type": "combobox",
       "options": {
          "Cinnamon Recorder": "cinnamon",
-         "RecordMyDesktop": "gtk-recordmydesktop"
+         "RecordMyDesktop": "gtk-recordmydesktop",
+         "Byzanz": "byzanz"
       },
       "description": "Screen recorder program",
       "tooltip": "Preferred screen recorder program"
