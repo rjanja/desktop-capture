@@ -581,8 +581,8 @@ MyApplet.prototype = {
       }));
    },*/
 
-   _onKeybindingChanged: function(key, oldVal, newVal) {
-      global.log('binding change for '+key+' to '+newVal);
+   _onKeybindingChanged: function(provider, key, oldVal, newVal) {
+      global.log('binding change for '+key+' to '+(newVal ? newVal : '[]'));
       Main.keybindingManager.addHotKey(key, newVal, Lang.bind(this, function(e) {
          global.log('called bindFn with key '+key);
          global.log(typeof this._bindFns[key]);
@@ -601,7 +601,7 @@ MyApplet.prototype = {
       var curVal = this.settings.getValue(key);
       if (curVal != '' && curVal != null)
       {
-         this._onKeybindingChanged(key, null, curVal);
+         this._onKeybindingChanged(null, key, null, curVal);
       }
 
       // Rebind with any future changes
