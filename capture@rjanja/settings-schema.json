@@ -4,22 +4,28 @@
       "description": "General Settings"
    },
    "camera-program": {
+      "indent": true,
       "default": "cinnamon",
       "type": "combobox",
       "options": {
          "Cinnamon Screenshot": "cinnamon",
-         "GNOME Screenshot": "gnome-screenshot"
+         "GNOME Screenshot": "gnome-screenshot",
+         "Shutter": "shutter",
+         "XWD": "xwd",
+         "ImageMagick": "import"
       },
       "description": "Screen capture program",
       "tooltip": "Preferred screen capture program"
    },
    "recorder-program": {
+      "indent": true,
       "default": "cinnamon",
       "type": "combobox",
       "options": {
          "Cinnamon Recorder": "cinnamon",
          "RecordMyDesktop": "gtk-recordmydesktop",
-         "Byzanz": "byzanz"
+         "Byzanz": "byzanz",
+         "FFmpeg": "ffmpeg"
       },
       "description": "Screen recorder program",
       "tooltip": "Preferred screen recorder program"
@@ -32,6 +38,7 @@
       "description": "Screenshot Settings"
    },
    "camera-save-dir": {
+      "indent": true,
       "default": "~/Pictures/screenshots",
       "type": "filechooser",
       "select-dir": true,
@@ -40,6 +47,7 @@
       "allow-none": true
    },
    "camera-save-prefix": {
+      "indent": true,
       "default": "screenshot-%TYPE-%Y-%M-%D-%H%I%S",
       "type": "entry",
       "description": "Filename format",
@@ -58,6 +66,7 @@
       "tooltip": "Whether to use a timer before capturing"
    },
    "delay-seconds": {
+      "indent": true,
       "default": 2,
       "type": "spinbutton",
       "min": 0,
@@ -84,26 +93,31 @@
       "description": "Cinnamon Screenshot"
    },
    "kb-cs-window" : {
+      "indent": true,
       "type" : "keybinding",
       "description" : "Keybinding to capture a window: ",
       "default" : "<Control>F5"
    },
    "kb-cs-area" : {
+      "indent": true,
       "type" : "keybinding",
       "description" : "Keybinding to capture an area: ",
       "default" : "<Control>F6"
    },
    "kb-cs-ui" : {
+      "indent": true,
       "type" : "keybinding",
       "description" : "Keybinding to capture a UI element: ",
       "default" : "<Control>F7"
    },
    "kb-cs-screen" : {
+      "indent": true,
       "type" : "keybinding",
       "description" : "Keybinding to capture the screen: ",
       "default" : "<Control>F8"
    },
    "kb-cs-monitor-0" : {
+      "indent": true,
       "type" : "keybinding",
       "description" : "Keybinding to capture monitor 1: ",
       "default" : "<Control>F9"
@@ -237,6 +251,7 @@
       "dependency": "send-notification"
    },
    "show-copy-path-action": {
+      "indent": true,
       "default": false,
       "type": "checkbox",
       "description": "Enable copying path from notification",
@@ -244,6 +259,7 @@
       "dependency": "send-notification"
    },
    "show-copy-data-action": {
+      "indent": true,
       "default": true,
       "type": "checkbox",
       "description": "Enable copying image data from notification",
@@ -251,6 +267,7 @@
       "dependency": "send-notification"
    },
    "show-delete-action": {
+      "indent": true,
       "default": false,
       "type": "checkbox",
       "description": "Enable delete from notification",
@@ -258,6 +275,7 @@
       "dependency": "send-notification"
    },
    "show-upload-action": {
+      "indent": true,
       "default": true,
       "type": "checkbox",
       "description": "Enable upload from notification",
@@ -265,6 +283,7 @@
       "dependency": "send-notification"
    },
    "demo-notification-button" : {
+      "indent": true,
       "type" : "button",
       "description" : "Click here to send an example notification",
       "callback" : "on_config_demo_notification",
@@ -283,23 +302,39 @@
    },
    "cinn recorder settings": {
       "type": "header",
-      "description": "Cinnamon Recorder"
+      "description": "Recorder Settings"
    },
    
+   "label-recorder-settings": {
+      "type": "generic",
+      "default": "0",
+      "description": "Please <b>note</b> not all recorders may respect these settings."
+   },
+
    "recorder-save-dir": {
+      "indent": true,
       "default": "~/Videos/screencasts",
       "type": "filechooser",
       "select-dir": true,
       "description": "Save location",
-	  "tooltip": "Folder for new screen recordings",
+	   "tooltip": "Folder for new screen recordings",
       "allow-none": true
    },
    
    "recorder-save-prefix": {
+      "indent": true,
       "default": "screencast-%Y-%M-%D-%H%I%S",
       "type": "entry",
       "description": "Filename format",
       "tooltip": "Format for built-in recorder. E.g. %Y-%M-%D-%H%I = 2014-05-25-1848.webm. Use %S for seconds, %m for milliseconds"
+   },
+
+   "kb-recorder-stop" : {
+      "indent": true,
+      "type" : "keybinding",
+      "description" : "Keybinding to start/stop* recording: ",
+      "tooltip": "Will start only Cinnamon Recorder. Will stop any recorder using its stop-command.",
+      "default" : "<Control>F10"
    },
 
    

@@ -7,6 +7,12 @@
       "gnome-screenshot": {
          "enabled": true,
          "title": "Default",
+         "-append": "-f {DIRECTORY}/{FILENAME}.png",
+         "toggles": [
+            { "Copy to clipboard": "-c" },
+            { "Remove border": "-B", "Include border": "-b" },
+            { "Use timer": "-d {DELAY}" }
+         ],
          "supported": {
             "area": "--area",
             "current-window": "-d {DELAY} --window",
@@ -64,11 +70,11 @@
         "enabled": true,
         "-sound-on": "-f alsa -ac 2 -i pulse",
         "-sound-off": "",
+        "stop-command": "killall ffmpeg",
         "custom": {
           "Area (Window)": "#DC_WINDOW_HELPER# bash -c \"ffmpeg {SOUND} -f x11grab -s {WIDTH}x{HEIGHT} -r 30 -qscale 1 -i :0.0+{X},{Y} {DIRECTORY}/{FILENAME}.mkv\"",
           "Area (Select)": "#DC_AREA_HELPER# bash -c \"ffmpeg {SOUND} -f x11grab -s {WIDTH}x{HEIGHT} -r 30 -qscale 1 -i :0.0+{X},{Y} {DIRECTORY}/{FILENAME}.mkv\"",
-          "Screen": "bash -c \"ffmpeg {SOUND} -f x11grab -s {SCREEN_WIDTH}x{SCREEN_HEIGHT} -r 30 -qscale 1 -i :0.0 {DIRECTORY}/{FILENAME}.mkv\"",
-          "Stop recording": "killall ffmpeg"
+          "Screen": "bash -c \"ffmpeg {SOUND} -f x11grab -s {SCREEN_WIDTH}x{SCREEN_HEIGHT} -r 30 -qscale 1 -i :0.0 {DIRECTORY}/{FILENAME}.mkv\""
         }
       },
       "gtk-recordmydesktop": {
@@ -76,11 +82,11 @@
         "enabled": true,
         "-sound-on": "",
         "-sound-off": "--no-sound",
+        "stop-command": "killall recordmydesktop",
         "custom": {
           "Open GUI": "gtk-recordmydesktop",
           "Area (Window)": "#DC_WINDOW_HELPER# recordmydesktop {SOUND} -x {X} -y {Y} --width {WIDTH} --height {HEIGHT} -o {DIRECTORY}/{FILENAME}.ogv",
-          "Area (Select)": "#DC_AREA_HELPER# recordmydesktop {SOUND} -x {X} -y {Y} --width {WIDTH} --height {HEIGHT} -o {DIRECTORY}/{FILENAME}.ogv",
-          "Stop recording": "killall recordmydesktop"
+          "Area (Select)": "#DC_AREA_HELPER# recordmydesktop {SOUND} -x {X} -y {Y} --width {WIDTH} --height {HEIGHT} -o {DIRECTORY}/{FILENAME}.ogv"
         }
       },
       "byzanz": {
@@ -88,11 +94,14 @@
          "enabled": true,
          "-sound-on": "-a",
          "-sound-off": "",
+         "stop-command": "pkill -nf 'sleep 191449'",
          "custom": {
             "GIF (Window)": "#DC_WINDOW_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.gif",
-            "GIF (Select)": "#DC_AREA_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.gif",
-            "Stop recording": "pkill -nf 'sleep 191449'"
-         }
+            "GIF (Select)": "#DC_AREA_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.gif"
+         },
+         "options": [
+            { "type": "select", "var": "FORMAT", "name": "Output format", "values": ["flv", "gif", "ogv", "webm"]}
+         ]
       }
    }
 }

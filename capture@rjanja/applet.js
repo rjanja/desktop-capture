@@ -197,7 +197,7 @@ ScreenshotNotification.prototype = {
    },
 
    _onImageMouseover: function(actor, event) {
-      global.log('mouseover!!');
+      //global.log('mouseover!!');
    },
 
    // Expose the clicks now and maybe we'll allow configurable behavior later
@@ -581,20 +581,34 @@ MyApplet.prototype = {
       }));
    },*/
 
+   stop_any_recorder: function() {
+      if (this.get_recorder_program() == 'cinnamon') {
+         this._toggle_cinnamon_recorder();
+      }
+      else if (this.has_recorder_option('stop-command')) {
+         this.runCommand(this.get_recorder_option('stop-command'), 'recorder', false);
+      }
+   },
+
    _onKeybindingChanged: function(provider, key, oldVal, newVal) {
-      global.log('binding change for '+key+' to '+(newVal ? newVal : '[]'));
+      //global.log('binding change for '+key+' to '+(newVal ? newVal : '[]'));
       Main.keybindingManager.addHotKey(key, newVal, Lang.bind(this, function(e) {
-         global.log('called bindFn with key '+key);
-         global.log(typeof this._bindFns[key]);
+         //global.log('called bindFn with key '+key);
+         //global.log(typeof this._bindFns[key]);
          return this._bindFns[key]();
       }));
    },
 
    registerKeyBinding: function(key, captureType, index) {
-      global.log('registering key binding for '+key);
+      //global.log('registering key binding for '+key);
       this._bindFns[key] = Lang.bind(this, function() {
-         global.log('bindFn running for type ' + captureType);
-         return this.run_cinnamon_camera(captureType, null, index);
+         //global.log('bindFn running for type ' + captureType);
+         if (captureType == 'RECORDER') {
+            return this.stop_any_recorder();
+         }
+         else {
+            return this.run_cinnamon_camera(captureType, null, index);
+         }
       });
       
       // Read current value and if set, add the hotkey
@@ -624,6 +638,8 @@ MyApplet.prototype = {
                   this.registerKeyBinding('kb-cs-monitor-' + index, Screenshot.SelectionType.MONITOR, index);
                }));
             }
+
+            this.registerKeyBinding('kb-recorder-stop', 'RECORDER');
 
             /*this.settings.connect("changed::kb-cs-window", Lang.bind(this. this._onKeybindingChanged,
               Screenshot.SelectionType.WINDOW));
@@ -972,9 +988,9 @@ MyApplet.prototype = {
                 }, this);
             }
 
-            this.menu.addAction(this.indent(_("Interactive")), Lang.bind(this, function(e) {
-               return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
-            }));
+            // this.menu.addAction(this.indent(_("Interactive")), Lang.bind(this, function(e) {
+            //    return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
+            // }));
 
             this._redoMenuItem = this.menu.addAction(this.indent(_("Redo last")), Lang.bind(this, this.redo_cinnamon_camera));
             
@@ -1150,7 +1166,13 @@ MyApplet.prototype = {
                }
 
                for (var title in customOptions) {
-                  this.addCustomRecorderOption(title, customOptions[title]);
+                  this.addCustomRecorderOption(title, title);
+               }
+
+               if (this.has_recorder_option('stop-command')){
+                  this.menu.addAction(this.indent(_("Stop recording")), Lang.bind(this, function(actor, event) {
+                     this.runCommand(this.get_recorder_option('stop-command'), 'recorder', false);
+                  }));
                }
 
             }
@@ -1577,7 +1599,7 @@ MyApplet.prototype = {
 
    addCustomRecorderOption: function(title, cmd) {
       this.menu.addAction(this.indent(title), Lang.bind(this, function(actor, event) {
-         this.runCustomCommand(title, 'recorder');
+         this.runCustomCommand(cmd, 'recorder');
       }));
    },
 
@@ -1670,6 +1692,7 @@ MyApplet.prototype = {
          }
 
          if (false == filename) {
+            global.log('no filename');
             return false;
          }
 
@@ -1773,7 +1796,7 @@ MyApplet.prototype = {
          if (cmd !== false && cmd !== null) {
             // @todo Move this elsewhere when consolidating execution
             this.maybeCloseMenu();
-            return this.get_camera_program() + ' ' + this.command_replacements(cmd, options, true);
+            return this.get_camera_program() + ' ' + this.applyCommandReplacements(cmd, 'camera', options, true);
          }
          else {
             return "";
@@ -1791,7 +1814,7 @@ MyApplet.prototype = {
       let cmd = options['custom'][custom];
 
       if (cmd) {
-         return this.command_replacements(cmd, options, false);
+         return this.applyCommandReplacements(cmd, 'camera', options, false);
       }
       else {
          return "";
@@ -1803,66 +1826,28 @@ MyApplet.prototype = {
       let cmd = options['custom'][custom];
 
       if (cmd) {
-         return this.command_replacements(cmd, options, false);
+         return this.applyCommandReplacements(cmd, 'camera', options, false);
       }
       else {
          return "";
       }
    },
 
-   command_replacements: function(cmd, options, appendCommand) {
-      let psCursorOn = options['-cursor-on'];
-      let psCursorOff = options['-cursor-off'];
-      let psAppend = options['-append'];
-
-      let sCursor = "", sDelay = "", sDefaults = "";
-
-      if (psCursorOn && this._includeCursor)
-      {
-         sCursor = psCursorOn;
-      }
-      else if (psCursorOff && !this._includeCursor)
-      {
-         sCursor = psCursorOff;
-      }
-
-      // Rather than repeating same options in support.json, they can
-      // be made common to all capture modes for that application.
-      if (psAppend && appendCommand == true) {
-         cmd = cmd + ' ' + psAppend;
-      }
-
-      if (this._delay > 0)
-      {
-         sDelay = this._delay;
-      }
-
-      let sDimensions = global.screen_width + 'x' + global.screen_height;
-      // Replace tokens from our json support command arguments
-      return this.replaceTokens(
-         ['{DELAY}', '{CURSOR}', '{SCREEN_DIMENSIONS}', '{RECORDER_DIR}', '{SCREENSHOT_DIR}'],
-         [sDelay, sCursor, sDimensions, this._recorderSaveDir, this._cameraSaveDir],
-         cmd);
-   },
-
-   runCustomCommand: function(custom, mode, appendCommand) {
-      let options;
-      if (mode == 'camera') {
-         options = this.get_camera_options();
-      }
-      else {
-         options = this.get_recorder_options();
-      }
-      
-      let cmd = options['custom'][custom];
-
-      if (!cmd) {
-         return "";
+   applyCommandReplacements: function(cmd, mode, options, appendCommand) {
+      if (!options) {
+         if (mode == 'camera') {
+            options = this.get_camera_options();
+         }
+         else {
+            options = this.get_recorder_options();
+         }
       }
 
       let psCursorOn = options['-cursor-on'];
       let psCursorOff = options['-cursor-off'];
       let psAppend = options['-append'];
+      let psCursorOn = options['-cursor-on'];
+      let psCursorOff = options['-cursor-off'];
       
       let sCursor = "", sSound = "", sDelay = "", sDefaults = "";
 
@@ -1896,13 +1881,18 @@ MyApplet.prototype = {
          sDelay = this._delay;
       }
 
+      let sDimensions = global.screen_width + 'x' + global.screen_height;
+
       let replacements = {
          '{DELAY}': sDelay,
          '{CURSOR}': sCursor,
          '{SOUND}': sSound,
          '{DIRECTORY}': mode == 'camera' ? this._cameraSaveDir : this._recorderSaveDir,
+         '{SCREEN_DIMENSIONS}': sDimensions,
          '{SCREEN_WIDTH}': global.screen_width,
          '{SCREEN_HEIGHT}': global.screen_height,
+         '{RECORDER_DIR}': this._recorderSaveDir,
+         '{SCREENSHOT_DIR}': this._cameraSaveDir,
          '{FILENAME}': mode == 'camera' ? this.get_camera_filename() : this.get_recorder_filename()
       };
 
@@ -1910,6 +1900,14 @@ MyApplet.prototype = {
          cmd = cmd.replace(k, replacements[k]);
       }
 
+      return cmd;
+   },
+
+   runCommand: function(cmd, mode, isCapture) {
+      cmd = this.applyCommandReplacements(cmd, mode);
+
+      // When taking a capture, allow the use of the screenshot helper
+      // for choosing window or making an area selection.
       let interactiveCallouts = {
          '#DC_WINDOW_HELPER#': Screenshot.SelectionType.WINDOW,
          '#DC_AREA_HELPER#': Screenshot.SelectionType.AREA
@@ -1918,8 +1916,11 @@ MyApplet.prototype = {
       let helperMode = null;
       for (var k in interactiveCallouts) {
          if (cmd.indexOf(k) === 0) {
-            helperMode = interactiveCallouts[k];
-            global.log('Using screenshot helper from capture mode "' + Screenshot.SelectionTypeStr[helperMode] + '"');
+            if (isCapture == true) {
+               helperMode = interactiveCallouts[k];
+               global.log('Using screenshot helper from capture mode "' + Screenshot.SelectionTypeStr[helperMode] + '"');
+            }
+
             cmd = cmd.replace(k,'');
             if (cmd.charAt(0)==' ') {
                cmd = cmd.substr(1);
@@ -1930,19 +1931,51 @@ MyApplet.prototype = {
 
       this.maybeCloseMenu();
 
-      if (null !== helperMode) {
-         let ss = new Screenshot.ScreenshotHelper(helperMode, Lang.bind(this, function(vars) {
-            global.res = vars;
-            this.runInteractiveCustom(cmd, vars);
-            
-         }), { selectionHelper: true });
+      if (isCapture == true) {
+         if (null !== helperMode) {
+            let ss = new Screenshot.ScreenshotHelper(helperMode, Lang.bind(this, function(vars) {
+               global.res = vars;
+               this.runInteractiveCustom(cmd, vars);
+               
+            }), { selectionHelper: true });
+         }
+         else {
+            global.log('**FINAL CMD IS** '+cmd);
+            this.TryExec(cmd, Lang.bind(this, this.onProcessSpawned),
+               Lang.bind(this, this.onProcessError),
+               Lang.bind(this, this.onProcessComplete));
+         }
       }
       else {
-         global.log('**FINAL CMD IS** '+cmd);
-         this.TryExec(cmd, Lang.bind(this, this.onProcessSpawned),
-            Lang.bind(this, this.onProcessError),
-            Lang.bind(this, this.onProcessComplete));
+         this.TryExec(cmd);
       }
+
+      return false;
+   },
+
+   // @todo Separate out command-getting from command-parsing
+   runCustomCommand: function(custom, mode, appendCommand) {
+      let options;
+      if (mode == 'camera') {
+         options = this.get_camera_options();
+      }
+      else {
+         options = this.get_recorder_options();
+      }
+      
+      let cmd = options['custom'][custom];
+
+      if (!cmd) {
+         return "";
+      }
+
+      // Rather than repeating same options in support.json, they can
+      // be made common to all capture modes for that application.
+      if (options['-append'] && appendCommand == true) {
+         cmd = cmd + ' ' + psAppend;
+      }
+
+      this.runCommand(cmd, mode, true);
 
       return false;
    },
@@ -2244,16 +2277,18 @@ MyApplet.prototype = {
       let imgLog = imgLogFile.append_to(0, null);
 
       f.load_contents_async(null, function(f, res) {
+         
          let contents;
          try {
             contents = f.load_contents_finish(res)[1];
          } catch (e) {
-            log("*** ERROR: " + e.message);
+            global.log("*** ERROR: " + e.message);
             callback(false, null);
          }
+
+         let buffer = new Soup.Buffer(contents, contents.length);
+         let multiPart = new Soup.Multipart(Soup.FORM_MIME_TYPE_MULTIPART);
          
-         let buffer = new Soup.Buffer.new(contents, contents.length);
-         let multiPart = new Soup.Multipart.new(Soup.FORM_MIME_TYPE_MULTIPART);
          multiPart.append_form_string('key', IMGUR_CRED);
          multiPart.append_form_file('image', filename, 'image/png', buffer);
 
@@ -2263,9 +2298,7 @@ MyApplet.prototype = {
             if (response.status_code !== 200) {
                global.log("Error during upload: response code " + response.status_code
                   + ": " + response.reason_phrase + " - " + response.response_body.data);
-               
                callback(false, null);
-
                return true;
             }
 
