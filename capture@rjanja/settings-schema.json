@@ -27,7 +27,8 @@
          "RecordMyDesktop": "gtk-recordmydesktop",
          "Byzanz": "byzanz",
          "FFmpeg": "ffmpeg",
-         "Kazam": "kazam"
+         "Kazam": "kazam",
+         "avconv": "avconv"
       },
       "description": "Screen recorder program",
       "tooltip": "Preferred screen recorder program"

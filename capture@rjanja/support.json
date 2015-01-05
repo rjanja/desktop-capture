@@ -91,6 +91,18 @@
           "Screen": "bash -c \"ffmpeg {SOUND} -f x11grab -s {SCREEN_WIDTH}x{SCREEN_HEIGHT} -r 30 -qscale 1 -i :0.0 {DIRECTORY}/{FILENAME}.mkv\""
         }
       },
+      "avconv": {
+        "title": "avconv (ffmpeg rewrite)",
+        "enabled": true,
+        "-sound-on": "-f alsa -ac 2 -i pulse",
+        "-sound-off": "",
+        "stop-command": "killall avconv",
+        "custom": {
+          "Area (Window)": "#DC_WINDOW_HELPER# bash -c \"avconv {SOUND} -f x11grab -s {NICEWIDTH}x{NICEHEIGHT} -r 30 -qscale 1 -i :0.0+{X},{Y} {DIRECTORY}/{FILENAME}.mkv\"",
+          "Area (Select)": "#DC_AREA_HELPER# bash -c \"avconv {SOUND} -f x11grab -s {NICEWIDTH}x{NICEHEIGHT} -r 30 -qscale 1 -i :0.0+{X},{Y} {DIRECTORY}/{FILENAME}.mkv\"",
+          "Screen": "bash -c \"avconv {SOUND} -f x11grab -s {SCREEN_WIDTH}x{SCREEN_HEIGHT} -r 30 -qscale 1 -i :0.0 {DIRECTORY}/{FILENAME}.mkv\""
+        }
+      },
       "gtk-recordmydesktop": {
         "title": "Record My Desktop",
         "enabled": true,
@@ -110,11 +122,17 @@
          "-sound-off": "",
          "stop-command": "pkill -nf 'sleep 191449'",
          "custom": {
-            "GIF (Window)": "#DC_WINDOW_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.gif",
-            "GIF (Select)": "#DC_AREA_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.gif"
+            "Record {FORMAT|UPPER} (Window)": "#DC_WINDOW_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.{FORMAT}",
+            "Record {FORMAT|UPPER} (Select)": "#DC_AREA_HELPER# byzanz-record {SOUND} -e 'sleep 191449' -x {X} -y {Y} -w {WIDTH} -h {HEIGHT} {DIRECTORY}/{FILENAME}.{FORMAT}"
          },
-         "options": [
-            { "type": "select", "var": "FORMAT", "name": "Output format", "values": ["flv", "gif", "ogv", "webm"]}
+         "controls": [
+            { "type": "select", "var": "FORMAT", "name": "Output format...", "default": "gif", "values": [
+              { "name": "Animated GIF image (GIF)", "value": "gif" },
+              { "name": "Flash Screen video (FLV)", "value": "flv" },
+              { "name": "Ogg Theora video (OGV)", "value": "ogv" },
+              { "name": "WebM video (WEBM)", "value": "webm" }
+            ]},
+            { "type": "toggle", "var": "SOUND", "name": "Record sound", "default": "on", "onValue": "-a", "offValue": "" }
          ]
       },
       "kazam": {
