@@ -58,6 +58,20 @@
             "Root window": "import -window root {DIRECTORY}/{FILENAME}.png",
             "Screen": "import -window root -display :0.0 -screen {DIRECTORY}/{FILENAME}.png"
          }
+      },
+      "kazam": {
+         "title": "Kazam",
+         "enabled": true,
+         "supported": {
+            "screen": "--fullscreen",
+            "area": "--area",
+            "window": "--select",
+            "current-window": "--window"
+         },
+         "custom": {
+            "Open Kazam": "kazam",
+            "Preferences": "kazam --preferences"
+         }
       }
    },
    "recorder": {
@@ -102,6 +116,15 @@
          "options": [
             { "type": "select", "var": "FORMAT", "name": "Output format", "values": ["flv", "gif", "ogv", "webm"]}
          ]
+      },
+      "kazam": {
+         "title": "Kazam",
+         "enabled": true,
+         "-sound-on": "",
+         "-sound-off": "--nosound",
+         "custom": {
+            "Open recorder": "kazam"
+         }
       }
    }
 }

@@ -28,7 +28,8 @@ const SelectionType = {
    MONITOR: 2,
    WINDOW: 3,
    AREA: 4,
-   CINNAMON: 5
+   CINNAMON: 5,
+   REPEAT: 6
 }
 
 const SOUND_ID = 1;
@@ -39,7 +40,8 @@ const SelectionTypeStr = {
    2: "monitor",
    3: "window",
    4: "area",
-   5: "cinnamon"
+   5: "cinnamon",
+   6: "repeat"
 }
 
 function ScreenshotHelper(selectionType, callback, params) {

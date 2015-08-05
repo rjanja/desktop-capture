@@ -606,6 +606,9 @@ MyApplet.prototype = {
          if (captureType == 'RECORDER') {
             return this.stop_any_recorder();
          }
+         else if (captureType == Screenshot.SelectionType.REPEAT) {
+            return this.repeat_cinnamon_camera();
+         }
          else {
             return this.run_cinnamon_camera(captureType, null, index);
          }
@@ -631,6 +634,8 @@ MyApplet.prototype = {
             this.registerKeyBinding('kb-cs-area', Screenshot.SelectionType.AREA);
             this.registerKeyBinding('kb-cs-ui', Screenshot.SelectionType.CINNAMON);
             this.registerKeyBinding('kb-cs-screen', Screenshot.SelectionType.SCREEN);
+            this.registerKeyBinding('kb-cs-repeat', Screenshot.SelectionType.REPEAT);
+
             //this.registerKeyBinding('cs-monitor', Screenshot.SelectionType.MONITOR);
 
             if (Main.layoutManager.monitors.length > 1) {
@@ -992,7 +997,7 @@ MyApplet.prototype = {
             //    return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
             // }));
 
-            this._redoMenuItem = this.menu.addAction(this.indent(_("Redo last")), Lang.bind(this, this.redo_cinnamon_camera));
+            this._redoMenuItem = this.menu.addAction(this.indent(_("Repeat last")), Lang.bind(this, this.repeat_cinnamon_camera));
             
             if (this.lastCapture === null) {
                this._redoMenuItem.actor.hide();
@@ -1239,7 +1244,7 @@ MyApplet.prototype = {
       return (num < 10 ? '0' + num : num);
    },
 
-   redo_cinnamon_camera: function(event) {
+   repeat_cinnamon_camera: function(event) {
       if (this.lastCapture) {
          let filename;
          try {
@@ -1537,6 +1542,11 @@ MyApplet.prototype = {
 
    run_cinnamon_camera: function(type, event, index) {
       let enableTimer = (this._useTimer && this._delay > 0);
+
+      if (type == Screenshot.SelectionType.REPEAT) {
+         global.log("We shouldn't have reached run_cinnamon_camera.")
+         return;
+      }
 
       let filename;
       try {
@@ -1982,6 +1992,8 @@ MyApplet.prototype = {
 
    runInteractiveCustom: function(cmd, vars) {
       //global.log('runInteractiveCustom');
+      let niceHeight = vars['height'] % 2 == 0 ? vars['height'] : vars['height'] + 1,
+           niceWidth = vars['width']  % 2 == 0 ? vars['width']  : vars['width'] + 1;
 
       let replacements = {
          '{X}': vars['x'],
@@ -1989,7 +2001,8 @@ MyApplet.prototype = {
          '{X_Y}': vars['x']+','+vars['y'],
          '{WIDTH}': vars['width'],
          '{HEIGHT}': vars['height'],
-         
+         '{NICEWIDTH}': niceWidth,
+         '{NICEHEIGHT}': niceHeight
       };
 
       if (vars['window']) {
@@ -2111,7 +2124,8 @@ MyApplet.prototype = {
             null);
          }
       catch (e) {
-         onFailure(cmd);
+         global.log("Failure creating process");
+         typeof onFailure == 'function' && onFailure(cmd);
          return false;
       }
       if (success && pid != 0)
@@ -2129,7 +2143,12 @@ MyApplet.prototype = {
                   global.log(line);
                   global.log(size);
                   buf += line;
+                  if (line.indexOf("Error during recording") > 0) {
+                     typeof onFailure == 'function' && onFailure(cmd);
+                     return;
+                  }
                }
+
                typeof onComplete == 'function' && onComplete(status, buf);
             });
       }

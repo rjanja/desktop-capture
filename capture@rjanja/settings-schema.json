@@ -12,7 +12,8 @@
          "GNOME Screenshot": "gnome-screenshot",
          "Shutter": "shutter",
          "XWD": "xwd",
-         "ImageMagick": "import"
+         "ImageMagick": "import",
+         "Kazam": "kazam"
       },
       "description": "Screen capture program",
       "tooltip": "Preferred screen capture program"
@@ -25,7 +26,8 @@
          "Cinnamon Recorder": "cinnamon",
          "RecordMyDesktop": "gtk-recordmydesktop",
          "Byzanz": "byzanz",
-         "FFmpeg": "ffmpeg"
+         "FFmpeg": "ffmpeg",
+         "Kazam": "kazam"
       },
       "description": "Screen recorder program",
       "tooltip": "Preferred screen recorder program"
@@ -90,7 +92,7 @@
    },
    "cinn screenshot settings-window": {
       "type": "header",
-      "description": "Cinnamon Screenshot"
+      "description": "Cinnamon Screenshot (note: changing keybindings may require restarting)"
    },
    "kb-cs-window" : {
       "indent": true,
@@ -115,6 +117,12 @@
       "type" : "keybinding",
       "description" : "Keybinding to capture the screen: ",
       "default" : "<Control>F8"
+   },
+   "kb-cs-repeat" : {
+      "indent": true,
+      "type": "keybinding",
+      "description": "Keybinding to repeat last capture: ",
+      "default": "<Control>F9"
    },
    "kb-cs-monitor-0" : {
       "indent": true,
