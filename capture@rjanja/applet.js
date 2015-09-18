@@ -364,8 +364,15 @@ MyAppletPopupMenu.prototype = {
       this._animateClose = animateClose;
    },
 
-   addAction: function(title, callback) {
+   addAction: function(title, callback, context) {
       let menuItem = new MyPopupMenuItem(title, { });
+      if (context) {
+         let bin = new St.Bin({ x_align: St.Align.END, style_class: 'menu-context' });
+         let label = new St.Label();
+         label.set_text(context);
+         bin.add_actor(label);
+         menuItem.addActor(bin, { expand: true, span: -1, align: St.Align.END });
+      }
       this.addMenuItem(menuItem);
       menuItem.connect('activate', Lang.bind(this, function (menuItem, event) {
          callback(event);
@@ -971,25 +978,26 @@ MyApplet.prototype = {
          this.menu.addMenuItem(this._outputTitle);
 
          if (this.get_camera_program() == 'cinnamon') {
-            this.menu.addAction(this.indent(_("Window")), Lang.bind(this, function(e) {
+            let item = this.menu.addAction(this.indent(_("Window")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.WINDOW, e);
-            }));
+            }), this.settings.getValue('kb-cs-window'));
+
             this.menu.addAction(this.indent(_("Area")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.AREA, e);
-            }));
+            }), this.settings.getValue('kb-cs-area'));
             this.menu.addAction(this.indent(_("Cinnamon UI")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.CINNAMON, e);
-            }));
+            }), this.settings.getValue('kb-cs-ui'));
             this.menu.addAction(this.indent(_("Screen")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.SCREEN, e);
-            }));
+            }), this.settings.getValue('kb-cs-screen'));
 
             if (Main.layoutManager.monitors.length > 1) {
                Main.layoutManager.monitors.forEach(function(monitor, index) {
                   this.menu.addAction(this.indent(_("Monitor %d").format(index + 1)), 
                    Lang.bind(this, function(e) {
                      return this.run_cinnamon_camera(Screenshot.SelectionType.MONITOR, e, index);
-                  }));
+                  }), 'kb-cs-monitor-' + index);
                 }, this);
             }
 
@@ -997,7 +1005,10 @@ MyApplet.prototype = {
             //    return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
             // }));
 
-            this._redoMenuItem = this.menu.addAction(this.indent(_("Repeat last")), Lang.bind(this, this.repeat_cinnamon_camera));
+            this._redoMenuItem = this.menu.addAction(
+               this.indent(_("Repeat last")), 
+               Lang.bind(this, this.repeat_cinnamon_camera),
+               this.settings.getValue('kb-cs-repeat'));
             
             if (this.lastCapture === null) {
                this._redoMenuItem.actor.hide();
@@ -1012,7 +1023,7 @@ MyApplet.prototype = {
 
             if (this.has_camera_support('window'))
             {
-               this.menu.addAction(this.indent(_("Window")), Lang.bind(this, function(e) {
+               let item = this.menu.addAction(this.indent(_("Window")), Lang.bind(this, function(e) {
                   this.Exec(this.get_camera_command('window'));
                }));
             }
@@ -1146,7 +1157,10 @@ MyApplet.prototype = {
 
          if (this.get_recorder_program() == 'cinnamon')
          {
-             this._cRecorderItem = this.menu.addAction(this.indent(_("Start recording")), Lang.bind(this, this._toggle_cinnamon_recorder));
+             this._cRecorderItem = this.menu.addAction(
+               this.indent(_("Start recording")), 
+               Lang.bind(this, this._toggle_cinnamon_recorder),
+               this.settings.getValue('kb-recorder-stop'));
              // We could try to listen for when recording is activated
              // by keypress, but we wouldn't be able to differentiate
              // start vs. stop as it isn't exposed to us. So for now,

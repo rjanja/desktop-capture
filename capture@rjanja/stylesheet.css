@@ -124,3 +124,7 @@ StBoxLayout.applet-box.desktop-capture StBin {
    color: #ffc;
    text-shadow: 2px 1px 1px #333;
 }
+
+.menu-context {
+    color: #999999;
+}
