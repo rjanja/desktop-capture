@@ -264,25 +264,6 @@ function StubbornSwitchMenuItem() {
 StubbornSwitchMenuItem.prototype = {
    __proto__: PopupSwitchMenuItem.prototype,
 
-    _init: function(text, active, params) {
-        //PopupSwitchMenuItem.prototype._init.call(this, text, active, params);
-        PopupBaseMenuItem.prototype._init.call(this, params);
-
-        this.label = new St.Label({ text: text, style_class: 'popup-switch-menu-label' });
-        this._switch = new Switch(active);
-
-        this.addActor(this.label);
-
-        this._statusBin = new St.Bin({ style_class: 'popup-switch-menu-bin', x_align: St.Align.END });
-        this.addActor(this._statusBin,
-                      { expand: false, span: -1 });
-
-        this._statusLabel = new St.Label({ text: '',
-                                           style_class: 'popup-inactive-menu-item'
-                                         });
-        this._statusBin.child = this._switch.actor;
-    },
-
    activate: function(event) {
       if (this._switch.actor.mapped) {
          this.toggle();
@@ -293,8 +274,6 @@ StubbornSwitchMenuItem.prototype = {
       if (event.type() == Clutter.EventType.KEY_PRESS &&
          event.get_key_symbol() == Clutter.KEY_space)
          return;
-
-      //PopupBaseMenuItem.prototype.activate.call(this, event);
    },
 };
 
@@ -308,14 +287,6 @@ StubbornComboMenuItem.prototype = {
     _init: function(text, active, onChange) {
          PopupBaseMenuItem.prototype._init.call(this, { reactive: false,
                       style_class: 'delay-chooser' });
-
-         /*this._iconBin = new St.Button({ style_class: 'delay-chooser-user-icon' });
-         this.addActor(this._iconBin);
-
-         this._iconBin.connect('clicked', Lang.bind(this,
-            function() {
-                this.activate();
-            }));*/
 
          this.label = new St.Label({ text: text, style_class: 'delay-chooser-label' });
          this.addActor(this.label);
@@ -367,7 +338,7 @@ MyAppletPopupMenu.prototype = {
    addAction: function(title, callback, context) {
       let menuItem = new MyPopupMenuItem(title, { });
       if (context) {
-         let bin = new St.Bin({ x_align: St.Align.END, style_class: 'menu-context' });
+         let bin = new St.Bin({ x_align: St.Align.END, style_class: 'menuitem-detail' });
          let label = new St.Label();
          label.set_text(context);
          bin.add_actor(label);
@@ -2366,8 +2337,8 @@ function main(metadata, orientation, panelHeight, instanceId) {
    AppletDir = imports.ui.appletManager.appletMeta[metadata.uuid].path;
    //global.log(AppletDir);
    SUPPORT_FILE = AppletDir + '/support.json';
-   ICON_FILE = AppletDir + '/desktop-capture-512.png';
-   ICON_FILE_ACTIVE = AppletDir + '/desktop-capture-512-rec.png';
+   ICON_FILE = AppletDir + '/icon.png';
+   ICON_FILE_ACTIVE = AppletDir + '/icon-active.png';
    CLIPBOARD_HELPER = AppletDir + '/clip.py';
 
    let myApplet = new MyApplet(metadata, orientation, panelHeight, instanceId);

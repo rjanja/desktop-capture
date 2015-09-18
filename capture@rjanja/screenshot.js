@@ -190,7 +190,7 @@ ScreenshotHelper.prototype = {
       } else {
          if (!this._timer) {
             this._timer = new St.Label({
-              style_class: 'timer'
+              style_class: 'capture-countdown-timer'
             });
 
             Main.uiGroup.add_actor(this._timer);
@@ -347,7 +347,7 @@ ScreenshotHelper.prototype = {
 
       this.container = new St.Group({
          reactive: true,
-         style_class: 'area-selection-container',
+         style_class: 'capture-area-selection',
          x_align: St.Align.START,
          y_align: St.Align.START
       });
@@ -452,7 +452,7 @@ ScreenshotHelper.prototype = {
       function instructionHeader(container, labelText) {
          let label = new St.Label({
             text: labelText,
-            style_class: 'instructions'
+            style_class: 'instructions-label-header'
          });
          container.add_actor(label);
          label.set_position(0, startY);
@@ -465,7 +465,7 @@ ScreenshotHelper.prototype = {
          subCount++;
          let label = new St.Label({
             text: labelText,
-            style_class: 'instructions-sub'
+            style_class: 'instructions-label-text'
          });
          container.add_actor(label);
          label.set_position(0, startY + (subCount * 50));
@@ -1497,8 +1497,8 @@ ScreenshotHelper.prototype = {
       });
 
       let sizeInfo = or.width + ' \u00D7 ' + or.height;
-      let title = new St.Label({ text: metaWindow.get_title(), style_class: 'overlay-test-label' });
-      let subtitle = new St.Label({ text: sizeInfo, style_class: 'overlay-size-label' })
+      let title = new St.Label({ text: metaWindow.get_title(), style_class: 'overlay-label-title' });
+      let subtitle = new St.Label({ text: sizeInfo, style_class: 'overlay-label-size' })
 
       let box = new St.BoxLayout({
          vertical: true,
