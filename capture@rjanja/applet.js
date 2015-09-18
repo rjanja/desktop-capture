@@ -2366,8 +2366,8 @@ function main(metadata, orientation, panelHeight, instanceId) {
    AppletDir = imports.ui.appletManager.appletMeta[metadata.uuid].path;
    //global.log(AppletDir);
    SUPPORT_FILE = AppletDir + '/support.json';
-   ICON_FILE = AppletDir + '/desktop-capture.png';
-   ICON_FILE_ACTIVE = AppletDir + '/desktop-capture-active.png';
+   ICON_FILE = AppletDir + '/desktop-capture-512.png';
+   ICON_FILE_ACTIVE = AppletDir + '/desktop-capture-512-rec.png';
    CLIPBOARD_HELPER = AppletDir + '/clip.py';
 
    let myApplet = new MyApplet(metadata, orientation, panelHeight, instanceId);
