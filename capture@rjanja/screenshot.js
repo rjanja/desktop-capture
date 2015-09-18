@@ -828,6 +828,9 @@ ScreenshotHelper.prototype = {
             let pad = 1;
             this.flash(screenshot.x - pad, screenshot.y - pad, screenshot.width + (2*pad), screenshot.height + (2*pad));
          }
+         else if (this._selectionType == SelectionType.SCREEN) {
+            this.flash(0, 0, global.screen_width, global.screen_height);
+         }
          else {
             this.flash(screenshot.x, screenshot.y, screenshot.width, screenshot.height);
          }
