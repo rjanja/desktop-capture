@@ -347,6 +347,30 @@ LocalSettings.prototype = {
 };
 Signals.addSignalMethods(LocalSettings.prototype);
 
+function MyAppletPopupMenu(launcher, orientation, animateClose) {
+    this._init(launcher, orientation, animateClose);
+}
+
+MyAppletPopupMenu.prototype = {
+  __proto__: Applet.AppletPopupMenu.prototype,
+
+  _init: function(launcher, orientation, animateClose) {
+    Applet.AppletPopupMenu.prototype._init.call(this, launcher, orientation);
+    this._animateClose = animateClose;
+  },
+
+  addAction: function(title, callback, detail_text) {
+    let menuItem = Applet.AppletPopupMenu.prototype.addAction.call(this, title, callback);
+
+    let bin = new St.Bin({ x_align: St.Align.END, style_class: 'menuitem-detail' });
+    let label = new St.Label();
+    label.set_text(detail_text);
+    bin.add_actor(label);
+    menuItem.addActor(bin, { expand: true, span: -1, align: St.Align.END });
+    return menuItem;
+  }
+}
+
 function MyApplet(metadata, orientation, panelHeight, instanceId) {
    this._init(metadata, orientation, panelHeight, instanceId);
 }
@@ -768,7 +792,8 @@ MyApplet.prototype = {
 
    draw_menu: function(orientation) {
       this.menuManager = new PopupMenu.PopupMenuManager(this);
-      this.menu = new Applet.AppletPopupMenu(this, this.orientation);
+      // this.menu = new Applet.AppletPopupMenu(this, this.orientation);
+      this.menu = new MyAppletPopupMenu(this, this.orientation, this._useTimer);
       // @todo(Rob): disable transition effects with this._useTimer
       this.menuManager.addMenu(this.menu);
 
