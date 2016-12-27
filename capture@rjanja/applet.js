@@ -1,7 +1,7 @@
 /**
  * Cinnamon Desktop Capture applet.
  *
- * @author  Robert Adams <radams@artlogic.com>
+ * @author  Robert Adams <pillage@gmail.com>
  * @link    http://github.com/rjanja/desktop-capture/
  */
 
@@ -276,168 +276,6 @@ StubbornSwitchMenuItem.prototype = {
          return;
    },
 };
-
-function StubbornComboMenuItem() {
-    this._init.apply(this, arguments);
-}
-
-StubbornComboMenuItem.prototype = {
-   __proto__: PopupBaseMenuItem.prototype,
-
-    _init: function(text, active, onChange) {
-         PopupBaseMenuItem.prototype._init.call(this, { reactive: false,
-                      style_class: 'delay-chooser' });
-
-         this.label = new St.Label({ text: text, style_class: 'delay-chooser-label' });
-         this.addActor(this.label);
-
-         this._section = new PopupMenu.PopupMenuSection();
-         this.addActor(this._section.actor);
-
-         this._combo = new PopupMenu.PopupComboBoxMenuItem({ style_class: 'popup-combo' });
-         this._section.addMenuItem(this._combo);
-
-         let item;
-
-         item = new PopupMenu.PopupMenuItem(_("None"));
-         this._combo.addMenuItem(item);
-
-         item = new PopupMenu.PopupMenuItem(_("1 sec"));
-         this._combo.addMenuItem(item);
-
-         item = new PopupMenu.PopupMenuItem(_("2 sec"));
-         this._combo.addMenuItem(item);
-
-         item = new PopupMenu.PopupMenuItem(_("3 sec"));
-         this._combo.addMenuItem(item);
-
-         item = new PopupMenu.PopupMenuItem(_("5 sec"));
-         this._combo.addMenuItem(item);
-
-         this._combo.connect('active-item-changed', onChange);
-
-         this._combo.setSensitive(true);
-         this._combo.setActiveItem(active);
-
-         return true;
-   }
-};
-
-function MyAppletPopupMenu(launcher, orientation, animateClose) {
-    this._init(launcher, orientation, animateClose);
-}
-
-MyAppletPopupMenu.prototype = {
-   __proto__: Applet.AppletPopupMenu.prototype,
-
-   _init: function(launcher, orientation, animateClose) {
-      Applet.AppletPopupMenu.prototype._init.call(this, launcher, orientation);
-      this._animateClose = animateClose;
-   },
-
-   addAction: function(title, callback, context) {
-      let menuItem = new MyPopupMenuItem(title, { });
-      if (context) {
-         let bin = new St.Bin({ x_align: St.Align.END, style_class: 'menuitem-detail' });
-         let label = new St.Label();
-         label.set_text(context);
-         bin.add_actor(label);
-         menuItem.addActor(bin, { expand: true, span: -1, align: St.Align.END });
-      }
-      this.addMenuItem(menuItem);
-      menuItem.connect('activate', Lang.bind(this, function (menuItem, event) {
-         callback(event);
-         return false;
-      }));
-
-      return menuItem;
-   },
-
-   close: function(animate) {
-      if (!this.isOpen)
-         return;
-         
-      global.menuStackLength -= 1;
-
-      Main.panel._hidePanel();
-      if (Main.panel2 != null)
-         Main.panel2._hidePanel();
-
-      if (this._activeMenuItem)
-         this._activeMenuItem.setActive(false);
-
-      this._boxPointer.hide(this._animateClose);
-
-      this.isOpen = false;
-      this.emit('open-state-changed', false);
-   }
-}
-
-function MyPopupMenuItem()
-{
-   this._init.apply(this, arguments);
-}
-
-MyPopupMenuItem.prototype =
-{
-   __proto__: PopupMenu.PopupMenuItem.prototype,
-
-   _init: function (text, params) {
-      PopupMenu.PopupMenuItem.prototype._init.call(this, text, params);
-   }
-};
-
-function TextImageMenuItem() {
-    this._init.apply(this, arguments);
-}
-
-TextImageMenuItem.prototype = {
-    __proto__: PopupMenu.PopupBaseMenuItem.prototype,
-
-    _init: function(text, icon, image, align, style) {
-        PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
-
-        this.actor = new St.BoxLayout({style_class: style});
-        this.actor.add_style_pseudo_class('active');
-        if (icon) {
-            this.icon = new St.Icon({icon_name: icon});
-        }
-        if (image) {
-            this.icon = new St.Bin();
-            this.icon.set_child(this._getIconImage(image));
-        }
-        this.text = new St.Label({text: text});
-        if (align === "left") {
-            this.actor.add_actor(this.icon, { span: 0 });
-            this.actor.add_actor(this.text, { span: -1 });
-        }
-        else {
-            this.actor.add_actor(this.text, { span: 0 });
-            this.actor.add_actor(this.icon, { span: -1 });
-        }
-    },
-
-    setText: function(text) {
-        this.text.text = text;
-    },
-
-    setIcon: function(icon) {
-        this.icon.icon_name = icon;
-    },
-
-    setImage: function(image) {
-        this.icon.set_child(this._getIconImage(image));
-    },
-
-    // retrieve an icon image
-    _getIconImage: function(icon_name) {
-         let icon_file = icon_path + icon_name + ".svg";
-         let file = Gio.file_new_for_path(icon_file);
-         let icon_uri = file.get_uri();
-
-         return St.TextureCache.get_default().load_uri_async(icon_uri, 16, 16);
-    },
-}
 
 function getSettings(schema) {
    try {
@@ -930,7 +768,8 @@ MyApplet.prototype = {
 
    draw_menu: function(orientation) {
       this.menuManager = new PopupMenu.PopupMenuManager(this);
-      this.menu = new MyAppletPopupMenu(this, this.orientation, this._useTimer);
+      this.menu = new Applet.AppletPopupMenu(this, this.orientation);
+      // @todo(Rob): disable transition effects with this._useTimer
       this.menuManager.addMenu(this.menu);
 
       this._contentSection = new PopupMenu.PopupMenuSection();
@@ -945,7 +784,8 @@ MyApplet.prototype = {
       }
 
       if (this.has_camera()) {
-         this._outputTitle = new TextImageMenuItem(_("Camera"), "camera-photo", false, "right", "sound-volume-menu-item");
+         this._outputTitle = new PopupMenu.PopupIconMenuItem(_("Camera"), "camera-photo", St.IconType.SYMBOLIC);
+         //false, "right", "sound-volume-menu-item");
          this.menu.addMenuItem(this._outputTitle);
 
          if (this.get_camera_program() == 'cinnamon') {
@@ -1123,7 +963,8 @@ MyApplet.prototype = {
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
          }
 
-         this._outputTitle2 = new TextImageMenuItem(_("Recorder"), "media-record", false, "right", "sound-volume-menu-item");
+         this._outputTitle2 = new PopupMenu.PopupIconMenuItem(_("Recorder"), "media-record", St.IconType.SYMBOLIC);
+         // this._outputTitle2 = new TextImageMenuItem(_("Recorder"), "media-record", false, "right", "sound-volume-menu-item");
          this.menu.addMenuItem(this._outputTitle2);
 
          if (this.get_recorder_program() == 'cinnamon')
