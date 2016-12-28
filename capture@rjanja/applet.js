@@ -311,7 +311,9 @@ LocalSettings.prototype = {
       }
 
       try {
-         this._settings = JSON.parse(Cinnamon.get_file_contents_utf8_sync(this._filename));
+        let file = Gio.File.new_for_path(this._filename);
+        let [status, buffer] = file.load_contents(null);
+        this._settings = JSON.parse(buffer);
          this.emit("settings-changed");
          if (this._initialized) {
             for (var k in this._settings) {
@@ -362,11 +364,14 @@ MyAppletPopupMenu.prototype = {
   addAction: function(title, callback, detail_text) {
     let menuItem = Applet.AppletPopupMenu.prototype.addAction.call(this, title, callback);
 
-    let bin = new St.Bin({ x_align: St.Align.END, style_class: 'menuitem-detail' });
-    let label = new St.Label();
-    label.set_text(detail_text);
-    bin.add_actor(label);
-    menuItem.addActor(bin, { expand: true, span: -1, align: St.Align.END });
+    if (detail_text) {
+      let bin = new St.Bin({ x_align: St.Align.END, style_class: 'menuitem-detail' });
+      let label = new St.Label();
+      label.set_text(detail_text);
+      bin.add_actor(label);
+      menuItem.addActor(bin, { expand: true, span: -1, align: St.Align.END });
+    }
+
     return menuItem;
   }
 }
@@ -695,19 +700,21 @@ MyApplet.prototype = {
          this._crSettings.connect('changed', Lang.bind(this, this._crSettingsChanged));
          this._crSettingsChanged();
 
-         // Get information on what our various programs support
-         let supportFile = GLib.build_filenamev([SUPPORT_FILE]);
-         try {
-            this._programSupport = JSON.parse(Cinnamon.get_file_contents_utf8_sync(supportFile));
-         }
-         catch (e) {
-            global.logError("Could not parse Desktop Capture's support.json!")
-            global.logError(e);
-         }
+        // Get information on what our various programs support
+        try {
+          let supportFile = GLib.build_filenamev([SUPPORT_FILE]);
+          let file = Gio.File.new_for_path(supportFile);
+          let [status, buffer] = file.load_contents(null);
+          this._programSupport = JSON.parse(buffer);
+        }
+        catch (e) {
+          global.logError("Could not parse Desktop Capture's support.json!")
+          global.logError(e);
+        }
 
          this._registerKeyBindings();
 
-         //this.detect_programs();
+         // this.detect_programs();
          let xfixesCursor = Cinnamon.XFixesCursor.get_for_stage(global.stage);
          this._xfixesCursor = xfixesCursor;
 
@@ -1907,16 +1914,15 @@ MyApplet.prototype = {
       this._programs[program] = false;
    },
 
-   _detect_program: function(program, i) {
-      try {
-         let [success, out, err, ret] = GLib.spawn_command_line_sync(program + ' --help', out, err, ret);
-         this._set_program_available(program);
-      }
-      catch (e)
-      {
-         this._set_program_unavailable(program);
-      }
-   },
+  _detect_program: function(program, i) {
+    let _program = GLib.find_program_in_path(program);
+    if (typeof _program == 'string' && _program == program) {
+      this._set_program_available(program);
+    }
+    else {
+      this._set_program_unavailable(program);
+    }
+  },
 
    detect_programs: function() {
       let programs = new Array();
@@ -1928,7 +1934,6 @@ MyApplet.prototype = {
             }
          }
       }
-
       programs.forEach(Lang.bind(this, this._detect_program));
 
       if (!this.get_program_available(this._cameraProgram))
