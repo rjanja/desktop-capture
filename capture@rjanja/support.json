@@ -2,7 +2,7 @@
    "camera": {
       "cinnamon": {
          "enabled": true,
-         "title": "Cinnamon Screenshot"
+         "title": "Built-in"
       },
       "gnome-screenshot": {
          "enabled": true,
@@ -76,7 +76,7 @@
    },
    "recorder": {
       "cinnamon": {
-        "title": "Cinnamon Recorder",
+        "title": "Built-in",
         "enabled": true
       },
       "ffmpeg": {

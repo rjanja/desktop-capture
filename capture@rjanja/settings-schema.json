@@ -1,21 +1,21 @@
 {
    "general stetings": {
       "type": "header",
-      "description": "General Settings"
+      "description": "Capture Tool Selection"
    },
    "camera-program": {
       "indent": true,
       "default": "cinnamon",
       "type": "combobox",
       "options": {
-         "Cinnamon Screenshot": "cinnamon",
+         "Built-in": "cinnamon",
          "GNOME Screenshot": "gnome-screenshot",
          "Shutter": "shutter",
          "XWD": "xwd",
          "ImageMagick": "import",
          "Kazam": "kazam"
       },
-      "description": "Screen capture program",
+      "description": "Screenshot program",
       "tooltip": "Preferred screen capture program"
    },
    "recorder-program": {
@@ -23,21 +23,29 @@
       "default": "cinnamon",
       "type": "combobox",
       "options": {
-         "Cinnamon Recorder": "cinnamon",
+         "Built-in": "cinnamon",
          "RecordMyDesktop": "gtk-recordmydesktop",
          "Byzanz": "byzanz",
          "FFmpeg": "ffmpeg",
          "Kazam": "kazam"
       },
-      "description": "Screen recorder program",
+      "description": "Recorder program",
       "tooltip": "Preferred screen recorder program"
    },
+   "use-symbolic-icon": {
+      "default": false,
+      "type": "checkbox",
+      "description": "Use symbolic (black and white) icon for applet",
+      "tooltip": "Whether to use symbolic (black and white) icon for applet"
+   },
+
    "div1" : {
     "type" : "separator"
    },
-   "cinn screenshot settings": {
+
+   "gen screenshot settings": {
       "type": "header",
-      "description": "Screenshot Settings"
+      "description": "Screenshots: General Settings"
    },
    "camera-save-dir": {
       "indent": true,
@@ -92,7 +100,11 @@
    },
    "cinn screenshot settings-window": {
       "type": "header",
-      "description": "Cinnamon Screenshot (note: changing keybindings may require restarting)"
+      "description": "Screenshots: Built-in Capture Settings"
+   },
+   "cinn screenshot note": {
+      "type": "label",
+      "description": "Note: changing keybindings may require restarting Cinnamon."
    },
    "kb-cs-window" : {
       "indent": true,
@@ -156,12 +168,6 @@
       "type": "checkbox",
       "description": "Include applied styles in UI capture",
       "tooltip": "Whether to include CSS selection styles in Cinnamon UI screenshots"
-   },
-   "use-symbolic-icon": {
-      "default": false,
-      "type": "checkbox",
-      "description": "Use symbolic (black and white) icon for applet",
-      "tooltip": "Whether to use symbolic (black and white) icon for applet"
    },
 
    "play-shutter-sound": {
@@ -238,7 +244,7 @@
    },
    "notification settings": {
       "type": "header",
-      "description": "Notifications"
+      "description": "Screenshots: Post-Capture Settings"
    },
    "send-notification": {
       "default": true,
@@ -308,15 +314,15 @@
    "div4" : {
       "type" : "separator"
    },
-   "cinn recorder settings": {
+   "gen recorder settings": {
       "type": "header",
-      "description": "Recorder Settings"
+      "description": "Recorder: General Settings"
    },
    
    "label-recorder-settings": {
-      "type": "generic",
-      "default": "0",
-      "description": "Please <b>note</b> not all recorders may respect these settings."
+      "indent": true,
+      "type": "label",
+      "description": "Please note not all recorder tools may respect these settings."
    },
 
    "recorder-save-dir": {
@@ -337,12 +343,32 @@
       "tooltip": "Format for built-in recorder. E.g. %Y-%M-%D-%H%I = 2014-05-25-1848.webm. Use %S for seconds, %m for milliseconds"
    },
 
+   "cinn recorder settings": {
+      "type": "header",
+      "description": "Recorder: Built-in Settings"
+   },
+
+   "label-internal-recorder-settings": {
+      "type": "label",
+      "description": "These settings only apply when using the Built-in Recorder tool."
+   },
+
    "kb-recorder-stop" : {
       "indent": true,
       "type" : "keybinding",
-      "description" : "Keybinding to start/stop* recording: ",
+      "description" : "Keybinding to start/stop recording: ",
       "tooltip": "Will start only Cinnamon Recorder. Will stop any recorder using its stop-command.",
       "default" : "<Control>F10"
+   },
+
+   "external recorder settings": {
+      "type": "header",
+      "description": "Recorder: External Tool Settings"
+   },
+   
+   "label-external-recorder-settings": {
+      "type": "label",
+      "description": "These settings only apply when not using the Built-in Recorder tool."
    },
 
    

@@ -2,8 +2,8 @@
     "website": "https://github.com/rjanja/desktop-capture", 
     "description": "Screenshot and screencasting tools", 
     "contributors": "Rob Adams,Per \u00c5ngstr\u00f6m,Stephen Ostrow,Davide Cristini,Robert Orzanna", 
-    "uuid": "capture@rjanja", 
+    "name": "Desktop Capture", 
     "hide-configuration": false, 
-    "version": "1.07", 
-    "name": "Desktop Capture"
+    "version": "1.08", 
+    "uuid": "capture@rjanja"
 }
