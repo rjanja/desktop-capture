@@ -64,6 +64,7 @@ ScreenshotHelper.prototype = {
          windowAsArea: false,
          playShutterSound: true,
          useTimer: true,
+         showTimer: true,
          playTimerSound: true,
          timerDuration: 3,
          soundTimerInterval: 'dialog-warning',
@@ -136,48 +137,57 @@ ScreenshotHelper.prototype = {
 
    captureTimer: function(options, onFinished, onInterval) {
       if (options.useTimer && options.timerDuration > 0) {
-         this._setTimer(options.timerDuration);
-         this._fadeOutTimer();
-
-         if (options.playTimerSound)
-            this.playSound(options.soundTimerInterval);
-
-         let timeoutId = Mainloop.timeout_add(1000, Lang.bind(this, function() {
-            this._timeout--;
-
-            if (onInterval && typeof onInterval == 'function')
-               onInterval();
-
-            if (this._timeout > 0) {
-               let timeoutText = '';
-               if (this._timeout == 1 && Math.floor(Math.random()*101) == 100) {
-                  timeoutText = '\u2764';
-               }
-               else {
-                  timeoutText = this._timeout;
-               }
-
-               this._timer.set_text('' + timeoutText);
-
-               if (options.playTimerSound)
-                  this.playSound(options.soundTimerInterval)
-
-               this._fadeOutTimer();
-            } else {
-               //if (options.playShutterSound)
-               //   this.playSound(options.soundShutter);
-
+         if (options.showTimer == false) {
+            let timeoutId = Mainloop.timeout_add(options.timerDuration * 1000, Lang.bind(this, function() {
                Mainloop.source_remove(timeoutId);
                onFinished();
                return false;
-            }
+            }));
+         }
+         else {
+            this._setTimer(options.timerDuration);
+            this._fadeOutTimer();
 
-            return true;
-         }));
+            if (options.playTimerSound)
+               this.playSound(options.soundTimerInterval);
+
+            let timeoutId = Mainloop.timeout_add(1000, Lang.bind(this, function() {
+               this._timeout--;
+
+               if (onInterval && typeof onInterval == 'function')
+                  onInterval();
+
+               if (this._timeout > 0) {
+                  let timeoutText = '';
+                  if (this._timeout == 1 && Math.floor(Math.random()*101) == 100) {
+                     timeoutText = '\u2764';
+                  }
+                  else {
+                     timeoutText = this._timeout;
+                  }
+
+                  this._timer.set_text('' + timeoutText);
+
+                  if (options.playTimerSound)
+                     this.playSound(options.soundTimerInterval)
+
+                  this._fadeOutTimer();
+               } else {
+                  //if (options.playShutterSound)
+                  //   this.playSound(options.soundShutter);
+
+                  Mainloop.source_remove(timeoutId);
+                  onFinished();
+                  return false;
+               }
+
+               return true;
+            }));
+         }
       }
       else {
          onFinished();
-      }
+      }   
    },
 
    _setTimer: function(timeout) {

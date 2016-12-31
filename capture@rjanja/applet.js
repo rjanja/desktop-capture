@@ -531,6 +531,7 @@ MyApplet.prototype = {
       this._includeWindowFrame = this.settings.getValue('include-window-frame');
       this._useCameraFlash = this.settings.getValue('use-camera-flash');
       this._useTimer = this.settings.getValue('use-timer');
+      this._showTimer = this.settings.getValue('show-capture-timer');
       this._playShutterSound = this.settings.getValue('play-shutter-sound');
       this._playIntervalSound = this.settings.getValue('play-timer-interval-sound');
       this._copyToClipboard = this.settings.getValue('copy-to-clipboard');
@@ -673,6 +674,7 @@ MyApplet.prototype = {
          this._openAfter = false;
          this._delay = 0;
          this._useTimer = false;
+         this._showTimer = false;
          this._copyData = false;
          this._showCopyToggle = true;
          this._copyDataAutoOff = true;
@@ -1447,6 +1449,7 @@ MyApplet.prototype = {
             //copyToClipboard: this._copyData ? 4 : this._copyToClipboard,
             playShutterSound: this._playShutterSound,
             useTimer: enableTimer,
+            showTimer: this._showTimer,
             playTimerSound: this._playIntervalSound,
             timerDuration: this._delay,
             soundTimerInterval: 'dialog-warning',
