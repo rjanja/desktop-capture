@@ -158,11 +158,8 @@ ScreenshotNotification.prototype = {
       this._imageBin.child = image;
       this._imageBin.opacity = 230;
 
-      
-
       this._table.add_style_class_name('multi-line-notification');
-      // Only show expanded image style if we also have actions to display
-      this._actionArea && this._table.add_style_class_name('notification-with-image');
+      this._table.add_style_class_name('notification-with-image');
       this._addBannerBody();
       this._updateLastColumnSettings();
       this._table.add(this._imageBin, { row: 1,
