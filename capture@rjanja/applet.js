@@ -832,10 +832,25 @@ MyApplet.prototype = {
       }
 
       if (this.has_camera()) {
-         this._outputTitle = new PopupMenu.PopupIconMenuItem(_("Camera"), "camera-photo", St.IconType.SYMBOLIC);
-         //false, "right", "sound-volume-menu-item");
-         this.menu.addMenuItem(this._outputTitle);
+         if (this.has_camera_option('gui')) {
+            this._outputTitle = new PopupMenu.PopupIconMenuItem(
+               _("Camera") + ": " + this.get_camera_option('title'),
+               "camera-photo", St.IconType.SYMBOLIC);
 
+            let guiCommand = this.get_camera_option('gui');
+            this._outputTitle.connect('activate', Lang.bind(this, function (menuItem, event) {
+               this.Exec(guiCommand);
+            }));
+         }
+         else {
+            this._outputTitle = new PopupMenu.PopupIconMenuItem(
+               _("Camera") + ": " + this.get_camera_option('title'), 
+               "camera-photo", St.IconType.SYMBOLIC,
+               { reactive: false });
+         }
+
+         this.menu.addMenuItem(this._outputTitle);
+         
          if (this.get_camera_program() == 'cinnamon') {
             let item = this.menu.addAction(this.indent(_("Window")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.WINDOW, e);
@@ -1011,8 +1026,22 @@ MyApplet.prototype = {
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
          }
 
-         this._outputTitle2 = new PopupMenu.PopupIconMenuItem(_("Recorder"), "media-record", St.IconType.SYMBOLIC);
-         // this._outputTitle2 = new TextImageMenuItem(_("Recorder"), "media-record", false, "right", "sound-volume-menu-item");
+         if (this.has_recorder_option('gui')) {
+            this._outputTitle2 = new PopupMenu.PopupIconMenuItem(
+               _("Recorder") + ": " + this.get_recorder_option('title'), 
+               "media-record", St.IconType.SYMBOLIC);
+         
+            let guiCommand = this.get_recorder_option('gui');
+            this._outputTitle2.connect('activate', Lang.bind(this, function (menuItem, event) {
+               this.Exec(guiCommand);
+            }));
+         }
+         else {
+            this._outputTitle2 = new PopupMenu.PopupIconMenuItem(
+               _("Recorder") + ": " + this.get_recorder_option('title'), 
+               "media-record", St.IconType.SYMBOLIC, { reactive: false });
+         }
+         
          this.menu.addMenuItem(this._outputTitle2);
 
          if (this.get_recorder_program() == 'cinnamon')
@@ -1051,6 +1080,7 @@ MyApplet.prototype = {
                if (this.has_recorder_option('stop-command')){
                   this.menu.addAction(this.indent(_("Stop recording")), Lang.bind(this, function(actor, event) {
                      this.runCommand(this.get_recorder_option('stop-command'), 'recorder', false);
+
                   }));
                }
 
@@ -1819,13 +1849,11 @@ MyApplet.prototype = {
       if (isCapture == true) {
          if (null !== helperMode) {
             let ss = new Screenshot.ScreenshotHelper(helperMode, Lang.bind(this, function(vars) {
-               global.res = vars;
                this.runInteractiveCustom(cmd, vars);
-               
             }), { selectionHelper: true });
          }
          else {
-            global.log('**FINAL CMD IS** '+cmd);
+            this.log('running '+cmd);
             this.TryExec(cmd, Lang.bind(this, this.onProcessSpawned),
                Lang.bind(this, this.onProcessError),
                Lang.bind(this, this.onProcessComplete));
@@ -1881,16 +1909,22 @@ MyApplet.prototype = {
       };
 
       if (vars['window']) {
-         replacements['{X_WINDOW}'] = vars.window['x-window']; // Window frame
+         // numeric xwindow id e.g. to use with xprop/xwininfo
+         replacements['{X_WINDOW_ID}'] = vars.window.get_meta_window().get_xwindow();
+         replacements['{X_WINDOW_FRAME}'] = vars.window['x-window']; // Window frame
          replacements['{WM_CLASS}'] = vars.window.get_meta_window().get_wm_class();
          replacements['{WINDOW_TITLE}'] = vars.window.get_meta_window().get_title();
+         // let xid = window.get_meta_window().get_description().match(/0x[0-9a-f]+/);
+         // if (xid && xid[0]) {
+         //    replacements['{X_WINDOW_ID}'] = xid[0];
+         // }
       }
 
       for (var k in replacements) {
          cmd = cmd.replace(k, replacements[k]);
       }
 
-      global.log('**FINAL CMD IS** '+cmd);
+      this.log('running '+cmd);
       this.TryExec(cmd, Lang.bind(this, this.onProcessSpawned),
          Lang.bind(this, this.onProcessError),
          Lang.bind(this, this.onProcessComplete));
@@ -1911,6 +1945,8 @@ MyApplet.prototype = {
    },
 
    onProcessComplete: function(status, stdout) {
+      this.log("Process exited with status " + status);
+
       if (!this._useSymbolicIcon) {
          this.set_applet_icon_path(ICON_FILE);
       }
@@ -1956,14 +1992,14 @@ MyApplet.prototype = {
       if (!this.get_program_available(this._cameraProgram))
       {
          this._recorderProgram = null;
-         global.log(this._cameraProgram + ' is not available. Disabling camera functions.');
+         this.log(this._cameraProgram + ' is not available. Disabling camera functions.');
       }
 
       if (!this.get_program_available(this._recorderProgram)
           && this._recorderProgram != 'cinnamon')
       {
          this._recorderProgram = null;
-         global.log('No screen recorder program is available. Disabling recorder functions.');
+         this.log('No screen recorder program is available. Disabling recorder functions.');
       }
 
       return programs.length;
@@ -1997,7 +2033,7 @@ MyApplet.prototype = {
             null);
          }
       catch (e) {
-         global.log("Failure creating process");
+         this.log("Failure creating process");
          typeof onFailure == 'function' && onFailure(cmd);
          return false;
       }
@@ -2005,16 +2041,16 @@ MyApplet.prototype = {
       {
          let out_reader = new Gio.DataInputStream({ base_stream: new Gio.UnixInputStream({fd: out_fd}) });
          // Wait for answer
-         global.log("Created process, pid=" + pid);
+         this.log("Spawned process with pid=" + pid);
          typeof onStart == 'function' && onStart(pid);
          GLib.child_watch_add( GLib.PRIORITY_DEFAULT, pid,
             function(pid,status) {
                GLib.spawn_close_pid(pid);
-               global.log("Process completed, status=" + status);
+               // global.log("Process completed, status=" + status);
                let [line, size, buf] = [null, 0, ""];
                while (([line, size] = out_reader.read_line(null)) != null && line != null) {
-                  global.log(line);
-                  global.log(size);
+                  // global.log(line);
+                  // global.log(size);
                   buf += line;
                   if (line.indexOf("Error during recording") > 0) {
                      typeof onFailure == 'function' && onFailure(cmd);
@@ -2027,7 +2063,7 @@ MyApplet.prototype = {
       }
       else
       {
-         global.log("Failed process creation");
+         this.log("Failed to spawn process");
          typeof onFailure == 'function' && onFailure(cmd);
       }
 
