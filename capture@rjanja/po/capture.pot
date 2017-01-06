@@ -1,0 +1,706 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-01-06 12:34+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+
+#: applet.js:280
+#, javascript-format
+msgid "Schema \"%s\" not found."
+msgstr ""
+
+#. Create our right-click menus first, they'll be modified once
+#. settings are loaded in the event one or both the save folders
+#. do not exist or are not writeable
+#: applet.js:710
+msgid "Open screenshots folder"
+msgstr ""
+
+#: applet.js:714
+msgid "Open recordings folder"
+msgstr ""
+
+#: applet.js:750
+msgid "Screenshot and desktop video"
+msgstr ""
+
+#: applet.js:760
+msgid "Capture settings"
+msgstr ""
+
+#: applet.js:848 applet.js:858
+msgid "Camera"
+msgstr ""
+
+#: applet.js:866 applet.js:911
+msgid "Window"
+msgstr ""
+
+#: applet.js:870 applet.js:932
+msgid "Area"
+msgstr ""
+
+#: applet.js:873
+msgid "Cinnamon UI"
+msgstr ""
+
+#: applet.js:876
+msgid "Screen"
+msgstr ""
+
+#: applet.js:882
+#, javascript-format
+msgid "Monitor %d"
+msgstr ""
+
+#: applet.js:894
+msgid "Repeat last"
+msgstr ""
+
+#: applet.js:918
+msgid "Window section"
+msgstr ""
+
+#: applet.js:925
+msgid "Current window"
+msgstr ""
+
+#: applet.js:939
+msgid "Entire screen"
+msgstr ""
+
+#: applet.js:946
+msgid "Window menu"
+msgstr ""
+
+#: applet.js:953
+msgid "Tooltip"
+msgstr ""
+
+#. OPTION: Include Cursor (toggle switch)
+#: applet.js:970
+msgid "Include cursor"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->use-timer->description
+#: applet.js:985
+msgid "Use timer"
+msgstr ""
+
+#: applet.js:996
+msgid "Copy image"
+msgstr ""
+
+#: applet.js:1011
+msgid "Upload to imgur"
+msgstr ""
+
+#: applet.js:1042 applet.js:1052
+msgid "Recorder"
+msgstr ""
+
+#: applet.js:1061 applet.js:1551
+msgid "Start recording"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->record-sound->description
+#: applet.js:1077
+msgid "Record sound"
+msgstr ""
+
+#: applet.js:1092 applet.js:1548
+msgid "Stop recording"
+msgstr ""
+
+#: applet.js:1246
+#, javascript-format
+msgid "Screenshot has been uploaded as %s"
+msgstr ""
+
+#: applet.js:1250 applet.js:1457
+msgid "Link has been copied to clipboard"
+msgstr ""
+
+#: applet.js:1256 applet.js:1461
+msgid "Screenshot could not be uploaded due to an error."
+msgstr ""
+
+#: applet.js:1265
+msgid "Path has been copied to clipboard."
+msgstr ""
+
+#: applet.js:1269
+msgid "Filename has been copied to clipboard."
+msgstr ""
+
+#: applet.js:1273
+msgid "Directory has been copied to clipboard."
+msgstr ""
+
+#: applet.js:1278
+msgid "Image data has been copied to clipboard."
+msgstr ""
+
+#. global.tex = image_texture;
+#: applet.js:1323
+msgid "Screenshot has been saved to:"
+msgstr ""
+
+#: applet.js:1328
+msgid "Screenshot captured!"
+msgstr ""
+
+#: applet.js:1335
+msgid "Delete"
+msgstr ""
+
+#: applet.js:1339
+msgid "Copy Data"
+msgstr ""
+
+#: applet.js:1343
+msgid "Copy Path"
+msgstr ""
+
+#: applet.js:1347
+msgid "Open Link"
+msgstr ""
+
+#: applet.js:1350
+msgid "Upload"
+msgstr ""
+
+#: applet.js:1433 applet.js:1434
+#, javascript-format
+msgid "The screenshot at %s was removed from disk."
+msgstr ""
+
+#. 30*3 + 50
+#: screenshot.js:495
+msgid "Click and drag to select an area for capture"
+msgstr ""
+
+#: screenshot.js:496
+msgid "Arrow keys move the selection"
+msgstr ""
+
+#: screenshot.js:497
+msgid "Holding SHIFT, arrow keys resize the selection"
+msgstr ""
+
+#: screenshot.js:498
+msgid "Press ENTER or KP_RETURN to complete the capture, or ESC to cancel"
+msgstr ""
+
+#: screenshot.js:502
+msgid "Move mouse over a UI element to select it"
+msgstr ""
+
+#: screenshot.js:503
+msgid "Mousewheel traverses through parent elements"
+msgstr ""
+
+#: screenshot.js:504
+msgid "Holding SHIFT, clicks pass through to UI"
+msgstr ""
+
+#: screenshot.js:505
+msgid "Click to complete the capture, or ESC to cancel"
+msgstr ""
+
+#: screenshot.js:843
+msgid "Desktop"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-cs-repeat->description
+msgid "Keybinding to repeat last capture: "
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-cs-monitor-0->description
+msgid "Keybinding to capture monitor 1: "
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-upload-toggle->description
+msgid "Show toggle button for uploading image to imgur.com"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-upload-toggle->tooltip
+msgid ""
+"Whether to show another toggle button in the menu for automatically "
+"uploading. If you have notifications enabled you probably don't need this "
+"set."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-recorder-stop->description
+msgid "Keybinding to start/stop recording: "
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-recorder-stop->tooltip
+msgid ""
+"Will start only Cinnamon Recorder. Will stop any recorder using its stop-"
+"command."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->use-timer->tooltip
+msgid "Whether to use a timer before capturing"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->include-styles->description
+msgid "Use highlighted style in UI capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->include-styles->tooltip
+msgid ""
+"Turn on for a 'highlighted' effect, using CSS styles applied by .capture-"
+"outline-frame"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->gen recorder settings->description
+msgid "Recorder: General Settings"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-cs-window->description
+msgid "Keybinding to capture a window: "
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->label-internal-recorder-
+#. settings->description
+msgid "These settings only apply when using the Built-in Recorder tool."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->last-selected-page->description
+msgid "Last selected page (tab index) of settings application"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->notification settings->description
+msgid "Screenshots: Post-Capture Settings"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->upload-to-imgur->description
+msgid "Upload all captures to imgur.com"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->upload-to-imgur->tooltip
+msgid ""
+"If enabled, all captures will be uploaded to imgur. The view and delete URLs"
+" for each capture are stored in a file imgur.log in the capture save "
+"directory."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-save-dir->description
+#. capture@rjanja->settings-schema.json->recorder-save-dir->description
+msgid "Save location"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-save-dir->tooltip
+msgid "Folder to save new screenshots"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->description
+msgid "Screenshot program"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->tooltip
+msgid "Preferred screen capture program"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->options
+msgid "ImageMagick"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->options
+#. capture@rjanja->settings-schema.json->recorder-program->options
+msgid "Kazam"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->options
+#. capture@rjanja->settings-schema.json->recorder-program->options
+msgid "Built-in"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->options
+msgid "Shutter"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->options
+msgid "XWD"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-program->options
+msgid "GNOME Screenshot"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->include-cursor->description
+msgid "Include mouse cursor"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->include-cursor->tooltip
+msgid "Whether to include mouse cursor in screenshot"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->capture-window-as-area->description
+msgid ""
+"Ignore transparency in window captures (suggested, or shots may be black or "
+"distorted)"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->capture-window-as-area->tooltip
+msgid ""
+"Asking the desktop manager for a screenshot of a window would usually result"
+" in a nice image retaining any transparent regions. But depending on the "
+"graphics drivers and Cinnamon version it may turn out black or distorted."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-cs-ui->description
+msgid "Keybinding to capture a UI element: "
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->upload-auto-off->description
+msgid "Turn off image upload toggle after capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->upload-auto-off->tooltip
+msgid ""
+"When set, the upload to imgur toggle button will be turned off after a "
+"successful capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->label-recorder-settings->description
+msgid "Please note not all recorder tools may respect these settings."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->delay-seconds->description
+msgid "Capture delay"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->delay-seconds->tooltip
+msgid "How many seconds to wait before taking a screenshot"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->delay-seconds->units
+msgid "seconds"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->recorder-program->description
+msgid "Recorder program"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->recorder-program->tooltip
+msgid "Preferred screen recorder program"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->recorder-program->options
+msgid "RecordMyDesktop"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->recorder-program->options
+msgid "Byzanz"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->recorder-program->options
+msgid "FFmpeg"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-copy-toggle->description
+msgid "Show toggle button for copying image to clipboard"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-copy-toggle->tooltip
+msgid ""
+"Whether to show another toggle button in the menu for copying image to "
+"clipboard. If you have notifications enabled you probably don't need this "
+"set."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->upload-imgur->description
+msgid "Upload image to imgur.com (toggle)"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->upload-imgur->tooltip
+msgid "This is an override setting"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->notification-behavior->description
+msgid "When clicking notification"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->notification-behavior->tooltip
+msgid ""
+"The behavior to use when clicking on the notification bubble after a "
+"screenshot is taken."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->notification-behavior->options
+msgid "Open the file"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->notification-behavior->options
+msgid "Do nothing (dismiss)"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->notification-behavior->options
+msgid "Open the directory"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->open-after->description
+msgid "Open file manager after capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->open-after->tooltip
+msgid "Whether to open the screenshot in file manager"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->label-external-recorder-
+#. settings->description
+msgid "These settings only apply when not using the Built-in Recorder tool."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->cinn recorder settings->description
+msgid "Recorder: Built-in Settings"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->demo-notification-button->description
+msgid "Click here to send an example notification"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->demo-notification-button->tooltip
+msgid ""
+"Pressing this button will send an example notification with all actions "
+"disabled."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->include-window-frame->description
+msgid "Include window frame"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->include-window-frame->tooltip
+msgid "Whether to include the window frame and titlebar in window captures"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->external recorder
+#. settings->description
+msgid "Recorder: External Tool Settings"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-to-clipboard->options
+msgid "Path and filename"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-to-clipboard->options
+msgid "Image Data"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-to-clipboard->options
+msgid "Off"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-to-clipboard->options
+msgid "Only Filename"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-to-clipboard->options
+msgid "Only Directory"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-to-clipboard->tooltip
+msgid ""
+"Whether to copy path/filename of screenshots to clipboard after capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-to-clipboard->description
+msgid "Copy to clipboard"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->cinn screenshot note->description
+msgid "Note: changing keybindings may require restarting Cinnamon."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->general stetings->description
+msgid "Capture Tool Selection"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->last-selected-subpage->description
+msgid "Last selected sub-page (tab index) of settings application"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-cs-area->description
+msgid "Keybinding to capture an area: "
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-save-prefix->description
+#. capture@rjanja->settings-schema.json->recorder-save-prefix->description
+msgid "Filename format"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->camera-save-prefix->tooltip
+msgid ""
+"Don't include file extension. %TYPE is area, window, etc. E.g. %Y-%M-%D-%H%I"
+" = 2014-05-25-1848.png. Use %S for seconds, %m for milliseconds"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->recorder-save-prefix->tooltip
+msgid ""
+"Format for built-in recorder. E.g. %Y-%M-%D-%H%I = 2014-05-25-1848.webm. Use"
+" %S for seconds, %m for milliseconds"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->use-symbolic-icon->description
+msgid "Use symbolic (black and white) icon for applet"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->use-symbolic-icon->tooltip
+msgid "Whether to use symbolic (black and white) icon for applet"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-delete-action->description
+msgid "Enable delete from notification"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-delete-action->tooltip
+msgid ""
+"If checked, a delete button will be shown in the notification that allows "
+"you to remove the screenshot from disk."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-capture-timer->description
+msgid "Show capture timer"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-capture-timer->tooltip
+msgid "Whether to show the timer on the screen"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-data->description
+msgid "Copy image data to clipboard (toggle)"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-data->tooltip
+msgid "This overrides the 'Copy to clipboard' setting"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->send-notification->description
+msgid "Use desktop notifications"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->send-notification->tooltip
+msgid "Whether to send a notification to desktop after capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-upload-action->description
+msgid "Enable upload from notification"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-upload-action->tooltip
+msgid ""
+"If checked, a upload button will be shown in the notification that allows "
+"you to quickly upload the image."
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->play-timer-interval-
+#. sound->description
+msgid "Play timer interval sound"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->play-timer-interval-sound->tooltip
+msgid "Whether to play the timer interval sound as the timer counts down"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->gen screenshot settings->description
+msgid "Screenshots: General Settings"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-copy-path-action->description
+msgid "Enable copying path from notification"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-copy-path-action->tooltip
+msgid ""
+"If checked, a button will be shown in the notification that allows you to "
+"copy the screenshot path to clipboard"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-data-auto-off->description
+msgid "Turn off copy image toggle after capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->copy-data-auto-off->tooltip
+msgid ""
+"When set, the copy image to clipboard toggle button override will be turned "
+"off after a successful capture"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->play-shutter-sound->description
+msgid "Play shutter sound"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->play-shutter-sound->tooltip
+msgid "Whether to play the shutter sound as the capture is made"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->kb-cs-screen->description
+msgid "Keybinding to capture the screen: "
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->use-camera-flash->description
+msgid "Use camera flash"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->use-camera-flash->tooltip
+msgid "Whether to show a bright flash over the capture area"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->cinn screenshot settings-
+#. window->description
+msgid "Screenshots: Built-in Capture Settings"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-copy-data-action->description
+msgid "Enable copying image data from notification"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->show-copy-data-action->tooltip
+msgid ""
+"If checked, a button will be shown in the notification that allows you to "
+"copy the screenshot data to clipboard"
+msgstr ""
+
+#. capture@rjanja->settings-schema.json->recorder-save-dir->tooltip
+msgid "Folder for new screen recordings"
+msgstr ""
+
+#. capture@rjanja->metadata.json->description
+msgid "Screenshot and screencasting tools"
+msgstr ""
+
+#. capture@rjanja->metadata.json->contributors
+msgid "Rob Adams"
+msgstr ""
+
+#. capture@rjanja->metadata.json->contributors
+msgid "Stephen Ostrow"
+msgstr ""
+
+#. capture@rjanja->metadata.json->contributors
+msgid "Davide Cristini"
+msgstr ""
+
+#. capture@rjanja->metadata.json->contributors
+msgid "Robert Orzanna"
+msgstr ""
+
+#. capture@rjanja->metadata.json->name
+msgid "Desktop Capture"
+msgstr ""

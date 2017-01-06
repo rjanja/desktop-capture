@@ -90,7 +90,7 @@
         }
       },
       "gtk-recordmydesktop": {
-        "title": "Record My Desktop",
+        "title": "RecordMyDesktop",
         "enabled": true,
         "-sound-on": "",
         "-sound-off": "--no-sound",

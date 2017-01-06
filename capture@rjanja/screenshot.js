@@ -22,6 +22,13 @@ const Lang = imports.lang;
 const St = imports.gi.St;
 const Gio = imports.gi.Gio;
 
+const Gettext = imports.gettext
+Gettext.bindtextdomain("capture@rjanja", GLib.get_home_dir() + "/.local/share/locale")
+
+function _(str) {
+  return Gettext.dgettext("capture@rjanja", str);
+}
+
 const SelectionType = {
    ALL_WORKSPACES: 0,  /* @todo */
    SCREEN: 1,
