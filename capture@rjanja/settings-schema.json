@@ -145,8 +145,8 @@
    "capture-window-as-area": {
       "default": true,
       "type": "checkbox",
-      "description": "Capture window as area (suggested, or shots may be black or distorted)",
-      "tooltip": "Whether to use area selection for window captures"
+      "description": "Ignore transparency in window captures (suggested, or shots may be black or distorted)",
+      "tooltip": "Asking the desktop manager for a screenshot of a window would usually result in a nice image retaining any transparent regions. But depending on the graphics drivers and Cinnamon version it may turn out black or distorted."
    },
    "include-window-frame": {
       "default": true,
@@ -166,8 +166,8 @@
    "include-styles": {
       "default": false,
       "type": "checkbox",
-      "description": "Include applied styles in UI capture",
-      "tooltip": "Whether to include CSS selection styles in Cinnamon UI screenshots"
+      "description": "Use highlighted style in UI capture",
+      "tooltip": "Turn on for a 'highlighted' effect, using CSS styles applied by .capture-outline-frame"
    },
 
    "play-shutter-sound": {
