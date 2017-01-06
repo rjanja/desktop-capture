@@ -690,8 +690,12 @@ MyApplet.prototype = {
          this._instanceId = instanceId;
          this._uuid = metadata.uuid;
          this._shouldRedraw = false;
+         this._canOpenFolderFile = false;
+         this._fileman = null;
 
          this.maybeRegisterRole("screenshot", metadata.uuid);
+
+         this.testCanOpenFolderFile();
 
          // Create our right-click menus first, they'll be modified once
          // settings are loaded in the event one or both the save folders
@@ -1359,13 +1363,19 @@ MyApplet.prototype = {
          }));
 
          if ('dismiss' != this._notificationBehavior) {
+            if ('open-dir' == this._notificationBehavior && this._canOpenFolderFile) {
+               notification.connect('clicked', Lang.bind(this, function() {
+                  this.openFolderFile(screenshot.file);
+               }));
+            }
+            else {
             let path = 'open-file' == this._notificationBehavior 
               ? screenshot.file : screenshot.outputDirectory;
 
-            notification.connect('clicked', Lang.bind(this,
-               function() {
-                  this._doRunHandler('file://' + path);
-            }));
+               notification.connect('clicked', Lang.bind(this, function() {
+                     this._doRunHandler('file://' + path);
+               }));
+            }
          }
 
          source.notify(notification);
@@ -1375,8 +1385,13 @@ MyApplet.prototype = {
    },
 
    handleNotificationResponse: function(screenshot, action, notification) {
-      if ('open-folder' == action) {
-         this._doRunHandler('file://' + screenshot.outputDirectory);
+      if ('open-dir' == action) {
+         if (this._canOpenFolderFile) {
+            this.openFolderFile(screenshot.file);
+         }
+         else {
+            this._doRunHandler('file://' + screenshot.outputDirectory);
+         }
       }
       else if ('open-file' == action) {
          this._doRunHandler('file://' + screenshot.file);
@@ -2047,18 +2062,16 @@ MyApplet.prototype = {
             function(pid,status) {
                GLib.spawn_close_pid(pid);
                // global.log("Process completed, status=" + status);
-               let [line, size, buf] = [null, 0, ""];
+               var [line, size, buf] = [null, 0, ""];
                while (([line, size] = out_reader.read_line(null)) != null && line != null) {
-                  // global.log(line);
-                  // global.log(size);
                   buf += line;
-                  if (line.indexOf("Error during recording") > 0) {
-                     typeof onFailure == 'function' && onFailure(cmd);
-                     return;
-                  }
                }
-
-               typeof onComplete == 'function' && onComplete(status, buf);
+               if (buf.indexOf("Error during recording") > 0) {
+                  typeof onFailure == 'function' && onFailure(cmd);
+               }
+               else {
+                  typeof onComplete == 'function' && onComplete(status, buf);
+               }
             });
       }
       else
@@ -2107,9 +2120,32 @@ MyApplet.prototype = {
       this.cinnamon_camera_complete(screenshot);
    },
 
-   on_config_demo_notification: function() {
-      //return this._send_test_notification();
+   on_config_demo_folder_open: function() {
+      this.testCanOpenFolderFile();
+   },
 
+   testCanOpenFolderFile: function() {
+      let query = 'xdg-mime query default inode/directory';
+      let x = this.TryExec(query, null, null, Lang.bind(this, function(status, output) {
+         let cmd = output.split('.desktop')[0];
+         if (cmd == "nemo" || cmd == "nautilus") {
+            this.log('Support for open folder/file enabled');
+            this._canOpenFolderFile = true;
+            this._fileman = cmd;
+         }
+         else {
+            this._canOpenFolderFile = false;
+            this._fileman = null;
+            this.log('No support for open folder/file');
+         }
+      }));
+   },
+
+   openFolderFile: function(filename) {
+      this.Exec(this._fileman + " " + filename);
+   },
+
+   on_config_demo_notification: function() {
       var enableTimer = (this._useTimer && this._delay > 0);
       var options = {
          includeCursor: this._includeCursor,
