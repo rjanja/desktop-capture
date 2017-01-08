@@ -190,31 +190,31 @@ msgstr ""
 
 #. 30*3 + 50
 #: screenshot.js:495
-msgid "Click and drag to select an area for capture"
+msgid "Select an area by clicking and dragging"
 msgstr ""
 
 #: screenshot.js:496
-msgid "Arrow keys move the selection"
+msgid "Use arrow keys to move the selection"
 msgstr ""
 
 #: screenshot.js:497
-msgid "Holding SHIFT, arrow keys resize the selection"
+msgid "Use SHIFT and arrow keys to resize the selection"
 msgstr ""
 
 #: screenshot.js:498
-msgid "Press ENTER or KP_RETURN to complete the capture, or ESC to cancel"
+msgid "Press ENTER to confirm or ESC to cancel"
 msgstr ""
 
 #: screenshot.js:502
-msgid "Move mouse over a UI element to select it"
+msgid "Select a UI element by moving the mouse"
 msgstr ""
 
 #: screenshot.js:503
-msgid "Mousewheel traverses through parent elements"
+msgid "Use mousewheel to traverse hierarchy"
 msgstr ""
 
 #: screenshot.js:504
-msgid "Holding SHIFT, clicks pass through to UI"
+msgid "Hold SHIFT to allow clicking UI element"
 msgstr ""
 
 #: screenshot.js:505
