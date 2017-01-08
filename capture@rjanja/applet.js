@@ -2121,7 +2121,7 @@ MyApplet.prototype = {
    },
 
    on_config_demo_folder_open: function() {
-      this.testCanOpenFolderFile();
+      // this.testCanOpenFolderFile();
    },
 
    testCanOpenFolderFile: function() {
