@@ -373,6 +373,13 @@ MyAppletPopupMenu.prototype = {
   }
 }
 
+const Gettext = imports.gettext
+Gettext.bindtextdomain("capture@rjanja", GLib.get_home_dir() + "/.local/share/locale")
+
+function _(str) {
+  return Gettext.dgettext("capture@rjanja", str);
+}
+
 function MyApplet(metadata, orientation, panelHeight, instanceId) {
    this._init(metadata, orientation, panelHeight, instanceId);
 }
@@ -1313,7 +1320,7 @@ MyApplet.prototype = {
 
          //global.tex = image_texture;
 
-         let body = 'Screenshot has been saved to: \n' + image_file.get_parent().get_uri()
+         let body = _("Screenshot has been saved to:") + '\n' + image_file.get_parent().get_uri()
            + (screenshot.extraActionMessage ? "\n\n" + screenshot.extraActionMessage : "")
            + (screenshot.clipboardMessage ? "\n\n" + screenshot.clipboardMessage : "");
 
