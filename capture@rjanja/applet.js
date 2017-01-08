@@ -845,7 +845,7 @@ MyApplet.prototype = {
       if (this.has_camera()) {
          if (this.has_camera_option('gui')) {
             this._outputTitle = new PopupMenu.PopupIconMenuItem(
-               _("Camera") + ": " + this.get_camera_option('title'),
+               _("Camera") + ": " + _(this.get_camera_option('title')),
                "camera-photo", St.IconType.SYMBOLIC);
 
             let guiCommand = this.get_camera_option('gui');
@@ -855,7 +855,7 @@ MyApplet.prototype = {
          }
          else {
             this._outputTitle = new PopupMenu.PopupIconMenuItem(
-               _("Camera") + ": " + this.get_camera_option('title'), 
+               _("Camera") + ": " + _(this.get_camera_option('title')), 
                "camera-photo", St.IconType.SYMBOLIC,
                { reactive: false });
          }
@@ -1039,7 +1039,7 @@ MyApplet.prototype = {
 
          if (this.has_recorder_option('gui')) {
             this._outputTitle2 = new PopupMenu.PopupIconMenuItem(
-               _("Recorder") + ": " + this.get_recorder_option('title'), 
+               _("Recorder") + ": " + _(this.get_recorder_option('title')), 
                "media-record", St.IconType.SYMBOLIC);
          
             let guiCommand = this.get_recorder_option('gui');
@@ -1049,7 +1049,7 @@ MyApplet.prototype = {
          }
          else {
             this._outputTitle2 = new PopupMenu.PopupIconMenuItem(
-               _("Recorder") + ": " + this.get_recorder_option('title'), 
+               _("Recorder") + ": " + _(this.get_recorder_option('title')), 
                "media-record", St.IconType.SYMBOLIC, { reactive: false });
          }
          
