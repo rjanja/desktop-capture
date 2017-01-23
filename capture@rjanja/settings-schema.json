@@ -252,16 +252,28 @@
       "description": "Use desktop notifications",
       "tooltip": "Whether to send a notification to desktop after capture"
    },
-   "notification-behavior": {
-      "default": "dismiss",
+   "notif-image-left-click": {
+      "default": "open-file",
       "type": "combobox",
       "options": {
          "Do nothing (dismiss)": "dismiss",
          "Open the file": "open-file",
-         "Open the directory": "open-dir"
+         "Open the directory": "open-dir"         
       },
-      "description": "When clicking notification",
-      "tooltip": "The behavior to use when clicking on the notification bubble after a screenshot is taken.",
+      "description": "When left-clicking preview image",
+      "tooltip": "",
+      "dependency": "send-notification"
+   },
+   "notif-image-right-click": {
+      "default": "open-file",
+      "type": "combobox",
+      "options": {
+         "Do nothing (dismiss)": "dismiss",
+         "Open the file": "open-file",
+         "Open the directory": "open-dir"         
+      },
+      "description": "When right-clicking preview image",
+      "tooltip": "",
       "dependency": "send-notification"
    },
    "show-copy-path-action": {
@@ -310,8 +322,62 @@
       "description": "Open file manager after capture",
       "tooltip": "Whether to open the screenshot in file manager"
    },
+   "demo-open-button" : {
+      "indent": true,
+      "type" : "button",
+      "description" : "Click here to open a folder and select a file",
+      "callback" : "on_config_demo_folder_open",
+      "tooltip" : "Pressing this button will open a folder and select a file.",
+      "dependency": "send-notification"
+   },
    
    "div4" : {
+      "type" : "separator"
+   },
+   "integration with imgur": {
+      "type": "header",
+      "description": "Integrations: Imgur (Screenshots)"
+   },
+   "use-imgur": {
+      "indent": true,
+      "type": "switch",
+      "default": false,
+      "description": "Enable this integration",
+      "tooltip": "Whether to use imgur image hosting services"
+   },
+   "use-imgur-account": {
+      "indent": true,
+      "type": "switch",
+      "default": false,
+      "description": "Publish to your own account instead of anonymously",
+      "tooltip": "Whether to publish to your own imgur account instead of anonymously",
+      "dependency": "use-imgur"
+   },
+   "imgur-wizard-button": {
+      "indent": true,
+      "type" : "button",
+      "description" : "Wizard: Connect to your account..",
+      "callback" : "on_config_integrate_imgur",
+      "tooltip" : "Pressing this button will open a configuration utility",
+      "dependency": "use-imgur-account"
+   },
+   "imgur-access-token": {
+      "type" : "generic",
+      "description" : "imgur oauth access token",
+      "default" : ""
+   },
+   "imgur-refresh-token": {
+      "type" : "generic",
+      "description" : "imgur oauth refresh token",
+      "default" : ""
+   },
+   "imgur-album-id": {
+      "type" : "generic",
+      "description" : "imgur oauth album id",
+      "default" : ""
+   },
+
+   "div5b" : {
       "type" : "separator"
    },
    "gen recorder settings": {
