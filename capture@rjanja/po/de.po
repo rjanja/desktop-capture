@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-06 12:35+0100\n"
-"PO-Revision-Date: 2017-01-06 16:49+0100\n"
+"POT-Creation-Date: 2017-01-08 14:43+0100\n"
+"PO-Revision-Date: 2017-01-08 15:04+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -190,46 +190,44 @@ msgid "The screenshot at %s was removed from disk."
 msgstr "Das Bildschirmfoto in %s wurde von der Festplatte entfernt."
 
 #. 30*3 + 50
-#: screenshot.js:495
+#: screenshot.js:490
 msgid "Select an area by clicking and dragging"
-msgstr "Klicken und ziehen, um einen Aufnahmebereich auszuwählen"
+msgstr "Aufnahmebereich durch Klicken und Ziehen auswählen"
 
-#: screenshot.js:496
+#: screenshot.js:491
 msgid "Use arrow keys to move the selection"
 msgstr "Pfeiltasten benutzen, um den Auswahlbereich zu bewegen"
 
-#: screenshot.js:497
+#: screenshot.js:492
 msgid "Use SHIFT and arrow keys to resize the selection"
 msgstr ""
-"SHIFT gedrückt halten, um die Größe des Auswahlbereichs mit den Pfeiltasten "
-"zu ändern"
+"UMSCHALTTASTE und Pfeiltasten benutzen, um die Größe des Auswahlbereichs zu "
+"ändern"
+
+#: screenshot.js:493
+msgid "Press ENTER to confirm or ESC to cancel"
+msgstr "Drücken Sie ENTER zum Bestätigen oder ESC zum Abbrechen der Aufnahme"
+
+#: screenshot.js:497
+msgid "Select a UI element by moving the mouse"
+msgstr "Ein Benutzeroberflächen-Element durch Bewegen der Maus auswählen"
 
 #: screenshot.js:498
-msgid "Press ENTER to confirm or ESC to cancel"
-msgstr ""
-"ENTER oder KP_RETURN drücken, um die Aufnahme abzuschließen, oder ESC um "
-"abzubrechen"
-
-#: screenshot.js:502
-msgid "Select a UI element by moving the mouse"
-msgstr "Maus über ein Benutzeroberflächen-Element bewegen, um es auszuwählen"
-
-#: screenshot.js:503
 msgid "Use mousewheel to traverse hierarchy"
-msgstr "Mit dem Mausrad werden die übergeordneten Elemente ausgewählt"
+msgstr "Mausrad benutzen, um übergeordnete Elemente auszuwählen"
 
-#: screenshot.js:504
+#: screenshot.js:499
 msgid "Hold SHIFT to allow clicking UI element"
 msgstr ""
-"SHIFT gedrückt halten, um Benutzeroberflächen-Elemente mit Mausklicks zu "
-"öffnen"
+"UMSCHALTTASTE gedrückt halten, um das Klicken von Benutzeroberflächen-"
+"Elementen zu ermöglichen"
 
-#: screenshot.js:505
+#: screenshot.js:500
 msgid "Click to complete the capture, or ESC to cancel"
 msgstr ""
 "Mit der Maus klicken, um Aufnahme abzuschließen, oder ESC um abzubrechen"
 
-#: screenshot.js:843
+#: screenshot.js:838
 msgid "Desktop"
 msgstr "Schreibtisch"
 

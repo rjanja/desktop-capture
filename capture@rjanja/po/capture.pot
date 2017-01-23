@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-06 12:34+0100\n"
+"POT-Creation-Date: 2017-01-08 14:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -189,39 +189,39 @@ msgid "The screenshot at %s was removed from disk."
 msgstr ""
 
 #. 30*3 + 50
-#: screenshot.js:495
+#: screenshot.js:490
 msgid "Select an area by clicking and dragging"
 msgstr ""
 
-#: screenshot.js:496
+#: screenshot.js:491
 msgid "Use arrow keys to move the selection"
 msgstr ""
 
-#: screenshot.js:497
+#: screenshot.js:492
 msgid "Use SHIFT and arrow keys to resize the selection"
 msgstr ""
 
-#: screenshot.js:498
+#: screenshot.js:493
 msgid "Press ENTER to confirm or ESC to cancel"
 msgstr ""
 
-#: screenshot.js:502
+#: screenshot.js:497
 msgid "Select a UI element by moving the mouse"
 msgstr ""
 
-#: screenshot.js:503
+#: screenshot.js:498
 msgid "Use mousewheel to traverse hierarchy"
 msgstr ""
 
-#: screenshot.js:504
+#: screenshot.js:499
 msgid "Hold SHIFT to allow clicking UI element"
 msgstr ""
 
-#: screenshot.js:505
+#: screenshot.js:500
 msgid "Click to complete the capture, or ESC to cancel"
 msgstr ""
 
-#: screenshot.js:843
+#: screenshot.js:838
 msgid "Desktop"
 msgstr ""
 
