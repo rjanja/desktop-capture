@@ -1458,8 +1458,9 @@ MyApplet.prototype = {
       }
 
       if (screenshot.uploaded) {
+         notification.addButton('copy-link', _('Copy URL'));
          // notification.addButton('open-link', _('Open Link'));
-         notification.addButton('close-notif', _('Close'));
+         // notification.addButton('close-notif', _('Close'));
       }
       else if (this._showUploadAction) {
          notification.addButton('upload', _('Upload'));
@@ -1467,8 +1468,12 @@ MyApplet.prototype = {
    },
 
    handleNotificationResponse: function(screenshot, action, notification) {
+      if ('delete-file' != action && 'upload' != action) {
+         notification.setUrgency(MessageTray.Urgency.LOW);
+         notification.setResident(false);
+      }
+
       if ('close-notif' == action) {
-         // notification.setUrgency(MessageTray.Urgency.LOW);
          notification.destroy();
       }
       else if ('open-dir' == action) {
@@ -1487,6 +1492,9 @@ MyApplet.prototype = {
       }
       else if ('copy-path' == action) {
          St.Clipboard.get_default().set_text(screenshot.file);
+      }
+      else if ('copy-link' == action) {
+         St.Clipboard.get_default().set_text(screenshot.imgur.link);
       }
       else if ('open-link' == action) {
          this._doRunHandler(screenshot.json.link);
@@ -1541,7 +1549,7 @@ MyApplet.prototype = {
             let title, body;
             if (success) {
                screenshot.uploaded = true;
-               screenshot.json = json;
+               screenshot.imgur = json;
 
                if (screenshot.options.copyToClipboard) {
                   St.Clipboard.get_default().set_text(json.link);
