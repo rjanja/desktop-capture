@@ -7,483 +7,373 @@ const GdkPixbuf = imports.gi.GdkPixbuf;
 const GObject = imports.gi.GObject;
 const Lang = imports.lang;
 
-// let Imgur;
 let Services;
-// print(window.pkg);
-// for(var k in window) {
-//   print(k);
-// }
-// print(window.keys);
-// print(ARGV);
-
-
-const DBusDaemonIface = '<node><interface name="org.Cinnamon"> \
-    <method name="activateCallback"> \
-        <arg type="s" direction="in" /> \
-        <arg type="s" direction="in" /> \
-        <arg type="s" direction="in" /> \
-    </method> \
-    <method name="Eval"> \
-        <arg type="s" direction="in" name="script" /> \
-        <arg type="b" direction="out" name="success" /> \
-        <arg type="s" direction="out" name="result" /> \
-    </method> \
-    <method name="updateSetting"> \
-        <arg type="s" direction="in" /> \
-        <arg type="s" direction="in" /> \
-        <arg type="s" direction="in" /> \
-        <arg type="s" direction="in" /> \
-    </method> \
-    <method name="GetRunningXletUUIDs"> \
-        <arg type="s" direction="in" /> \
-        <arg type="as" direction="out" /> \
-    </method> \
-</interface></node>';
-
-const DBusDaemonProxy = Gio.DBusProxy.makeProxyWrapper(DBusDaemonIface);
 
 function initEnvironment() {
-    window.getApp = function() {
-        return Gio.Application.get_default();
-    };
+  window.getApp = function() {
+    return Gio.Application.get_default();
+  };
 }
 
 const ImgurWizard = new Lang.Class ({
-    Name: 'MessageDialog Example',
-    _path: null,
-    _step: 1,
-    _maxSteps: 5,
-    _accessToken: null,
-    _refreshToken: null,
-    _albumId: null,
+  Name: 'MessageDialog Example',
+  _path: null,
+  _step: 1,
+  _maxSteps: 5,
+  _accessToken: null,
+  _refreshToken: null,
+  _albumId: null,
 
-    // Create the application itself
-    _init: function (path, accessToken, refreshToken, albumId) {
-      this._path = path;
-      this._accessToken = accessToken;
-      this._refreshToken = refreshToken;
-      this._albumId = albumId;
+  _init: function (path, accessToken, refreshToken, albumId) {
+    this._path = path;
+    this._accessToken = accessToken;
+    this._refreshToken = refreshToken;
+    this._albumId = albumId;
 
-      this.application = new Gtk.Application ({
-        application_id: 'org.example.jsmessagedialog',
-        flags: Gio.ApplicationFlags.FLAGS_NONE });
+    this.application = new Gtk.Application ({
+      application_id: 'org.example.jsmessagedialog',
+      flags: Gio.ApplicationFlags.FLAGS_NONE });
 
-      // Connect 'activate' and 'startup' signals to the callback functions
-      this.application.connect('activate', Lang.bind(this, this._onActivate));
-      this.application.connect('startup', Lang.bind(this, this._onStartup));
+    this.application.connect('activate', Lang.bind(this, this._onActivate));
+    this.application.connect('startup', Lang.bind(this, this._onStartup));
 
-      this.imgur = new Services.Imgur(this._accessToken, this._refreshToken);
-      this._gdbusProxy = new DBusDaemonProxy(Gio.DBus.session,
-        'org.Cinnamon', '/org/Cinnamon');
-      //this._gdbusProxy.activateCallbackRemote('on_config_demo_instructions', 'capture@rjanja', 'capture@rjanja');
+    this.imgur = new Services.Imgur(this._accessToken, this._refreshToken, this._albumId, Lang.bind(this, this._onNewToken));
+  },
 
-      // this._gdbusProxy.GetRunningXletUUIDsRemote('applet', Lang.bind(this, this._listNames));
-      // this._gdbusProxy.updateSettingRemote('capture@rjanja', 'capture@rjanja', 'imgur-pin', '123');
+  _onActivate: function () {
+    this._window.present ();
+  },
 
-      // let script = 'Main.cinnamonDBusService._getXletObject("capture@rjanja", "");';
-      // this._gdbusProxy.EvalRemote(script, function(success, result) {
-      //   print(success);
-      //   print(result);
-      // });
-      //(Lang.bind(this, this._listNames));
+  _onStartup: function () {
+    this._buildUI();
+    if (this._accessToken && this._refreshToken) {
+      // activate spinner and show text
+      this._step = 4;
+      this.showStep(4);
+      this._backButton.set_label('Log out');
 
-        // this.settings = new Settings.AppletSettings(this, this._uuid, this._instanceId);
-    },
+      // try access token first
 
-    // Callback function for 'activate' signal presents windows when active
-    _onActivate: function () {
-      this._window.present ();
-    },
+      // if success, take to album selection
 
-    // Callback function for 'startup' signal initializes menus and builds the UI
-    _onStartup: function () {
-      this._buildUI();
-      if (this._accessToken && this._refreshToken) {
-        // activate spinner and show text
-        this._step = 4;
-        this.showStep(4);
-        this._backButton.set_label('Log out');
+      // if failure, try to get new token
 
-        // try access token first
+      // if success, print out (save) new access token, take to album selection
 
-        // if success, take to album selection
+      // if failure, print out (save) blank tokens
+    }
+  },
 
-        // if failure, try to get new token
+  _buildUI: function () {
+    let builder = new Gtk.Builder();
+    builder.add_from_file(this._path + '/imgur-wizard.ui');
+    this._window = builder.get_object('wizWindow');
+    this._window.set_title('Imgur Wizard');
+    this._topBox = builder.get_object('box1');
+    this._logoBox = builder.get_object('box2');
+    this._testBox = builder.get_object('box3');
+    this._logoBox.override_background_color(Gtk.StateType.NORMAL, new Gdk.RGBA({red:255, green:255, blue: 255, alpha:1}));
+    this._introLabel = builder.get_object('introLabel');
+    this._contentBox = builder.get_object('contentBox');
+    this._backButton = builder.get_object('backButton');
+    this._nextButton = builder.get_object('nextButton');
+    this._backButton.set_alignment(1.0, 0.5);
+    this._nextButton.set_alignment(0.0, 0.5);
 
-        // if success, print out (save) new access token, take to album selection
+    let intro = "<big>Desktop Capture</big>\n"
+     + "<b>Connection Wizard - Imgur (Screenshots)</b>\n"
+     + "<small>Upload screenshots into an album of your choice!</small>";
+    this._introLabel.set_markup(intro);
+    this._introLabel.set_line_wrap(true);
+    this._introLabel.set_justify(Gtk.Justification.LEFT);
+    this._introLabel.set_alignment(0, 0.5);
+    this._introLabel.set_padding(5, 0);
 
-        // if failure, print out (save) blank tokens
-      }
-    },
+    let instructions = "To upload screenshots to imgur,"
+    + " you need to authorize this applet to use your account."
+    + " This wizard will guide you through this process."
+    + "\n\n"
+    + "Requirements:\n"
+    + " - internet derp derp\n"
+    + " - you must have an <a href='http://imgur.com'>imgur account</a>\n"
+    + " - you may already have an album for screenshots\n";
 
-    // Build the application's UI
-    _buildUI: function () {
-      let builder = new Gtk.Builder();
-      builder.add_from_file(this._path + '/imgur-wizard.ui');
-      this._window = builder.get_object('wizWindow');
-      this._window.set_title('Imgur Wizard');
-      this._topBox = builder.get_object('box1');
-      this._logoBox = builder.get_object('box2');
-      this._testBox = builder.get_object('box3');
-      this._logoBox.override_background_color(Gtk.StateType.NORMAL, new Gdk.RGBA({red:255, green:255, blue: 255, alpha:1}));
-      this._introLabel = builder.get_object('introLabel');
-      this._contentBox = builder.get_object('contentBox');
-      this._backButton = builder.get_object('backButton');
-      this._nextButton = builder.get_object('nextButton');
-      this._backButton.set_alignment(1.0, 0.5);
-      this._nextButton.set_alignment(0.0, 0.5);
+    this._instructionsLabel = new Gtk.Label({ label: instructions, use_markup: true});
+    this._instructionsLabel.set_line_wrap(true);
+    this._instructionsLabel.set_justify(Gtk.Justification.LEFT);
+    this._instructionsLabel.set_alignment(0, 0);
+    this._instructionsLabel.set_padding(10, 10);
 
-      let intro = "<big>Desktop Capture</big>\n"
-       + "<b>Connection Wizard - Imgur (Screenshots)</b>\n"
-       + "<small>Upload screenshots into an album of your choice!</small>";
-      this._introLabel.set_markup(intro);
-      this._introLabel.set_line_wrap(true);
-      this._introLabel.set_justify(Gtk.Justification.LEFT);
-      this._introLabel.set_alignment(0, 0.5);
-      this._introLabel.set_padding(5, 0);
+    // @todo(Rob): Redo the stack in Glade 3.19
+    this._stack = new Gtk.Stack();
+    this._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT);
+    this._stack.set_transition_duration(1000);
 
-      let instructions = "To upload screenshots to imgur,"
-      + " you need to authorize this applet to use your account."
-      + " This wizard will guide you through this process."
-      + "\n\n"
-      + "Requirements:\n"
-      + " - internet derp derp\n"
-      + " - you must have an <a href='http://imgur.com'>imgur account</a>\n"
-      + " - you may already have an album for screenshots\n";
-      // + " - , or created for you";
+    this._stack.add_titled(this._instructionsLabel, '1', 'a label');
 
-      this._instructionsLabel = new Gtk.Label({ label: instructions, use_markup: true});
-      this._instructionsLabel.set_line_wrap(true);
-      this._instructionsLabel.set_justify(Gtk.Justification.LEFT);
-      this._instructionsLabel.set_alignment(0, 0);
-      this._instructionsLabel.set_padding(10, 10);
+    let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
+    this._stack.add_titled(box, '2', 'Permission Request');
+    let instructionsText2 = 'Grant permission for Desktop Capture to access your imgur account.';
+    let instructionsLabel2 = new Gtk.Label({ label: instructionsText2, use_markup: true});
+    instructionsLabel2.set_padding(10, 10);
+    instructionsLabel2.set_justify(Gtk.Justification.LEFT);
+    instructionsLabel2.set_alignment(0, 0);
+    box.pack_start(instructionsLabel2, false, false, 5);
+    let launchBrowserButton = new Gtk.Button({ label: 'Launch Browser', margin: 10 });
+    launchBrowserButton.connect("clicked", Lang.bind(this, this.launchBrowser));
+    box.pack_start(launchBrowserButton, false, false, 5);
+    let instructionsText3 = 'Press Next when you have authorized Desktop Capture and received a PIN.';
+    let instructionsLabel3 = new Gtk.Label({ label: instructionsText3, use_markup: true });
+    instructionsLabel3.set_justify(Gtk.Justification.CENTER);
+    instructionsLabel3.set_alignment(0, 0);
+    instructionsLabel3.set_padding(10, 10);
+    box.pack_start(instructionsLabel3, false, false, 5);
 
-      // @todo(Rob): Redo the stack in Glade 3.19
-      this._stack = new Gtk.Stack();
-      this._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT);
-      this._stack.set_transition_duration(1000);
+    let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
+    this._stack.add_titled(box, '3', 'Validate PIN');
+    let instructionsText = 'Enter PIN to validate access and get tokens.';
+    let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
+    instructionsLabel.set_padding(10, 10);
+    instructionsLabel.set_justify(Gtk.Justification.LEFT);
+    instructionsLabel.set_alignment(0.0, 0.5);
+    box.pack_start(instructionsLabel, false, false, 5);
+    let labelText = 'Enter PIN';
+    let label = new Gtk.Label({ label: labelText });
 
-      this._stack.add_titled(this._instructionsLabel, '1', 'a label');
+    let box2 = new Gtk.Box();
+    box2.pack_start(new Gtk.Label({ label: '' }), false, true, 20);
+    box2.set_spacing(5);
+    // this._window.add(box1);
+    var pinLabel = new Gtk.Label({ label: 'PIN:' });
+    pinLabel.set_justify(Gtk.Justification.RIGHT);
+    pinLabel.set_alignment(1.0, 0.5);
+    box2.pack_start(pinLabel, false, true, 5);      
+    this._pinEntry = new Gtk.Entry();
+    this._pinEntry.set_alignment(0.0, 0.5);
+    this._pinEntry.set_max_width_chars(32);
+    this._pinEntry.set_max_length(32); // 10
+    box2.pack_start(this._pinEntry, false, false, 5);
+    box2.set_homogeneous(false);
+    // box2.set_margin(10);
+    box.pack_start(box2, true, true, 5);
 
-      let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-      this._stack.add_titled(box, '2', 'Permission Request');
-      let instructionsText2 = 'Grant permission for Desktop Capture to access your imgur account.';
-      let instructionsLabel2 = new Gtk.Label({ label: instructionsText2, use_markup: true});
-      instructionsLabel2.set_padding(10, 10);
-      instructionsLabel2.set_justify(Gtk.Justification.LEFT);
-      instructionsLabel2.set_alignment(0, 0);
-      box.pack_start(instructionsLabel2, false, false, 5);
-      let launchBrowserButton = new Gtk.Button({ label: 'Launch Browser', margin: 10 });
-      launchBrowserButton.connect("clicked", Lang.bind(this, this.launchBrowser));
-      box.pack_start(launchBrowserButton, false, false, 5);
-      let instructionsText3 = 'Press Next when you have authorized Desktop Capture and received a PIN.';
-      let instructionsLabel3 = new Gtk.Label({ label: instructionsText3, use_markup: true });
-      instructionsLabel3.set_justify(Gtk.Justification.CENTER);
-      instructionsLabel3.set_alignment(0, 0);
-      instructionsLabel3.set_padding(10, 10);
-      box.pack_start(instructionsLabel3, false, false, 5);
+    
+    let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
+    this._stack.add_titled(box, '4', 'Choose album');
+    let instructionsText = 'Please choose the album for new screenshots.';
+    let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
+    instructionsLabel.set_padding(10, 10);
+    instructionsLabel.set_justify(Gtk.Justification.LEFT);
+    instructionsLabel.set_alignment(0, 0);
+    box.pack_start(instructionsLabel, false, false, 5);
 
-      let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-      this._stack.add_titled(box, '3', 'Validate PIN');
-      let instructionsText = 'Enter PIN to validate access and get tokens.';
-      let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
-      instructionsLabel.set_padding(10, 10);
-      instructionsLabel.set_justify(Gtk.Justification.LEFT);
-      instructionsLabel.set_alignment(0.0, 0.5);
-      box.pack_start(instructionsLabel, false, false, 5);
-      let labelText = 'Enter PIN';
-      let label = new Gtk.Label({ label: labelText });
+    this.liststore = new Gtk.ListStore();
+    this.liststore.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
+    this.liststore.set(this.liststore.append(), [0, 1], ['-1', '(Loading..)']);
+    var cellRenderer = new Gtk.CellRendererText();
 
-      let box2 = new Gtk.Box();
-      box2.pack_start(new Gtk.Label({ label: '' }), false, true, 20);
-      box2.set_spacing(5);
-      // this._window.add(box1);
-      var pinLabel = new Gtk.Label({ label: 'PIN:' });
-      pinLabel.set_justify(Gtk.Justification.RIGHT);
-      pinLabel.set_alignment(1.0, 0.5);
-      box2.pack_start(pinLabel, false, true, 5);      
-      this._pinEntry = new Gtk.Entry();
-      this._pinEntry.set_alignment(0.0, 0.5);
-      this._pinEntry.set_max_width_chars(32);
-      this._pinEntry.set_max_length(32); // 10
-      box2.pack_start(this._pinEntry, false, false, 5);
-      box2.set_homogeneous(false);
-      // box2.set_margin(10);
-      box.pack_start(box2, true, true, 5);
-
-      
-      let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-      this._stack.add_titled(box, '4', 'Choose album');
-      let instructionsText = 'Please choose the album for new screenshots.';
-      let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
-      instructionsLabel.set_padding(10, 10);
-      instructionsLabel.set_justify(Gtk.Justification.LEFT);
-      instructionsLabel.set_alignment(0, 0);
-      box.pack_start(instructionsLabel, false, false, 5);
-
-      this.liststore = new Gtk.ListStore();
-      this.liststore.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
-      this.liststore.set(this.liststore.append(), [0, 1], ['-1', '(Loading..)']);
-      var cellRenderer = new Gtk.CellRendererText();
-
-      this.albumSelect = new Gtk.ComboBox();
-      this.albumSelect.set_model(this.liststore);
-      this.albumSelect.pack_start(cellRenderer, true);
-      this.albumSelect.add_attribute(cellRenderer, "text", 1);
-      this.albumSelect.set_active(0);
-      this.albumSelect.set_margin_left(10);
-      this.albumSelect.set_margin_right(10);
-      this.albumSelect.connect("changed", Lang.bind(this, this._onAlbumChanged));
-      this.albumSelect.set_sensitive(false);
-      box.pack_start(this.albumSelect, false, false, 5);
-      let subText = '<small>Manage your albums by visiting your <a href="http://imgur.com/">imgur account</a>.</small>';
-      let subLabel = new Gtk.Label({ label: subText, use_markup: true });
-      subLabel.set_padding(10, 10);
-      subLabel.set_justify(Gtk.Justification.LEFT);
-      subLabel.set_alignment(0, 0);
-      box.pack_start(subLabel, false, false, 5);
+    this.albumSelect = new Gtk.ComboBox();
+    this.albumSelect.set_model(this.liststore);
+    this.albumSelect.pack_start(cellRenderer, true);
+    this.albumSelect.add_attribute(cellRenderer, "text", 1);
+    this.albumSelect.set_active(0);
+    this.albumSelect.set_margin_left(10);
+    this.albumSelect.set_margin_right(10);
+    this.albumSelect.connect("changed", Lang.bind(this, this._onAlbumChanged));
+    this.albumSelect.set_sensitive(false);
+    box.pack_start(this.albumSelect, false, false, 5);
+    let subText = '<small>Manage your albums by visiting your <a href="http://imgur.com/">imgur account</a>.</small>';
+    let subLabel = new Gtk.Label({ label: subText, use_markup: true });
+    subLabel.set_padding(10, 10);
+    subLabel.set_justify(Gtk.Justification.LEFT);
+    subLabel.set_alignment(0, 0);
+    box.pack_start(subLabel, false, false, 5);
 
 
-      let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-      this._stack.add_titled(box, '5', 'Finished');
-      let instructionsText = 'All done!';
-      let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
-      instructionsLabel.set_padding(10, 10);
-      instructionsLabel.set_justify(Gtk.Justification.LEFT);
-      instructionsLabel.set_alignment(0, 0);
-      box.pack_start(instructionsLabel, false, false, 5);
+    let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
+    this._stack.add_titled(box, '5', 'Finished');
+    let instructionsText = 'All done!';
+    let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
+    instructionsLabel.set_padding(10, 10);
+    instructionsLabel.set_justify(Gtk.Justification.LEFT);
+    instructionsLabel.set_alignment(0, 0);
+    box.pack_start(instructionsLabel, false, false, 5);
 
 
-      this._topBox.add(this._stack);
-      this._logo = builder.get_object('logoImage');
-      let pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(this._path + '/icon.png',
-        64, 64, true);
-      this._logo.set_from_pixbuf(pixbuf);
-      this._window.set_icon(pixbuf);
+    this._topBox.add(this._stack);
+    this._logo = builder.get_object('logoImage');
+    let pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(this._path + '/icon.png',
+      64, 64, true);
+    this._logo.set_from_pixbuf(pixbuf);
+    this._window.set_icon(pixbuf);
 
-      this._backButton.set_label('Quit');
-      this._backButton.connect("clicked", Lang.bind(this, this.goBack));
-      this._nextButton.connect("clicked", Lang.bind(this, this.goForward));
+    this._backButton.set_label('Quit');
+    this._backButton.connect("clicked", Lang.bind(this, this.goBack));
+    this._nextButton.connect("clicked", Lang.bind(this, this.goForward));
 
 
-      this.application.add_window(this._window);
-      this._window.show_all();
-      this._backButton.set_visible(false);
+    this.application.add_window(this._window);
+    this._window.show_all();
+    this._backButton.set_visible(false);
 
-      // DEBUG
-      // this._step = 4;
-      // this.showStep(4);
-    },
+    // DEBUG
+    // this._step = 4;
+    // this.showStep(4);
+  },
 
-    _onAlbumChanged: function(combobox) {
-      // log('now selected: ' + this._getComboValue(combobox, this.liststore));
-    },
+  _onAlbumChanged: function(combobox) {
+    let value = this._getComboValue(combobox, this.liststore);
+    if (value) {
+      print("album_id=" + value);
+    }
+  },
 
-    _getComboValue: function(combobox, liststore) {
-      var [success, treeiter] = combobox.get_active_iter();
+  _getComboValue: function(combobox, liststore) {
+    var [success, treeiter] = combobox.get_active_iter();
 
-      if (success) {
-        return liststore.get_value(treeiter, 0);
-      }
-      else {
-        return '';
-      }
-    },
+    if (success) {
+      return liststore.get_value(treeiter, 0);
+    }
+    else {
+      return '';
+    }
+  },
 
-    goBack: function() {
-      if (this._step <= 1) {
-        this._window.destroy();
-      }
-      else if (this._step == 4 && this._backButton.get_label() == 'Log out') {
-        this._backButton.set_label('Back');
-        this._step = 1;
-        this.showStep(this._step);
-        this.savePrefs('', '', '');
-      }
-      else {
-        this.showStep(--this._step);
-      }
-    },
+  goBack: function() {
+    if (this._step <= 1) {
+      this._window.destroy();
+    }
+    else if (this._step == 4 && this._backButton.get_label() == 'Log out') {
+      this._backButton.set_label('Back');
+      this._step = 1;
+      this.showStep(this._step);
+      this.savePrefs('', '', '');
+    }
+    else {
+      this.showStep(--this._step);
+    }
+  },
 
-    goForward: function() {
-      if (this._step == 3) {
-        let pin = this._pinEntry.get_text();
-        log('pin entered is: ' + pin);
-        this.imgur.redeemPinCode(pin, Lang.bind(this, function() {
-          this._showPinError('Pin Incorrect');
-        }), Lang.bind(this, function(json) {
-          this.savePrefs(json['access_token'], json['refresh_token'], '');
-          this.showStep(++this._step);
-        }));
-      }
-      else {
+  goForward: function() {
+    if (this._step == 3) {
+      let pin = this._pinEntry.get_text();
+      log('pin entered is: ' + pin);
+      this.imgur.redeemPinCode(pin, Lang.bind(this, function() {
+        this._showPinError('Pin Incorrect');
+      }), Lang.bind(this, function(json) {
+        this.savePrefs(json['access_token'], json['refresh_token'], '');
         this.showStep(++this._step);
-      }
-    },
+      }));
+    }
+    else {
+      this.showStep(++this._step);
+    }
+  },
 
-    savePrefs: function(accessToken, refreshToken, albumId) {
-      this._accessToken = accessToken;
-      this._refreshToken = refreshToken;
-      this._albumId = albumId;
-      print("access_token=" + accessToken);
-      print("refresh_token=" + refreshToken);
-      print("album_id=" + albumId);
-      this.imgur = new Services.Imgur(this._accessToken, this._refreshToken);
-    },
+  savePrefs: function(accessToken, refreshToken, albumId) {
+    this._accessToken = accessToken;
+    this._refreshToken = refreshToken;
+    this._albumId = albumId;
+    print("access_token=" + accessToken);
+    print("refresh_token=" + refreshToken);
+    print("album_id=" + albumId);
+    this.imgur = new Services.Imgur(this._accessToken, this._refreshToken, this._albumId, Lang.bind(this, this._onNewToken));
+  },
 
-    showStep: function(step) {
-      this.hideShowButtons();
-      this._stack.set_visible_child_name(step.toString());
+  _onNewToken: function(token) {
+    this._accessToken = token;
+    print("access_token=" + this._accessToken);
+  },
 
-      if (step == 4) {
-        this.imgur.requestAlbumList(function() {
-          log('error! probably a token thang');
-        }, Lang.bind(this, function(json) {
-          this.liststore.clear();
-          var i = 0, exactMatch = false;
-          for (let idx in json) {
-            let album = json[idx];
-            // log('Album ID ' + album['id'] + ': ' + album['title']);
-            this.liststore.set(this.liststore.append(), [0, 1], [album['id'], album['title'] + " (" + album['privacy'] + ")"]);
-            if ((!this._albumId && album['title'] == 'Screenshots')
-             || this._albumId == album['id']) {
-              exactMatch = true;
-              this.albumSelect.set_active(i);
-            }
-            i++;
+  showStep: function(step) {
+    this.hideShowButtons();
+    this._stack.set_visible_child_name(step.toString());
+
+    if (step == 4) {
+      this.imgur.requestAlbumList(function(e) {
+        log(JSON.stringify(e));
+        log('error! probably a token thang');
+      }, Lang.bind(this, function(json) {
+        this.liststore.clear();
+        var i = 0, exactMatch = false;
+        for (let idx in json) {
+          let album = json[idx];
+          // log('Album ID ' + album['id'] + ': ' + album['title']);
+          this.liststore.set(this.liststore.append(), [0, 1], [album['id'], album['title'] + " (" + album['privacy'] + ")"]);
+          if ((!this._albumId && album['title'] == 'Screenshots')
+           || this._albumId == album['id']) {
+            exactMatch = true;
+            this.albumSelect.set_active(i);
           }
-          if (!exactMatch) {
-            this.liststore.set(this.liststore.append(), [0, 1], ['-1', '(Create a new "Screenshots" album)']);
-            this.albumSelect.set_active(i-1);
-          }
-          this.albumSelect.set_sensitive(true);
-        }));
-      }
-      else if (step == 5) {
-        this._albumId = this._getComboValue(this.albumSelect, this.liststore);
-        print('album_id=' + this._albumId);
-        log('album is ' + this._albumId);
-      }
-    },
+          i++;
+        }
+        if (!exactMatch) {
+          this.liststore.set(this.liststore.append(), [0, 1], ['-1', '(Create a new "Screenshots" album)']);
+          this.albumSelect.set_active(i-1);
+        }
+        this.albumSelect.set_sensitive(true);
+      }));
+    }
+    else if (step == 5) {
+      this._albumId = this._getComboValue(this.albumSelect, this.liststore);
+      print('album_id=' + this._albumId);
+      log('album is ' + this._albumId);
+    }
+  },
 
-    hideShowButtons: function() {
-      if (this._step > 1) {
-        this._backButton.set_label('Back');
-        this._backButton.set_visible(true);
-        if (this._step >= this._maxSteps) {
-          this._nextButton.set_sensitive(false);
-          this._nextButton.set_visible(false);
-        }
-        else {
-          this._nextButton.set_sensitive(true);
-          this._nextButton.set_visible(true);
-        }
+  hideShowButtons: function() {
+    if (this._step > 1) {
+      this._backButton.set_label('Back');
+      this._backButton.set_visible(true);
+      if (this._step >= this._maxSteps) {
+        this._nextButton.set_sensitive(false);
+        this._nextButton.set_visible(false);
       }
       else {
-        this._backButton.set_label('Quit');
-        this._backButton.set_visible(false);
+        this._nextButton.set_sensitive(true);
         this._nextButton.set_visible(true);
       }
-    },
-
-    launchBrowser: function() {
-      this.imgur.requestPinCode();
-
-      // this._window.remove(this._box);
-      // this._box2 = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10});
-      // this._window.add(this._box2);
-      
-      // let step1 = "Please enter the PIN you received from Imgur.";
-
-      // this._stepLabel = new Gtk.Label({ label: step1 });
-      // this._stepLabel.set_line_wrap(true);
-      // this._stepLabel.set_alignment(0, 0.5);
-      // this._stepLabel.set_justify(Gtk.Justification.LEFT);
-      // this._stepLabel.set_padding(5, 0);
-      // this._box2.pack_start(this._stepLabel, true, true, 0)
-
-      // var box1 = new Gtk.Box();
-      // box1.set_spacing(5);
-      // // this._window.add(box1);
-      // var pinLabel = new Gtk.Label({ label: 'PIN' });
-      // pinLabel.set_justify(Gtk.Justification.RIGHT);
-      // box1.pack_start(pinLabel, false, false, 10);
-      // // box1.add();
-      // this._box2.add(box1);
-
-      // this._pinEntry = new Gtk.Entry();
-      // box1.pack_start(this._pinEntry, false, true, 10)
-
-      // // this._box.add(this._pinEntry);
-      // this._confirmPinButton = new Gtk.Button({ label: "Next: Verify PIN" });
-      // this._confirmPinButton.connect("clicked", Lang.bind(this, this.verifyPin));
-      // this._box2.add(this._confirmPinButton);
-      // this._window.show_all();
-    },
-
-    verifyPin: function() {
-      
-    },
-
-    // Build the application menu, including the button that calls the dialog
-    _initMenus: function() {
-        let menu = new Gio.Menu();
-        menu.append("Message",'app.message');
-        menu.append("Quit",'app.quit');
-        this.application.set_app_menu(menu);
-
-        // This pops up a MessageDialog when "Message" is clicked in the menu
-        let messageAction = new Gio.SimpleAction ({ name: 'message' });
-        messageAction.connect('activate', Lang.bind(this,
-            function() {
-                this._showMessageDialog();
-            }));
-        this.application.add_action(messageAction);
-
-        // This closes the window when "Quit" is clicked in the menu
-        let quitAction = new Gio.SimpleAction ({ name: 'quit' });
-        quitAction.connect('activate', Lang.bind(this,
-            function() {
-                this._window.destroy();
-            }));
-        this.application.add_action(quitAction);
-    },
-
-    _showPinError: function (errorText) {
-
-        // Create a modal MessageDialog whose parent is the window
-        this._messageDialog = new Gtk.MessageDialog ({
-            transient_for: this._window,
-            modal: true,
-            buttons: Gtk.ButtonsType.OK,
-            message_type: Gtk.MessageType.WARNING,
-            text: errorText });
-
-        this._messageDialog.connect ('response', Lang.bind(this, this._response_cb));
-        this._messageDialog.show();
-    },
-
-
-
-    // Callback function (aka signal handler) for the response signal
-    _response_cb: function (messagedialog, response_id) {
-
-        // A simple switch that changes the main window's label
-        switch (response_id) {
-            case Gtk.ResponseType.OK:
-                // this.warningLabel.set_label ("*BOOM*\n");
-                break;
-            case Gtk.ResponseType.CANCEL:
-                // this.warningLabel.set_label ("Good choice!\n");
-                break;
-            case Gtk.ResponseType.DELETE_EVENT:
-                // this.warningLabel.set_label ("Dialog closed or cancelled.\n");
-                break;
-        }
-
-        this._messageDialog.destroy();
-
     }
+    else {
+      this._backButton.set_label('Quit');
+      this._backButton.set_visible(false);
+      this._nextButton.set_visible(true);
+    }
+  },
+
+  launchBrowser: function() {
+    this.imgur.requestPinCode();
+  },
+
+  verifyPin: function() {
+    
+  },
+
+  _showPinError: function (errorText) {
+    this._messageDialog = new Gtk.MessageDialog ({
+      transient_for: this._window,
+      modal: true,
+      buttons: Gtk.ButtonsType.OK,
+      message_type: Gtk.MessageType.WARNING,
+      text: errorText });
+
+    this._messageDialog.connect ('response', Lang.bind(this, this._response_cb));
+    this._messageDialog.show();
+  },
+
+  _response_cb: function (messagedialog, response_id) {
+    switch (response_id) {
+      case Gtk.ResponseType.OK:
+        break;
+      case Gtk.ResponseType.CANCEL:
+        break;
+      case Gtk.ResponseType.DELETE_EVENT:
+        break;
+    }
+
+    this._messageDialog.destroy();
+
+  }
 });
 
 function main(argv) {

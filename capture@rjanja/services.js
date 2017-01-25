@@ -2,12 +2,13 @@
 const Gio = imports.gi.Gio
 const Soup = imports.gi.Soup
 const AppUtil = imports.apputil
+const Lang = imports.lang;
 
 const httpSession = new Soup.SessionAsync();
 Soup.Session.prototype.add_feature.call(httpSession, new Soup.ProxyResolverDefault());
 
-function Imgur(accessToken, refreshToken, albumId) {
-  this._init(accessToken, refreshToken, albumId);
+function Imgur(accessToken, refreshToken, albumId, onRefresh) {
+  this._init(accessToken, refreshToken, albumId, onRefresh);
 }
 Imgur.prototype = {
   CLIENT_ID: "b639f14917109e3",
@@ -15,12 +16,13 @@ Imgur.prototype = {
   accessToken: null,
   refreshToken: null,
   albumId: null,
+  _onRefresh: null,
 
-  _init: function(accessToken, refreshToken, albumId) {
-    log('imgur init');
+  _init: function(accessToken, refreshToken, albumId, onRefresh) {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.albumId = albumId;
+    this._onRefresh = onRefresh;
   },
 
   isAnonymous: function() {
@@ -45,18 +47,45 @@ Imgur.prototype = {
     return "https://api.imgur.com/3/account/me/albums.json";
   },
   
-  requestAlbumList: function(onFailure, onSuccess) {
+  requestAlbumList: function(onFailure, onSuccess, limit) {
     let headers = {
       'Authorization': 'Bearer ' + this.accessToken,
     };
-    this.getJsonAsync(this.getAlbumsUrl(), headers, function(json) {
+    this.getJsonAsync(this.getAlbumsUrl(), headers, Lang.bind(this, function(json) {
       if (json['success']) {
         onSuccess(json['data']);
       }
-      else {
-        onFailure();
+      else if (!limit && json['status'] == 403) {
+        this.getNewTokens(function(json) {
+          onFailure(json);
+        }, Lang.bind(this, function() {
+          this.requestAlbumList(onFailure, onSuccess, true);
+        }));
       }
-    });
+      else {
+        onFailure(json);
+      }
+    }));
+  },
+
+  getNewTokens: function(onFailure, onSuccess) {
+    let payload = {
+      'refresh_token': this.refreshToken,
+      'client_id': this.CLIENT_ID,
+      'client_secret': this.CLIENT_SECRET,
+      'grant_type': 'refresh_token'
+    };
+
+    this.postJsonAsync(this.getTokenUrl(), payload, Lang.bind(this, function(json) {
+      if (json['access_token'] && json['refresh_token']) {
+        this.accessToken = json['access_token'];
+        this._onRefresh(json['access_token'], json['refresh_token']);
+        onSuccess();
+      }
+      else {
+        onFailure(json);
+      }
+    }));
   },
 
 	requestPinCode: function() {
@@ -64,8 +93,6 @@ Imgur.prototype = {
 	},
 
   redeemPinCode: function(pin, onFailure, onSuccess) {
-    log('redeemPinCode: redeeming ' + pin);
-
     let payload = {
       'client_id': this.CLIENT_ID,
       'client_secret': this.CLIENT_SECRET,
@@ -151,12 +178,12 @@ Imgur.prototype = {
         message.request_headers.append(key, request_headers[key]);
       }
 
-      httpSession.queue_message(message, function(session, response) {
+      httpSession.queue_message(message, Lang.bind(this, function(session, response) {
         if (response.status_code !== 200) {
-           log("Error during upload: response code " + response.status_code
-              + ": " + response.reason_phrase + " - " + response.response_body.data);
-           callback(false, null);
-           return true;
+          log("Error during upload: response code " + response.status_code
+            + ": " + response.reason_phrase + " - " + response.response_body.data);
+          callback(false, null);
+          return true;
         }
 
         try {
@@ -182,7 +209,7 @@ Imgur.prototype = {
           callback(false, null);
           return true;
         }
-      });
+      }));
 
       return true;
     }, null);
@@ -190,7 +217,7 @@ Imgur.prototype = {
     return true;
   },
 
-  upload: function(filename, params, callback) {
+  upload: function(filename, params, callback, limit) {
     let request_headers = {
       'Authorization': 'Bearer ' + this.accessToken,
     };
@@ -199,7 +226,7 @@ Imgur.prototype = {
     let dir = f.get_parent().get_path();
     let url = this.getUploadUrl();
 
-    f.load_contents_async(null, function(f, res) {
+    f.load_contents_async(null, Lang.bind(this, function(f, res) {
       let contents;
       try {
         contents = f.load_contents_finish(res)[1];
@@ -220,12 +247,21 @@ Imgur.prototype = {
       for (var key in request_headers) {
         message.request_headers.append(key, request_headers[key]);
       }
-      httpSession.queue_message(message, function(session, response) {
-        if (response.status_code !== 200) {
-           log("Error during upload: response code " + response.status_code
-              + ": " + response.reason_phrase + " - " + response.response_body.data);
-           callback(false, null);
-           return true;
+      httpSession.queue_message(message, Lang.bind(this, function(session, response) {
+        if (!limit && response.status_code == 403) {
+          this.getNewTokens(function(json) {
+            //log("Error getting new access token");
+            callback(false, null);
+          }, Lang.bind(this, function() {
+            this.upload(filename, params, callback, true);
+          }));
+          return true;
+        }
+        else if (response.status_code !== 200) {
+          // log("Error during upload: response code " + response.status_code
+          //   + ": " + response.reason_phrase + " - " + response.response_body.data);
+          callback(false, null);
+          return true;
         }
 
         try {
@@ -235,22 +271,22 @@ Imgur.prototype = {
             return true;
           }
           else {
-            log("Imgur upload failed");
+            global.log("Imgur upload failed");
             callback(false, null);
             log(JSON.stringify(imgur));
             return false;
           }
         }
         catch (e) {
-          log("Imgur seems to be down. Error was:");
-          logError(e);
+          global.log("Imgur seems to be down. Error was:");
+          global.logError(e);
           callback(false, null);
           return true;
         }
-      });
+      }));
 
       return true;
-    }, null);
+    }), null);
 
     return true;
   }

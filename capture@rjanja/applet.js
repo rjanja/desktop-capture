@@ -137,9 +137,8 @@ Source.prototype = {
    },
 
    _lastNotificationRemoved: function() {
-      global.log('destroyin');
-        this.destroy();
-    }
+     this.destroy();
+   }
 }
 
 function ScreenshotNotification(source, title, banner, params) {
@@ -456,7 +455,7 @@ MyApplet.prototype = {
       if (this._useImgur) {
          if (this._useImgurAccount) {
             this.log('[enabled] imgur (authenticated)');
-            this.imgur = new Services.Imgur(this._imgurAccessToken, this._imgurRefreshToken, this._imgurAlbumId);
+            this.imgur = new Services.Imgur(this._imgurAccessToken, this._imgurRefreshToken, this._imgurAlbumId, Lang.bind(this, this._onImgurTokensUpdated));
          }
          else {
             this.log('[enabled] imgur (anonymous)');
@@ -467,6 +466,14 @@ MyApplet.prototype = {
          this.log('[disabled] imgur');
          this.imgur = null;
       }
+   },
+
+   _onImgurTokensUpdated: function(accessToken, refreshToken) {
+      this.log('We received new imgur tokens!');
+      this._imgurAccessToken = accessToken;
+      this._imgurRefreshToken = refreshToken;
+      this.settings.setValue('imgur-access-token', accessToken);
+      this.settings.setValue('imgur-refresh-token', refreshToken);
    },
 
    /*_onKeybindingChanged: function(key, oldVal, newVal, type, index) {
@@ -1354,7 +1361,7 @@ MyApplet.prototype = {
    },
 
    maybeSendNotification: function(screenshot) {
-      global.log(JSON.stringify(screenshot));
+      // global.log(JSON.stringify(screenshot));
       if (screenshot.options.sendNotification) {
          let source = new Source('capture-rjanja', screenshot);
          Main.messageTray.add(source);
@@ -1393,7 +1400,7 @@ MyApplet.prototype = {
          //}
 
          notification.connect('action-invoked', Lang.bind(this, function(n, action_id) { 
-            global.log('Action invoked from notification: ' + action_id);
+            // global.log('Action invoked from notification: ' + action_id);
             return this.handleNotificationResponse(screenshot, action_id, n);
          }));
 
@@ -1529,11 +1536,8 @@ MyApplet.prototype = {
             method = 'upload';
             params = {album: this._imgurAlbumId};
          }
-         this.log(method);
-
 
          this.imgur[method](screenshot.file, params, Lang.bind(this, function(success, json) {
-            this.log('imgur upload was called');
             let title, body;
             if (success) {
                screenshot.uploaded = true;
@@ -1561,7 +1565,7 @@ MyApplet.prototype = {
             //      customContent: true, clear: false });
             this.addNotificationButtons(notification, screenshot);
 
-         }));
+         }), false);
 
          // return false;
 
