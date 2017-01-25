@@ -1296,7 +1296,7 @@ MyApplet.prototype = {
             Util.spawn(['gvfs-open', screenshot.outputDirectory]);
          }
       }*/
-      
+      return true;
    },
 
    maybeSendNotification: function(screenshot) {
@@ -1363,6 +1363,7 @@ MyApplet.prototype = {
             else {
                return this.handleNotificationResponse(screenshot, action_id, n);
             }
+            return true;
          }));
 
          notification.connect('image-left-clicked', Lang.bind(this, function(n, s) {
@@ -1509,6 +1510,7 @@ MyApplet.prototype = {
             openAfter: this._copyData ? false : this._openAfter,
             //clipboardHelper: CLIPBOARD_HELPER
          });
+         return true;
       });
 
       if (enableTimer || Screenshot.SelectionType.SCREEN != type) {
