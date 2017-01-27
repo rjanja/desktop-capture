@@ -1,5 +1,95 @@
 {
-   "general stetings": {
+   "layout" : {
+      "type" : "layout",
+      "pages" : ["general", "screenshot-builtin", "recorder-builtin"],
+
+      "general" : {
+         "type" : "page",
+         "title" : "General",
+         "sections" : ["screenshot-general", "recorder-general", "appearance"]
+      },
+
+      "tool-selection" : {
+         "type" : "section",
+         "title" : "Capture Tool Selection",
+         "keys" : ["camera-program", "recorder-program"]
+      },
+
+      "screenshot-general": {
+         "type": "section",
+         "title": "Screenshots",
+         "keys": ["camera-program", "camera-save-dir", "camera-save-prefix", "include-cursor", "use-timer", "delay-seconds", "show-capture-timer"]
+      },
+
+      "recorder-general": {
+         "type": "section",
+         "title": "Recorder",
+         "keys": ["recorder-program", "recorder-save-dir","recorder-save-prefix"]
+      },
+
+      "appearance": {
+         "type": "section",
+         "title" : "Appearance",
+         "keys": ["use-symbolic-icon"]
+      },
+
+      "screenshot-builtin": {
+         "type": "page",
+         "title": "Cinnamon Screenshot",
+         "sections": ["screenshot-builtin-fx","screenshot-builtin-notif","screenshot-builtin-imgur","screenshot-builtin-kb","screenshot-builtin-copying","screenshot-builtin-misc"]
+      },
+
+      "screenshot-builtin-notif": {
+         "type": "section",
+         "title": "Notifications",
+         "keys": ["send-notification","notif-image-left-click","notif-image-right-click","show-copy-path-action","show-copy-data-action","show-delete-action","demo-notification-button"]
+      },
+
+      "screenshot-builtin-imgur": {
+         "type": "section",
+         "title": "Integration: Imgur",
+         "keys": ["use-imgur","use-imgur-account","imgur-wizard-button"]
+      },
+
+      "screenshot-builtin-kb": {
+         "type": "section",
+         "title": "Keybindings",
+         "keys": ["kb-cs-window","kb-cs-area","kb-cs-ui","kb-cs-screen","kb-cs-repeat","kb-cs-monitor-0"]
+      },
+
+      "screenshot-builtin-fx": {
+         "type": "section",
+         "title": "Effects",
+         "keys": ["use-camera-flash","play-shutter-sound","play-timer-interval-sound"]
+      },
+
+      "screenshot-builtin-copying": {
+         "type": "section",
+         "title": "Copying",
+         "keys": ["copy-to-clipboard","show-copy-toggle","copy-data-auto-off","copy-data"]
+      },
+
+      "screenshot-builtin-misc": {
+         "type": "section",
+         "title": "Misc",
+         "keys": ["capture-window-as-area","include-window-frame","include-styles"]
+      },
+
+      "recorder-builtin": {
+         "type": "page",
+         "title": "Cinnamon Recorder",
+         "sections": ["recorder-builtin-kb"]
+      },
+
+      "recorder-builtin-kb": {
+         "type": "section",
+         "title": "Keybindings",
+         "keys": ["kb-recorder-stop"]
+      }
+
+   },
+
+   "general settings": {
       "type": "header",
       "description": "Capture Tool Selection"
    },
@@ -8,7 +98,7 @@
       "default": "cinnamon",
       "type": "combobox",
       "options": {
-         "Built-in": "cinnamon",
+         "Cinnamon Screenshot (built-in)": "cinnamon",
          "GNOME Screenshot": "gnome-screenshot",
          "Shutter": "shutter",
          "XWD": "xwd",
@@ -23,7 +113,7 @@
       "default": "cinnamon",
       "type": "combobox",
       "options": {
-         "Built-in": "cinnamon",
+         "Cinnamon Recorder (built-in)": "cinnamon",
          "RecordMyDesktop": "gtk-recordmydesktop",
          "Byzanz": "byzanz",
          "FFmpeg": "ffmpeg",
@@ -158,10 +248,9 @@
    "use-camera-flash": {
       "default": true,
       "type": "checkbox",
-      "description": "Use camera flash",
+      "description": "Show camera flash",
       "tooltip": "Whether to show a bright flash over the capture area"
-   },
-   
+   },   
    
    "include-styles": {
       "default": false,
@@ -266,7 +355,7 @@
       "description": "Enable copying image data from notification",
       "tooltip": "If checked, a button will be shown in the notification that allows you to copy the screenshot data to clipboard",
       "dependency": "send-notification"
-   },
+   },   
    "show-delete-action": {
       "indent": true,
       "default": false,
@@ -275,7 +364,6 @@
       "tooltip": "If checked, a delete button will be shown in the notification that allows you to remove the screenshot from disk.",
       "dependency": "send-notification"
    },
-
    "demo-notification-button" : {
       "indent": true,
       "type" : "button",
