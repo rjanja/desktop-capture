@@ -441,7 +441,6 @@ MyApplet.prototype = {
       this.settings.connect("changed::recorder-program", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::use-symbolic-icon", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::show-copy-toggle", Lang.bind(this, this._onRuntimeChanged));
-      this.settings.connect("changed::show-upload-toggle", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::use-imgur", Lang.bind(this, this._onUseImgur));
       this.settings.connect("changed::use-imgur-account", Lang.bind(this, this._onUseImgur));
 
@@ -596,9 +595,6 @@ MyApplet.prototype = {
       this._copyDataAutoOff = this.settings.getValue('copy-data-auto-off');
       this._sendNotification = this.settings.getValue('send-notification');
       this._includeStyles = this.settings.getValue('include-styles');
-      this._showUploadToggle = this.settings.getValue('show-upload-toggle');
-      this._uploadAutoOff = this.settings.getValue('upload-auto-off');
-      this._uploadToImgur = this.settings.getValue('upload-to-imgur');
       this._useSymbolicIcon = this.settings.getValue('use-symbolic-icon');
       this._recordSound = this.settings.getValue('record-sound');
 
@@ -606,7 +602,6 @@ MyApplet.prototype = {
       this._notifRightClickBehavior = this.settings.getValue('notif-image-right-click');
       
       this._showDeleteAction = this.settings.getValue('show-delete-action');
-      this._showUploadAction = this.settings.getValue('show-upload-action');
       this._showCopyPathAction = this.settings.getValue('show-copy-path-action');
       this._showCopyDataAction = this.settings.getValue('show-copy-data-action');
 
@@ -743,9 +738,6 @@ MyApplet.prototype = {
          this._copyData = false;
          this._showCopyToggle = true;
          this._copyDataAutoOff = true;
-         this._showUploadToggle = false;
-         this._uploadToImgur = false;
-         this._uploadAutoOff = true;
          this._recordSound = true;
          this.orientation = orientation;
          this.cRecorder = null;
@@ -1067,21 +1059,6 @@ MyApplet.prototype = {
                this._copyData = false;
                this.setSettingValue('copy-data', false);
             }
-
-            if (this._showUploadToggle) {
-               let uploadSwitch = new StubbornSwitchMenuItem(this.indent(_("Upload to imgur")), this._uploadToImgur, { style_class: 'bin' });
-               uploadSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
-                  this._uploadToImgur = v;
-                  this.setSettingValue('upload-to-imgur', v);
-                  return false;
-               }));
-               this.menu.addMenuItem(uploadSwitch);
-            }
-            else {
-               // Turn off our hidden setting since the UI can't.
-               this._uploadToImgur = false;
-               this.setSettingValue('upload-to-imgur', false);
-            }
          }
       }
 
@@ -1289,39 +1266,7 @@ MyApplet.prototype = {
          this._copyData = false;
          this.draw_menu();
       }
-      else if (this._uploadToImgur && this._uploadAutoOff) {
-         this.setSettingValue('upload-to-imgur', false);
-         this._uploadToImgur = false;
-         this.draw_menu();
-      }
 
-      // if (this._uploadToImgur) { // && !screenshot.demo) {
-      //    global.log('Uploading image to imgur..');
-      //    var method = 'uploadAnonymous', params = {};
-      //    if (this._useImgurAccount) {
-      //       method = 'upload';
-      //       params = {album: this._imgurAlbumId};
-      //    }
-
-      //    this.imgur[method](screenshot.file, params, Lang.bind(this, function(success, json) {
-      //          if (success) {
-      //             screenshot.uploaded = true;
-      //             screenshot.json = json;
-      //             screenshot.extraActionMessage = _('Screenshot has been uploaded as %s').format(json.links.original);
-
-      //             if (copyToClipboard) {
-      //                St.Clipboard.get_default().set_text(json.link);
-      //                screenshot.clipboardMessage = _('URL has been copied to clipboard.');
-      //             }
-      //          }
-      //          else {
-      //             screenshot.extraActionMessage = _('Screenshot could not be uploaded due to an error.');
-      //          }
-      //    }));
-
-      //    return false;
-      // }
-      // else 
       if (this._copyToClipboard) {
          if (ClipboardCopyType.PATH == copyToClipboard) {
             St.Clipboard.get_default().set_text(screenshot.file);
@@ -1343,21 +1288,6 @@ MyApplet.prototype = {
       }
 
       this.maybeSendNotification(screenshot);
-
-      
-
-      // open-after is deprecated now that we have notification options
-      /*if (screenshot.options.openAfter) {
-         try {
-            Gio.app_info_launch_default_for_uri('file://' + screenshot.outputDirectory,
-               this._getLaunchContext(screenshot));
-         }
-         catch (e) {
-            global.log('Spawning gvfs-open ' + screenshot.outputDirectory);
-            Util.spawn(['gvfs-open', screenshot.outputDirectory]);
-         }
-      }*/
-      
    },
 
    maybeSendNotification: function(screenshot) {
@@ -1459,10 +1389,8 @@ MyApplet.prototype = {
 
       if (screenshot.uploaded) {
          notification.addButton('copy-link', _('Copy URL'));
-         // notification.addButton('open-link', _('Open Link'));
-         // notification.addButton('close-notif', _('Close'));
       }
-      else if (this._showUploadAction) {
+      else if (this._useImgur) {
          notification.addButton('upload', _('Upload'));
       }
    },
@@ -1562,34 +1490,10 @@ MyApplet.prototype = {
                body =  _('Screenshot could not be uploaded due to an error.');
             }
 
-            // let icon = notification._icon;
-            // let file = Gio.file_new_for_path(screenshot.file);
-            // let icon_uri = file.get_uri();
-            // let icon_texture = St.TextureCache.get_default().load_uri_async(icon_uri, this._notificationIconSize, this._notificationIconSize);
-
             notification.addBody(body, true);
-            // notification.update(title, body,
-            //    { body: body,
-            //      customContent: true, clear: false });
             this.addNotificationButtons(notification, screenshot);
 
          }), false);
-
-         // return false;
-
-         // this.uploadToImgur(screenshot.file, Lang.bind(this, function(success, json) {
-         //    if (success) {
-         //       this._doRunHandler(json.links.imgur_page);
-
-         //       if (screenshot.options.copyToClipboard) {
-         //          St.Clipboard.get_default().set_text(json.links.original);
-         //          clipboardMessage = _('Link has been copied to clipboard');
-         //       }
-         //    }
-         //    else {
-         //       screenshot.extraActionMessage = _('Screenshot could not be uploaded due to an error.');
-         //    }
-         // }));
       }
 
       return true;
@@ -2194,7 +2098,6 @@ MyApplet.prototype = {
          outputFilename: '',
          outputDirectory: '',
          file: '',
-         uploadToImgur: this._uploadToImgur,
          options: options
       };
 
@@ -2315,7 +2218,6 @@ MyApplet.prototype = {
          outputDirectory: this._cameraSaveDir,
          file: ICON_FILE,
          options: options,
-         uploadToImgur: this._uploadToImgur,
          demo: true
       };
 

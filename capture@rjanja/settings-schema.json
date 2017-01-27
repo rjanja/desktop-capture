@@ -213,31 +213,6 @@
       "description": "Copy image data to clipboard (toggle)",
       "tooltip": "This overrides the 'Copy to clipboard' setting"
    },
-   "show-upload-toggle": {
-      "default": false,
-      "type": "checkbox",
-      "description": "Show toggle button for uploading image to imgur.com",
-      "tooltip": "Whether to show another toggle button in the menu for automatically uploading. If you have notifications enabled you probably don't need this set."
-   },
-   "upload-auto-off": {
-      "default": true,
-      "type": "checkbox",
-      "description": "Turn off image upload toggle after capture",
-      "tooltip": "When set, the upload to imgur toggle button will be turned off after a successful capture"
-   },
-   "upload-imgur": {
-      "default": false,
-      "type": "generic",
-      "description": "Upload image to imgur.com (toggle)",
-      "tooltip": "This is an override setting"
-   },
-
-   "upload-to-imgur": {
-      "default": false,
-      "type": "generic",
-      "description": "Upload all captures to imgur.com",
-      "tooltip": "If enabled, all captures will be uploaded to imgur. The view and delete URLs for each capture are stored in a file imgur.log in the capture save directory."
-   },
 
    "div3" : {
       "type" : "separator"
@@ -256,7 +231,7 @@
       "default": "open-file",
       "type": "combobox",
       "options": {
-         "Do nothing (dismiss)": "dismiss",
+         "Do nothing": "dismiss",
          "Open the file": "open-file",
          "Open the directory": "open-dir"         
       },
@@ -268,7 +243,7 @@
       "default": "open-file",
       "type": "combobox",
       "options": {
-         "Do nothing (dismiss)": "dismiss",
+         "Do nothing": "dismiss",
          "Open the file": "open-file",
          "Open the directory": "open-dir"         
       },
@@ -300,14 +275,7 @@
       "tooltip": "If checked, a delete button will be shown in the notification that allows you to remove the screenshot from disk.",
       "dependency": "send-notification"
    },
-   "show-upload-action": {
-      "indent": true,
-      "default": true,
-      "type": "checkbox",
-      "description": "Enable upload from notification",
-      "tooltip": "If checked, a upload button will be shown in the notification that allows you to quickly upload the image.",
-      "dependency": "send-notification"
-   },
+
    "demo-notification-button" : {
       "indent": true,
       "type" : "button",
@@ -322,14 +290,6 @@
       "description": "Open file manager after capture",
       "tooltip": "Whether to open the screenshot in file manager"
    },
-   "demo-open-button" : {
-      "indent": true,
-      "type" : "button",
-      "description" : "Click here to open a folder and select a file",
-      "callback" : "on_config_demo_folder_open",
-      "tooltip" : "Pressing this button will open a folder and select a file.",
-      "dependency": "send-notification"
-   },
    
    "div4" : {
       "type" : "separator"
@@ -342,15 +302,16 @@
       "indent": true,
       "type": "switch",
       "default": false,
-      "description": "Enable this integration",
-      "tooltip": "Whether to use imgur image hosting services"
+      "description": "Enable uploading from notifications",
+      "tooltip": "Whether to use imgur image hosting services",
+      "depenency": "send-notification"
    },
    "use-imgur-account": {
       "indent": true,
       "type": "switch",
       "default": false,
-      "description": "Publish to your own account instead of anonymously",
-      "tooltip": "Whether to publish to your own imgur account instead of anonymously",
+      "description": "Upload to your own account (instead of anonymously)",
+      "tooltip": "If unchecked, uploads will be anonymous and not tied to your account.",
       "dependency": "use-imgur"
    },
    "imgur-wizard-button": {
@@ -427,15 +388,6 @@
       "default" : "<Control>F10"
    },
 
-   "external recorder settings": {
-      "type": "header",
-      "description": "Recorder: External Tool Settings"
-   },
-   
-   "label-external-recorder-settings": {
-      "type": "label",
-      "description": "These settings only apply when not using the Built-in Recorder tool."
-   },
 
    
    "last-selected-page": {
