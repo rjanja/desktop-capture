@@ -2,7 +2,7 @@ Desktop Capture<a name="top">&nbsp;</a>
 ===============
 A comprehensive screenshot and screencasting applet for Cinnamon.
 
-![Applet configured for Cinnamon Screenshot and Recorder](img/https://raw.github.com/rjanja/desktop-capture/master/cinnamon-screenshot.png "Applet configured for Cinnamon Screenshot and FFmpeg Recorder")
+![Applet configured for Cinnamon Screenshot and Recorder](https://raw.github.com/rjanja/desktop-capture/master/img/cinnamon-screenshot.png "Applet configured for Cinnamon Screenshot and FFmpeg Recorder")
 
 
 ### Intro<a name="intro">&nbsp;</a>
