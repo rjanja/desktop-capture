@@ -2,7 +2,7 @@
  * Cinnamon Screenshot class to support capture selection and 
  * communication with back-end screencapture program.
  *
- * @author  Robert Adams <radams@artlogic.com>
+ * @author  Rob Adams <pillage@gmail.com>
  * @link    http://github.com/rjanja/desktop-capture/
  */
 
