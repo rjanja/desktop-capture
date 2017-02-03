@@ -401,6 +401,18 @@ MyAppletPopupMenu.prototype = {
   }
 }
 
+// l10n/translation
+const Gettext = imports.gettext;
+let UUID;
+
+function _(str) {
+   let customTranslation = Gettext.dgettext(UUID, str);
+   if(customTranslation != str) {
+      return customTranslation;
+   }
+   return Gettext.gettext(str);
+};
+
 function MyApplet(metadata, orientation, panelHeight, instanceId) {
    this._init(metadata, orientation, panelHeight, instanceId);
 }
@@ -725,6 +737,10 @@ MyApplet.prototype = {
          this._shouldRedraw = false;
          this._canOpenFolderFile = false;
          this._fileman = null;
+
+         // l10n/translation
+         UUID = metadata.uuid;
+         Gettext.bindtextdomain(UUID, GLib.get_home_dir() + "/.local/share/locale");
 
          this.maybeRegisterRole("screenshot", metadata.uuid);
 
@@ -1285,7 +1301,7 @@ MyApplet.prototype = {
 
          //global.tex = image_texture;
 
-         let body = 'Screenshot has been saved to: \n' + image_file.get_parent().get_uri()
+         let body = _('Screenshot has been saved to:') + '\n' + image_file.get_parent().get_uri()
            + (screenshot.extraActionMessage ? "\n\n" + screenshot.extraActionMessage : "")
            + (screenshot.clipboardMessage ? "\n\n" + screenshot.clipboardMessage : "");
 
@@ -1419,7 +1435,7 @@ MyApplet.prototype = {
             let icon_uri = icon_file.get_uri();
             let icon_texture = St.TextureCache.get_default().load_uri_async(icon_uri, this._notificationIconSize, this._notificationIconSize);
 
-            notification.update('Screenshot deleted', _("The screenshot at %s was removed from disk.").format(screenshot.file),
+            notification.update(_('Screenshot deleted'), _("The screenshot at %s was removed from disk.").format(screenshot.file),
                { body: _("The screenshot at %s was removed from disk.").format(screenshot.file),
                  icon: icon_texture, customContent: true, clear: true });
 
@@ -1438,7 +1454,7 @@ MyApplet.prototype = {
       }
       else if ('upload' == action) {
          notification.setUrgency(MessageTray.Urgency.CRITICAL);
-         notification.addBody('Uploading screenshot to imgur...', false);
+         notification.addBody(_('Uploading screenshot to imgur...'), false);
 
          var method = 'uploadAnonymous', params = {};
 
