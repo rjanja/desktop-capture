@@ -9,6 +9,16 @@ const Lang = imports.lang;
 
 let Services;
 
+// l10n/translation support
+const Gettext = imports.gettext;
+const GLib = imports.gi.GLib;
+const UUID = "capture@rjanja";
+Gettext.bindtextdomain(UUID, GLib.get_home_dir() + "/.local/share/locale");
+
+function _(str) {
+  return Gettext.dgettext(UUID, str);
+}
+
 function initEnvironment() {
   window.getApp = function() {
     return Gio.Application.get_default();
@@ -50,7 +60,7 @@ const ImgurWizard = new Lang.Class ({
       // activate spinner and show text
       this._step = 4;
       this.showStep(4);
-      this._backButton.set_label('Log out');
+      this._backButton.set_label(_('Log out'));
 
       // try access token first
 
@@ -68,7 +78,7 @@ const ImgurWizard = new Lang.Class ({
     let builder = new Gtk.Builder();
     builder.add_from_file(this._path + '/imgur-wizard.ui');
     this._window = builder.get_object('wizWindow');
-    this._window.set_title('Imgur Wizard');
+    this._window.set_title(_('Imgur Wizard'));
     this._topBox = builder.get_object('box1');
     this._logoBox = builder.get_object('box2');
     this._testBox = builder.get_object('box3');
@@ -80,23 +90,22 @@ const ImgurWizard = new Lang.Class ({
     this._backButton.set_alignment(1.0, 0.5);
     this._nextButton.set_alignment(0.0, 0.5);
 
-    let intro = "<big>Desktop Capture</big>\n"
-     + "<b>Connection Wizard - Imgur (Screenshots)</b>\n"
-     + "<small>Upload screenshots into an album of your choice!</small>";
+    let intro = "<big>" + _("Desktop Capture") + "</big>\n"
+     + "<b>" + _("Connection Wizard - Imgur (Screenshots)") + "</b>\n"
+     + "<small>" + _("Upload screenshots into an album of your choice!") + "</small>";
     this._introLabel.set_markup(intro);
     this._introLabel.set_line_wrap(true);
     this._introLabel.set_justify(Gtk.Justification.LEFT);
     this._introLabel.set_alignment(0, 0.5);
     this._introLabel.set_padding(5, 0);
 
-    let instructions = "To upload screenshots to imgur,"
-    + " you need to authorize this applet to use your account."
-    + " This wizard will guide you through this process."
+    let instructions = _("To upload screenshots to imgur, you need to authorize this applet to use your account.")
+    + " " + _("This wizard will guide you through this process.")
     + "\n\n"
-    + "Requirements:\n"
-    + " - internet derp derp\n"
-    + " - you must have an <a href='http://imgur.com'>imgur account</a>\n"
-    + " - you may already have an album for screenshots\n";
+    + _("Requirements:") + "\n"
+    + " - " + _("internet derp derp") + "\n"
+    + " - " + _("you must have an %s").replace(/%s/g, "<a href='http://imgur.com'>" + _("imgur account") + "</a>") + "\n"
+    + " - " + _("you may already have an album for screenshots") + "\n";
 
     this._instructionsLabel = new Gtk.Label({ label: instructions, use_markup: true});
     this._instructionsLabel.set_line_wrap(true);
@@ -112,17 +121,17 @@ const ImgurWizard = new Lang.Class ({
     this._stack.add_titled(this._instructionsLabel, '1', 'a label');
 
     let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-    this._stack.add_titled(box, '2', 'Permission Request');
-    let instructionsText2 = 'Grant permission for Desktop Capture to access your imgur account.';
+    this._stack.add_titled(box, '2', _('Permission Request'));
+    let instructionsText2 = _('Grant permission for Desktop Capture to access your imgur account.');
     let instructionsLabel2 = new Gtk.Label({ label: instructionsText2, use_markup: true});
     instructionsLabel2.set_padding(10, 10);
     instructionsLabel2.set_justify(Gtk.Justification.LEFT);
     instructionsLabel2.set_alignment(0, 0);
     box.pack_start(instructionsLabel2, false, false, 5);
-    let launchBrowserButton = new Gtk.Button({ label: 'Launch Browser', margin: 10 });
+    let launchBrowserButton = new Gtk.Button({ label: _('Launch Browser'), margin: 10 });
     launchBrowserButton.connect("clicked", Lang.bind(this, this.launchBrowser));
     box.pack_start(launchBrowserButton, false, false, 5);
-    let instructionsText3 = 'Press Next when you have authorized Desktop Capture and received a PIN.';
+    let instructionsText3 = _('Press Next when you have authorized Desktop Capture and received a PIN.');
     let instructionsLabel3 = new Gtk.Label({ label: instructionsText3, use_markup: true });
     instructionsLabel3.set_justify(Gtk.Justification.CENTER);
     instructionsLabel3.set_alignment(0, 0);
@@ -130,14 +139,14 @@ const ImgurWizard = new Lang.Class ({
     box.pack_start(instructionsLabel3, false, false, 5);
 
     let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-    this._stack.add_titled(box, '3', 'Validate PIN');
-    let instructionsText = 'Enter PIN to validate access and get tokens.';
+    this._stack.add_titled(box, '3', _('Validate PIN'));
+    let instructionsText = _('Enter PIN to validate access and get tokens.');
     let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
     instructionsLabel.set_padding(10, 10);
     instructionsLabel.set_justify(Gtk.Justification.LEFT);
     instructionsLabel.set_alignment(0.0, 0.5);
     box.pack_start(instructionsLabel, false, false, 5);
-    let labelText = 'Enter PIN';
+    let labelText = _('Enter PIN');
     let label = new Gtk.Label({ label: labelText });
 
     let box2 = new Gtk.Box();
@@ -159,8 +168,8 @@ const ImgurWizard = new Lang.Class ({
 
     
     let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-    this._stack.add_titled(box, '4', 'Choose album');
-    let instructionsText = 'Please choose the album for new screenshots.';
+    this._stack.add_titled(box, '4', _('Choose album'));
+    let instructionsText = _('Please choose the album for new screenshots.');
     let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
     instructionsLabel.set_padding(10, 10);
     instructionsLabel.set_justify(Gtk.Justification.LEFT);
@@ -169,7 +178,7 @@ const ImgurWizard = new Lang.Class ({
 
     this.liststore = new Gtk.ListStore();
     this.liststore.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
-    this.liststore.set(this.liststore.append(), [0, 1], ['-1', '(Loading..)']);
+    this.liststore.set(this.liststore.append(), [0, 1], ['-1', _('(Loading..)')]);
     var cellRenderer = new Gtk.CellRendererText();
 
     this.albumSelect = new Gtk.ComboBox();
@@ -182,7 +191,8 @@ const ImgurWizard = new Lang.Class ({
     this.albumSelect.connect("changed", Lang.bind(this, this._onAlbumChanged));
     this.albumSelect.set_sensitive(false);
     box.pack_start(this.albumSelect, false, false, 5);
-    let subText = '<small>Manage your albums by visiting your <a href="http://imgur.com/">imgur account</a>.</small>';
+    let subText = '<small>' + _("Manage your albums by visiting your %s.").replace(/%s/g,
+                                '<a href="http://imgur.com/">' + _("imgur account") +'</a>') + '</small>';
     let subLabel = new Gtk.Label({ label: subText, use_markup: true });
     subLabel.set_padding(10, 10);
     subLabel.set_justify(Gtk.Justification.LEFT);
@@ -191,8 +201,8 @@ const ImgurWizard = new Lang.Class ({
 
 
     let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
-    this._stack.add_titled(box, '5', 'Finished');
-    let instructionsText = 'All done!';
+    this._stack.add_titled(box, '5', _('Finished'));
+    let instructionsText = _('All done!');
     let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
     instructionsLabel.set_padding(10, 10);
     instructionsLabel.set_justify(Gtk.Justification.LEFT);
@@ -207,8 +217,9 @@ const ImgurWizard = new Lang.Class ({
     this._logo.set_from_pixbuf(pixbuf);
     this._window.set_icon(pixbuf);
 
-    this._backButton.set_label('Quit');
+    this._backButton.set_label(_('Quit'));
     this._backButton.connect("clicked", Lang.bind(this, this.goBack));
+    this._nextButton.set_label(_('Next'));
     this._nextButton.connect("clicked", Lang.bind(this, this.goForward));
 
 
@@ -243,8 +254,8 @@ const ImgurWizard = new Lang.Class ({
     if (this._step <= 1) {
       this._window.destroy();
     }
-    else if (this._step == 4 && this._backButton.get_label() == 'Log out') {
-      this._backButton.set_label('Back');
+    else if (this._step == 4 && this._backButton.get_label() == _('Log out')) {
+      this._backButton.set_label(_('Back'));
       this._step = 1;
       this.showStep(this._step);
       this.savePrefs('', '', '');
@@ -259,7 +270,7 @@ const ImgurWizard = new Lang.Class ({
       let pin = this._pinEntry.get_text();
       log('pin entered is: ' + pin);
       this.imgur.redeemPinCode(pin, Lang.bind(this, function() {
-        this._showPinError('Pin Incorrect');
+        this._showPinError(_('Pin Incorrect'));
       }), Lang.bind(this, function(json) {
         this.savePrefs(json['access_token'], json['refresh_token'], '');
         this.showStep(++this._step);
@@ -308,7 +319,7 @@ const ImgurWizard = new Lang.Class ({
           i++;
         }
         if (!exactMatch) {
-          this.liststore.set(this.liststore.append(), [0, 1], ['-1', '(Create a new "Screenshots" album)']);
+          this.liststore.set(this.liststore.append(), [0, 1], ['-1', _('(Create a new "Screenshots" album)')]);
           this.albumSelect.set_active(i-1);
         }
         this.albumSelect.set_sensitive(true);
@@ -323,7 +334,7 @@ const ImgurWizard = new Lang.Class ({
 
   hideShowButtons: function() {
     if (this._step > 1) {
-      this._backButton.set_label('Back');
+      this._backButton.set_label(_('Back'));
       this._backButton.set_visible(true);
       if (this._step >= this._maxSteps) {
         this._nextButton.set_sensitive(false);
@@ -335,7 +346,7 @@ const ImgurWizard = new Lang.Class ({
       }
     }
     else {
-      this._backButton.set_label('Quit');
+      this._backButton.set_label(_('Quit'));
       this._backButton.set_visible(false);
       this._nextButton.set_visible(true);
     }
