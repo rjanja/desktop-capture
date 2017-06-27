@@ -1832,9 +1832,6 @@ MyApplet.prototype = {
       let psCursorOn = options['-cursor-on'];
       let psCursorOff = options['-cursor-off'];
       let psAppend = options['-append'];
-      let psCursorOn = options['-cursor-on'];
-      let psCursorOff = options['-cursor-off'];
-      
       let sCursor = "", sSound = "", sDelay = "", sDefaults = "";
 
       if (psCursorOn && this._includeCursor)
