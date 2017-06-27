@@ -33,8 +33,13 @@ Beginning with Cinnamon **3.2** authenticated imgur uploads are supported, and t
 
 
 ### Installation<a name="installing">&nbsp;</a>
-* Make sure you have Cinnamon 2.6 or newer
-* Check out source with git, move `capture@rjanja` folder into `~/.local/share/cinnamon/applets/`, restart Cinnamon and add applet normally
+
+Make sure you have Cinnamon 2.6 or newer
+
+* Clone source or Download ZIP
+* Move `capture@rjanja` folder into `~/.local/share/cinnamon/applets/`
+* Restart Cinnamon (`Alt+F2`, `r`)
+* Add Desktop Capture applet to your panel
 
 ### Selection modes - advanced usage<a name="usage">&nbsp;</a>
 * ##### Area
