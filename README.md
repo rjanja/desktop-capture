@@ -21,6 +21,16 @@ My favorite capture software has always been Shutter, but when I found it wouldn
 
 ![Notification](https://raw.github.com/rjanja/desktop-capture/master/img/notification.png "Notifications")
 
+### Non-english translations
+Thanks to the contributions by users there are multiple translations available:
+
+* Chinese, courtesy of [giwhub](https://github.com/giwhub)
+* Czech, courtesy of [radek71](https://github.com/radek71)
+* German, courtesy of [NikoKrause](https://github.com/NikoKrause)
+* Swedish, courtesy of [eson57](https://github.com/eson57)
+
+Thank you so much, guys!
+
 ### Requirements
 
 This applet is multi-version, meaning different versions of Cinnamon will have different experiences and functionality.
