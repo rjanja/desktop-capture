@@ -385,6 +385,16 @@ msgstr "Tastenbelegung zur Wiederholung der letzten Aufnahme:"
 msgid "Keybinding to capture monitor 1: "
 msgstr "Tastenbelegung zur Aufnahme von Monitor 1:"
 
+#. 3.2->settings-schema.json->kb-cs-monitor-1->description
+#. 2.6->settings-schema.json->kb-cs-monitor-1->description
+msgid "Keybinding to capture monitor 2: "
+msgstr "Tastenbelegung zur Aufnahme von Monitor 2:"
+
+#. 3.2->settings-schema.json->kb-cs-monitor-2->description
+#. 2.6->settings-schema.json->kb-cs-monitor-2->description
+msgid "Keybinding to capture monitor 3: "
+msgstr "Tastenbelegung zur Aufnahme von Monitor 3:"
+
 #. 3.2->settings-schema.json->integration with imgur->description
 #. 2.6->settings-schema.json->integration with imgur->description
 msgid "Integrations: Imgur (Screenshots)"

@@ -525,32 +525,17 @@ MyApplet.prototype = {
             this.registerKeyBinding('kb-cs-screen', Screenshot.SelectionType.SCREEN);
             this.registerKeyBinding('kb-cs-repeat', Screenshot.SelectionType.REPEAT);
 
-            //this.registerKeyBinding('cs-monitor', Screenshot.SelectionType.MONITOR);
-
             if (Main.layoutManager.monitors.length > 1) {
                Main.layoutManager.monitors.forEach(Lang.bind(this, function(monitor, index) {
-                  this.registerKeyBinding('kb-cs-monitor-' + index, Screenshot.SelectionType.MONITOR, index);
+                  // we only support three monitors w/ shortcuts due to lack of conditional settings
+                  // in cinnamon xlet settings. see also issue 71
+                  if (index < 3) {
+                    this.registerKeyBinding('kb-cs-monitor-' + index, Screenshot.SelectionType.MONITOR, index);
+                  }
                }));
             }
 
             this.registerKeyBinding('kb-recorder-stop', 'RECORDER');
-
-            /*this.settings.connect("changed::kb-cs-window", Lang.bind(this. this._onKeybindingChanged,
-              Screenshot.SelectionType.WINDOW));
-            this.settings.connect("changed::kb-cs-area", Lang.bind(this. this._onKeybindingChanged,
-              Screenshot.SelectionType.AREA));
-            this.settings.connect("changed::kb-cs-ui", Lang.bind(this. this._onKeybindingChanged,
-              Screenshot.SelectionType.CINNAMON));
-            this.settings.connect("changed::kb-cs-screen", Lang.bind(this. this._onKeybindingChanged,
-              Screenshot.SelectionType.SCREEN));
-            this.settings.connect("changed::kb-cs-window", Lang.bind(this. this._onKeybindingChanged,
-              Screenshot.SelectionType.MONITOR));
-
-            if (Main.layoutManager.monitors.length > 1) {
-               Main.layoutManager.monitors.forEach(function(monitor, index) {
-                  this.settings.connect("changed::kb-cs-monitor-" + index, Lang.bind(this. this._onKeybindingChanged,
-                     Screenshot.SelectionType.MONITOR, index));
-            }*/
          }
       }
    },
@@ -921,22 +906,20 @@ MyApplet.prototype = {
 
             if (Main.layoutManager.monitors.length > 1) {
                Main.layoutManager.monitors.forEach(function(monitor, index) {
-                  this.menu.addAction(this.indent(_("Monitor %d").format(index + 1)), 
-                   Lang.bind(this, function(e) {
-                     return this.run_cinnamon_camera(Screenshot.SelectionType.MONITOR, e, index);
-                  }), 'kb-cs-monitor-' + index);
+                  if (index < 3) {
+                    this.menu.addAction(this.indent(_("Monitor %d").format(index + 1)), 
+                     Lang.bind(this, function(e) {
+                       return this.run_cinnamon_camera(Screenshot.SelectionType.MONITOR, e, index);
+                    }), 'kb-cs-monitor-' + index);
+                  }
                 }, this);
             }
-
-            // this.menu.addAction(this.indent(_("Interactive")), Lang.bind(this, function(e) {
-            //    return this.run_cinnamon_camera(Screenshot.SelectionType.INTERACTIVE, e);
-            // }));
 
             this._redoMenuItem = this.menu.addAction(
                this.indent(_("Repeat last")), 
                Lang.bind(this, this.repeat_cinnamon_camera),
                this.settings.getValue('kb-cs-repeat'));
-            
+
             if (this.lastCapture === null) {
                this._redoMenuItem.actor.hide();
             }
@@ -944,7 +927,7 @@ MyApplet.prototype = {
             // @todo add preview menu once preview app is finished
             //this.menu.addAction(this.indent(_("Preview last capture")), Lang.bind(this, function(e) {
             //}));
-            
+
          }
          else {
 

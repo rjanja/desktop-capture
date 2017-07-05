@@ -376,6 +376,16 @@ msgstr "Klávesová zkratka pro zopakování posledního zachycení:"
 msgid "Keybinding to capture monitor 1: "
 msgstr "Klávesová zkratka pro zachycení monitoru 1:"
 
+#. 3.2->settings-schema.json->kb-cs-monitor-1->description
+#. 2.6->settings-schema.json->kb-cs-monitor-1->description
+msgid "Keybinding to capture monitor 2: "
+msgstr "Klávesová zkratka pro zachycení monitoru 2:"
+
+#. 3.2->settings-schema.json->kb-cs-monitor-2->description
+#. 2.6->settings-schema.json->kb-cs-monitor-2->description
+msgid "Keybinding to capture monitor 3: "
+msgstr "Klávesová zkratka pro zachycení monitoru 3:"
+
 #. 3.2->settings-schema.json->integration with imgur->description
 #. 2.6->settings-schema.json->integration with imgur->description
 msgid "Integrations: Imgur (Screenshots)"

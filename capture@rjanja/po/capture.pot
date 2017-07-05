@@ -372,6 +372,16 @@ msgstr ""
 msgid "Keybinding to capture monitor 1: "
 msgstr ""
 
+#. 3.2->settings-schema.json->kb-cs-monitor-1->description
+#. 2.6->settings-schema.json->kb-cs-monitor-1->description
+msgid "Keybinding to capture monitor 2: "
+msgstr ""
+
+#. 3.2->settings-schema.json->kb-cs-monitor-2->description
+#. 2.6->settings-schema.json->kb-cs-monitor-2->description
+msgid "Keybinding to capture monitor 3: "
+msgstr ""
+
 #. 3.2->settings-schema.json->integration with imgur->description
 #. 2.6->settings-schema.json->integration with imgur->description
 msgid "Integrations: Imgur (Screenshots)"
