@@ -145,12 +145,14 @@
    "kb-cs-monitor-1" : {
       "indent": true,
       "type" : "keybinding",
-      "description" : "Keybinding to capture monitor 2: "
+      "description" : "Keybinding to capture monitor 2: ",
+      "default" : "<Control>F9"
    },
    "kb-cs-monitor-2" : {
       "indent": true,
       "type" : "keybinding",
-      "description" : "Keybinding to capture monitor 3: "
+      "description" : "Keybinding to capture monitor 3: ",
+      "default" : "<Control>F9"
    },
    "capture-window-as-area": {
       "default": true,
