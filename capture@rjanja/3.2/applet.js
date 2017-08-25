@@ -423,13 +423,14 @@ MyApplet.prototype = {
 
    _notificationImageSize: 128,
    _notificationIconSize: 24,
+   _uuid: null,
 
    log: function(msg) {
       //return;
       if (typeof msg == 'object') {
          global.log(msg);
       }
-      else {
+      else if (this._uuid) {
          global.log(this._uuid + ': ' + msg);
       }
       
@@ -1503,7 +1504,7 @@ MyApplet.prototype = {
 
       if (type == Screenshot.SelectionType.REPEAT) {
          global.log("We shouldn't have reached run_cinnamon_camera.")
-         return;
+         return false;
       }
 
       let filename;
@@ -2130,6 +2131,7 @@ MyApplet.prototype = {
       AppUtil.SpawnOpts(cmd, {
          onFailure: Lang.bind(this, function() {
             this.log("Error running imgur-setup.js");
+            return false;
          }),
          onLineOut: Lang.bind(this, function(line) {
             this.log('wiz > ' + line);
@@ -2152,6 +2154,8 @@ MyApplet.prototype = {
                this.settings.setValue('imgur-album-id', value);
                break;
             }
+
+            return true;
          }),
          onComplete: Lang.bind(this, function() {
             if ('' == this._imgurAccessToken &&
@@ -2161,9 +2165,12 @@ MyApplet.prototype = {
                this._useImgurAccount = false;
             }
             this._onUseImgur();
+            return true;
          }),
          logger: Lang.bind(this, this.log)
       });
+
+      return true;
    },
 
    testCanOpenFolderFile: function() {
