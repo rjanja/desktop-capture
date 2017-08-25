@@ -1094,7 +1094,7 @@ ScreenshotHelper.prototype = {
             return true;
          }
 
-         if (event.get_button() != 1) {
+         if (event.get_button() != 1 && event.get_button() != 3) {
              return true;
          }
 
@@ -1286,7 +1286,7 @@ ScreenshotHelper.prototype = {
                this.redrawAreaSelection(x, y);
             }
          } else if (type == Clutter.EventType.BUTTON_RELEASE) {
-            if (event.get_button() != 1) {
+            if (event.get_button() != 1 && event.get_button() != 3) {
               return true;
             }
 
