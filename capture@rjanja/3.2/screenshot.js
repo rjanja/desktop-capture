@@ -64,6 +64,8 @@ ScreenshotHelper.prototype = {
       this._modifiers = {};
       this._timeout  = 0;
       this._interactive = false;
+      this._initX = 0;
+      this._initY = 0;
       this._params = {
          filename: '',
          useFlash: true,
@@ -320,6 +322,9 @@ ScreenshotHelper.prototype = {
       let target = global.stage.get_actor_at_pos(Clutter.PickMode.REACTIVE,
                                                  stageX,
                                                  stageY);
+      if (this.instructionsShowing()) {
+         this.maybeHideInstructions(event);
+      }
 
       if (target != this._pointerTarget) {
          this._target = target;
@@ -434,6 +439,16 @@ ScreenshotHelper.prototype = {
       return this.instructionsContainer && this.instructionsContainer !== null;
    },
 
+   maybeHideInstructions: function(event) {
+      if (this._selectionType == SelectionType.CINNAMON) {
+         let [x, y, mask] = global.get_pointer();
+
+         if (Math.abs(x - this._initX) > 200 || Math.abs(y - this._initY) > 200) {
+            this.hideInstructions();
+         }
+      }
+   },
+
    hideInstructions: function() {
       if (this.instructionsShowing()) {
          Main.uiGroup.remove_actor(this.instructionsContainer);
@@ -447,6 +462,10 @@ ScreenshotHelper.prototype = {
    }, 
 
    showInstructions: function(cssExtra) {
+      let [x, y, mask] = global.get_pointer();
+      this._initX = x;
+      this._initY = y;
+
       this.instructionsContainer = new St.Group({
          reactive: false,
          style_class: 'instructions-container' + ' ' + cssExtra
@@ -1091,11 +1110,11 @@ ScreenshotHelper.prototype = {
       else if (type == Clutter.EventType.BUTTON_PRESS) {
          if (this.instructionsShowing()) {
             this.hideInstructions();
-            return true;
          }
 
-         if (event.get_button() != 1 && event.get_button() != 3) {
-             return true;
+         let button = event.get_button();
+         if (button == Clutter.BUTTON_LEFT || button == Clutter.BUTTON_RIGHT) {
+           return true;
          }
 
          let [xMouse, yMouse, mask] = global.get_pointer();
@@ -1286,7 +1305,8 @@ ScreenshotHelper.prototype = {
                this.redrawAreaSelection(x, y);
             }
          } else if (type == Clutter.EventType.BUTTON_RELEASE) {
-            if (event.get_button() != 1 && event.get_button() != 3) {
+            let button = event.get_button();
+            if (button == Clutter.BUTTON_LEFT || button == Clutter.BUTTON_RIGHT) {
               return true;
             }
 

@@ -1089,11 +1089,6 @@ ScreenshotHelper.prototype = {
          }
       }
       else if (type == Clutter.EventType.BUTTON_PRESS) {
-         if (this.instructionsShowing()) {
-            this.hideInstructions();
-            return true;
-         }
-
          if (event.get_button() != 1 && event.get_button() != 3) {
              return true;
          }
