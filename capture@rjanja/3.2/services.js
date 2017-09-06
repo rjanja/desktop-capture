@@ -46,7 +46,7 @@ Imgur.prototype = {
   getAlbumsUrl: function() {
     return "https://api.imgur.com/3/account/me/albums.json";
   },
-  
+
   requestAlbumList: function(onFailure, onSuccess, limit) {
     let headers = {
       'Authorization': 'Bearer ' + this.accessToken,
@@ -190,9 +190,9 @@ Imgur.prototype = {
           var imgur = JSON.parse(response.response_body.data);
           if (imgur['success']) {
             let linkText = 't=' + new Date(new Date().getTime()).toISOString()
-              + ': ' + imgur['data']['link'] + ' ' 
+              + ': ' + imgur['data']['link'] + ' '
               + imgur['data']['deletehash'] + '\n';
-            imgLog.write(linkText, null);      
+            imgLog.write(linkText, null);
             callback(true, imgur['data']);
             return true;
           }
@@ -237,7 +237,7 @@ Imgur.prototype = {
 
       let buffer = new Soup.Buffer(contents, contents.length);
       let multiPart = new Soup.Multipart(Soup.FORM_MIME_TYPE_MULTIPART);
-      
+
       multiPart.append_form_file('image', filename, 'image/png', buffer);
       for (key in params) {
         multiPart.append_form_string(key, params[key]);

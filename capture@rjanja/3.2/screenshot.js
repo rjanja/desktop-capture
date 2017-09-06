@@ -1,5 +1,5 @@
 /**
- * Cinnamon Screenshot class to support capture selection and 
+ * Cinnamon Screenshot class to support capture selection and
  * communication with back-end screencapture program.
  *
  * @author  Rob Adams <pillage@gmail.com>
@@ -88,7 +88,7 @@ ScreenshotHelper.prototype = {
       };
 
       this.setOptions(params);
-      
+
       global.log("Initializing screenshot tool");
 
       this._xfixesCursor = Cinnamon.XFixesCursor.get_for_stage(global.stage);
@@ -198,7 +198,7 @@ ScreenshotHelper.prototype = {
       }
       else {
          onFinished();
-      }   
+      }
    },
 
    _setTimer: function(timeout) {
@@ -287,7 +287,7 @@ ScreenshotHelper.prototype = {
          this.screenshotMonitor();
       })));
    },
-   
+
    selectCinnamon: function() {
       this._modal = true;
       this._target = null;
@@ -373,26 +373,26 @@ ScreenshotHelper.prototype = {
          return;
       }
 
-      this.border1 = new St.Bin({ 
+      this.border1 = new St.Bin({
          style_class: 'border-h',
          x_fill: true,
          y_fill: false,
          y_align: St.Align.START
       });
-      this.border2 = new St.Bin({ 
+      this.border2 = new St.Bin({
          style_class: 'border-h',
          x_fill: true,
          y_fill: false,
          y_align: St.Align.END
       });
-      this.border3 = new St.Bin({ 
+      this.border3 = new St.Bin({
          style_class: 'border-v',
          x_fill: false,
          y_fill: true,
          x_align: St.Align.START,
          y_align: St.Align.START
       });
-      this.border4 = new St.Bin({ 
+      this.border4 = new St.Bin({
          style_class: 'border-v',
          x_fill: false,
          y_fill: true,
@@ -423,7 +423,7 @@ ScreenshotHelper.prototype = {
       this.container.add_actor(this.handle7);
       this.container.add_actor(this.handle8);
 
-      
+
       this.initializeShadow();
       this.drawShadows(0, 0, 0, 0);
 
@@ -455,11 +455,11 @@ ScreenshotHelper.prototype = {
          this.instructionsContainer.destroy();
          this.instructionsContainer = null;
          return true;
-      } 
+      }
       else {
          return false;
       }
-   }, 
+   },
 
    showInstructions: function(cssExtra) {
       let [x, y, mask] = global.get_pointer();
@@ -527,7 +527,7 @@ ScreenshotHelper.prototype = {
          reactive: false,
          style_class: 'shadow-container'
       });
-      
+
       Main.uiGroup.add_actor(this.shadowContainer);
 
       this.coverLeft = new St.Bin({
@@ -550,7 +550,7 @@ ScreenshotHelper.prototype = {
          x_fill: true,
          y_fill: true
       });
-      
+
       this.shadowContainer.add_actor(this.coverLeft);
       this.shadowContainer.add_actor(this.coverRight);
       this.shadowContainer.add_actor(this.coverTop);
@@ -672,12 +672,12 @@ ScreenshotHelper.prototype = {
       let filename = this.getFilename(opts);
 
       let monitor = Main.layoutManager.monitors[opts.useIndex];
-      
+
       // Call capture back-end.
       let screenshot = new Cinnamon.Screenshot();
-      screenshot.screenshot_area (opts.includeCursor, 
-                                  monitor.x, monitor.y, 
-                                  monitor.width, monitor.height, 
+      screenshot.screenshot_area (opts.includeCursor,
+                                  monitor.x, monitor.y,
+                                  monitor.width, monitor.height,
                                   filename,
          Lang.bind(this, function() {
             this.runCallback({
@@ -693,7 +693,7 @@ ScreenshotHelper.prototype = {
       return true;
    },
 
-   
+
 
    screenshotCinnamon: function(actor, stageX, stageY, options) {
       //global.log('screenshotCinnamon() [actor,stageX,stageY]');
@@ -703,7 +703,7 @@ ScreenshotHelper.prototype = {
          this.reset();
          return false;
       }
-      
+
       // Reset after a short delay so we don't activate the actor we
       // have clicked.
       let timeoutId = Mainloop.timeout_add(200, Lang.bind(this, function() {
@@ -911,14 +911,14 @@ ScreenshotHelper.prototype = {
          }
          this._eventHandler = null;
       }
-      
+
       if (this.shadowContainer) {
          Main.uiGroup.remove_actor(this.shadowContainer);
          this.shadowContainer.destroy();
       }
 
       this.hideInstructions();
-      
+
       if (this._timer) {
          Main.uiGroup.remove_actor(this._timer);
          this._timer.destroy();
@@ -1040,8 +1040,8 @@ ScreenshotHelper.prototype = {
                return true;
             }
             else if (this._selectionMade) {
-               let isMovementKey = (sym == Clutter.KEY_Up 
-                   || sym == Clutter.KEY_Down || sym == Clutter.KEY_Left 
+               let isMovementKey = (sym == Clutter.KEY_Up
+                   || sym == Clutter.KEY_Down || sym == Clutter.KEY_Left
                    || sym == Clutter.KEY_Right);
 
                if (isMovementKey) {
@@ -1301,7 +1301,7 @@ ScreenshotHelper.prototype = {
                   x = Math.min(this._xEnd, this._xStart);
                   y = Math.min(this._yEnd, this._yStart);
                }
-               
+
                this.redrawAreaSelection(x, y);
             }
          } else if (type == Clutter.EventType.BUTTON_RELEASE) {
@@ -1332,9 +1332,9 @@ ScreenshotHelper.prototype = {
 
                [this._xStart, this._yStart] = this.container.get_position();
                [this._xEnd, this._yEnd] = [this._xStart + width, this._yStart + height];
-               
+
                this._mouseDown = false;
-               
+
                this._selectionMade = true;
 
                //if (this._xEnd == -1 || this._yEnd == -1 || (width < 5 && height < 5)) {
@@ -1420,11 +1420,11 @@ ScreenshotHelper.prototype = {
       Main.uiGroup.remove_actor(this.uiContainer);
       this.uiContainer.destroy();
 
-      
+
       this.container.remove_actor(this._outlineBackground);
       this._outlineBackground.destroy();
       this._outlineBackground = null;
-      
+
       this.container.remove_actor(this._outlineFrame);
       this._outlineFrame.destroy();
 
