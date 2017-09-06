@@ -1303,12 +1303,10 @@ MyApplet.prototype = {
 
          let image_file = Gio.file_new_for_path(screenshot.file);
          let image_uri = image_file.get_uri();
-         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
          let image_texture = St.TextureCache.get_default().load_uri_sync(
             St.TextureCachePolicy.NONE,
             image_uri,
-            this._notificationImageSize, this._notificationImageSize,
-            scaleFactor);
+            this._notificationImageSize, this._notificationImageSize);
 
          //global.tex = image_texture;
 

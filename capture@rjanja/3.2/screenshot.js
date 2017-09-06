@@ -400,10 +400,10 @@ ScreenshotHelper.prototype = {
          y_align: St.Align.START
       });
 
-      this.container.add_actor(this.border1, {expand: false, x_fill: false});
-      this.container.add_actor(this.border2, {expand: false, x_fill: false});
-      this.container.add_actor(this.border3, {expand: false, x_fill: false});
-      this.container.add_actor(this.border4, {expand: false, x_fill: false});
+      this.container.add_actor(this.border1);
+      this.container.add_actor(this.border2);
+      this.container.add_actor(this.border3);
+      this.container.add_actor(this.border4);
 
       this.handle1 = new St.Bin({ style_class: 'handle', name: 'handleNw', reactive: true });
       this.handle2 = new St.Bin({ style_class: 'handle', name: 'handleN', reactive: true });
