@@ -77,7 +77,7 @@ function SpawnOpts(command, options) {
   });
 
   opts.logger('Running ' + command);
-  let pid, stdin, stdout, stderr, stream, reader, success, argv;
+  let res, pid, stdin, stdout, stderr, stream, reader, success, argv;
   [success,argv] = GLib.shell_parse_argv(command);
 
   try {
