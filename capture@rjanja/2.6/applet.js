@@ -1661,12 +1661,7 @@ MyApplet.prototype = {
    },
 
    _launch_settings: function() {
-      if (this._localSettings) {
-         Main.Util.spawnCommandLine(AppletDir + "/settings.py");
-      }
-      else {
-         Main.Util.spawnCommandLine('cinnamon-settings applets '+this._uuid);
-      }
+      Main.Util.spawnCommandLine('cinnamon-settings applets '+this._uuid);
    },
 
    get_camera_program: function() {
