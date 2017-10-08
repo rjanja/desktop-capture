@@ -77,12 +77,12 @@ function SpawnOpts(command, options) {
   });
 
   opts.logger('Running ' + command);
-  let pid, stdin, stdout, stderr, stream, reader, success, argv;
+  let res, pid, stdin, stdout, stderr, stream, reader, success, argv;
   [success,argv] = GLib.shell_parse_argv(command);
 
   try {
     [res, pid, stdin, stdout, stderr] = GLib.spawn_async_with_pipes(
-      null, argv, null, GLib.SpawnFlags.SEARCH_PATH  | GLib.SpawnFlags.DO_NOT_REAP_CHILD, null);    
+      null, argv, null, GLib.SpawnFlags.SEARCH_PATH  | GLib.SpawnFlags.DO_NOT_REAP_CHILD, null);
   }
   catch (e) {
     opts.logger("Failure creating process");
@@ -94,7 +94,7 @@ function SpawnOpts(command, options) {
     opts.onSpawn(pid);
 
     stream = new Gio.DataInputStream({ base_stream : new Gio.UnixInputStream({ fd : stdout }) });
-    
+
     if (typeof opts.onLineOut == 'function') {
       this.read = function(stream, func) {
         stream.read_line_async(GLib.PRIORITY_LOW, null, Lang.bind(this, function(source, result) {

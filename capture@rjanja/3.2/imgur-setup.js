@@ -138,7 +138,7 @@ const ImgurWizard = new Lang.Class ({
     instructionsLabel3.set_padding(10, 10);
     box.pack_start(instructionsLabel3, false, false, 5);
 
-    let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
+    box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
     this._stack.add_titled(box, '3', _('Validate PIN'));
     let instructionsText = _('Enter PIN to validate access and get tokens.');
     let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
@@ -156,7 +156,7 @@ const ImgurWizard = new Lang.Class ({
     var pinLabel = new Gtk.Label({ label: 'PIN:' });
     pinLabel.set_justify(Gtk.Justification.RIGHT);
     pinLabel.set_alignment(1.0, 0.5);
-    box2.pack_start(pinLabel, false, true, 5);      
+    box2.pack_start(pinLabel, false, true, 5);
     this._pinEntry = new Gtk.Entry();
     this._pinEntry.set_alignment(0.0, 0.5);
     this._pinEntry.set_max_width_chars(32);
@@ -166,11 +166,11 @@ const ImgurWizard = new Lang.Class ({
     // box2.set_margin(10);
     box.pack_start(box2, true, true, 5);
 
-    
-    let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
+
+    box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
     this._stack.add_titled(box, '4', _('Choose album'));
-    let instructionsText = _('Please choose the album for new screenshots.');
-    let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
+    instructionsText = _('Please choose the album for new screenshots.');
+    instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
     instructionsLabel.set_padding(10, 10);
     instructionsLabel.set_justify(Gtk.Justification.LEFT);
     instructionsLabel.set_alignment(0, 0);
@@ -200,10 +200,10 @@ const ImgurWizard = new Lang.Class ({
     box.pack_start(subLabel, false, false, 5);
 
 
-    let box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
+    box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 0 });
     this._stack.add_titled(box, '5', _('Finished'));
-    let instructionsText = _('All done!');
-    let instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
+    instructionsText = _('All done!');
+    instructionsLabel = new Gtk.Label({ label: instructionsText, use_markup: true});
     instructionsLabel.set_padding(10, 10);
     instructionsLabel.set_justify(Gtk.Justification.LEFT);
     instructionsLabel.set_alignment(0, 0);
@@ -357,7 +357,7 @@ const ImgurWizard = new Lang.Class ({
   },
 
   verifyPin: function() {
-    
+
   },
 
   _showPinError: function (errorText) {
@@ -391,7 +391,7 @@ function main(argv) {
   initEnvironment();
   imports.searchPath.push(argv[0]);
   imports.searchPath.push('/usr/share/cinnamon/js');
-  
+
   Services = imports.services;
   // AppUtil = imports.apputil;
 

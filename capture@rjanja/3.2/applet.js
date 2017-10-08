@@ -256,7 +256,7 @@ ScreenshotNotification.prototype = {
      // We hide all types of notifications once the user clicks on them because the common
      // outcome of clicking should be the relevant window being brought forward and the user's
      // attention switching to the window.
-     
+
      // if (!this.resident) {
      //     this.emit('done-displaying');
      //     global.log('destroying it');
@@ -433,7 +433,7 @@ MyApplet.prototype = {
       else if (this._uuid) {
          global.log(this._uuid + ': ' + msg);
       }
-      
+
    },
 
    _initSettings: function() {
@@ -448,7 +448,7 @@ MyApplet.prototype = {
          this.settings = new LocalSettings(this._uuid, this._instanceId);
          this._localSettings = true;
       }
-      
+
       this.settings.connect("settings-changed", Lang.bind(this, this._onSettingsChanged));
       this.settings.connect("changed::camera-program", Lang.bind(this, this._onRuntimeChanged));
       this.settings.connect("changed::recorder-program", Lang.bind(this, this._onRuntimeChanged));
@@ -526,7 +526,7 @@ MyApplet.prototype = {
             return this.run_cinnamon_camera(captureType, null, index);
          }
       });
-      
+
       // Read current value and if set, add the hotkey
       var curVal = this.settings.getValue(key);
       if (curVal != '' && curVal != null)
@@ -598,7 +598,7 @@ MyApplet.prototype = {
 
       this._notifLeftClickBehavior = this.settings.getValue('notif-image-left-click');
       this._notifRightClickBehavior = this.settings.getValue('notif-image-right-click');
-      
+
       this._showDeleteAction = this.settings.getValue('show-delete-action');
       this._showCopyPathAction = this.settings.getValue('show-copy-path-action');
       this._showCopyDataAction = this.settings.getValue('show-copy-data-action');
@@ -696,7 +696,7 @@ MyApplet.prototype = {
 
    _onMenuKeyPress: function(actor, event) {
       let symbol = event.get_key_symbol();
-      
+
       if (symbol == Clutter.Shift_L)
       {
          this.setModifier(symbol, true);
@@ -723,7 +723,7 @@ MyApplet.prototype = {
 
    _init: function(metadata, orientation, panelHeight, instanceId) {
       Applet.IconApplet.prototype._init.call(this, orientation);
-      
+
       try {
          this._programs = {};
          this._programSupport = {};
@@ -765,7 +765,7 @@ MyApplet.prototype = {
          this.openScreenshotsFolderItem = new Applet.MenuItem(_("Open screenshots folder"),
             'folder', Lang.bind(this, this._openScreenshotsFolder));
          this._applet_context_menu.addMenuItem(this.openScreenshotsFolderItem);
-         
+
          this.openRecordingsFolderItem = new Applet.MenuItem(_("Open recordings folder"),
             'folder', Lang.bind(this, this._openRecordingsFolder));
          this._applet_context_menu.addMenuItem(this.openRecordingsFolderItem);
@@ -801,7 +801,7 @@ MyApplet.prototype = {
          this._xfixesCursor = xfixesCursor;
 
          this.actor.add_style_class_name('desktop-capture');
-         
+
          this.set_applet_tooltip(_("Screenshot and desktop video"));
 
          this.draw_menu(orientation);
@@ -827,7 +827,7 @@ MyApplet.prototype = {
 
    _checkPaths: function(force) {
       force = force || false;
-      
+
       this.openScreenshotsFolderItem.setSensitive(
         false != this._getCreateFolder(this._cameraSaveDir, force));
 
@@ -910,13 +910,13 @@ MyApplet.prototype = {
          }
          else {
             this._outputTitle = new PopupMenu.PopupIconMenuItem(
-               _("Camera") + ": " + this.get_camera_option('title'), 
+               _("Camera") + ": " + this.get_camera_option('title'),
                "camera-photo", St.IconType.SYMBOLIC,
                { reactive: false });
          }
 
          this.menu.addMenuItem(this._outputTitle);
-         
+
          if (this.get_camera_program() == 'cinnamon') {
             let item = this.menu.addAction(this.indent(_("Window")), Lang.bind(this, function(e) {
                return this.run_cinnamon_camera(Screenshot.SelectionType.WINDOW, e);
@@ -935,7 +935,7 @@ MyApplet.prototype = {
             if (Main.layoutManager.monitors.length > 1) {
                Main.layoutManager.monitors.forEach(function(monitor, index) {
                   if (index < 3) {
-                    this.menu.addAction(this.indent(_("Monitor %d").format(index + 1)), 
+                    this.menu.addAction(this.indent(_("Monitor %d").format(index + 1)),
                      Lang.bind(this, function(e) {
                        return this.run_cinnamon_camera(Screenshot.SelectionType.MONITOR, e, index);
                     }), 'kb-cs-monitor-' + index);
@@ -944,7 +944,7 @@ MyApplet.prototype = {
             }
 
             this._redoMenuItem = this.menu.addAction(
-               this.indent(_("Repeat last")), 
+               this.indent(_("Repeat last")),
                Lang.bind(this, this.repeat_cinnamon_camera),
                this.settings.getValue('kb-cs-repeat'));
 
@@ -1024,7 +1024,7 @@ MyApplet.prototype = {
          optionSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
             this._includeCursor = v;
             this.setSettingValue('include-cursor', v);
-            
+
             if (this.get_camera_program() == CAMERA_PROGRAM_GNOME
              && null !== this._ssSettings) {
                // We can't pass a cursor option to gnome-screenshot,
@@ -1067,7 +1067,7 @@ MyApplet.prototype = {
             this._send_test_notification();
          }));
       }*/
-      
+
 
       if (this.has_recorder())
       {
@@ -1077,9 +1077,9 @@ MyApplet.prototype = {
 
          if (this.has_recorder_option('gui')) {
             this._outputTitle2 = new PopupMenu.PopupIconMenuItem(
-               _("Recorder") + ": " + this.get_recorder_option('title'), 
+               _("Recorder") + ": " + this.get_recorder_option('title'),
                "media-record", St.IconType.SYMBOLIC);
-         
+
             let guiCommand = this.get_recorder_option('gui');
             this._outputTitle2.connect('activate', Lang.bind(this, function (menuItem, event) {
                this.Exec(guiCommand);
@@ -1087,16 +1087,16 @@ MyApplet.prototype = {
          }
          else {
             this._outputTitle2 = new PopupMenu.PopupIconMenuItem(
-               _("Recorder") + ": " + this.get_recorder_option('title'), 
+               _("Recorder") + ": " + this.get_recorder_option('title'),
                "media-record", St.IconType.SYMBOLIC, { reactive: false });
          }
-         
+
          this.menu.addMenuItem(this._outputTitle2);
 
          if (this.get_recorder_program() == 'cinnamon')
          {
              this._cRecorderItem = this.menu.addAction(
-               this.indent(_("Start recording")), 
+               this.indent(_("Start recording")),
                Lang.bind(this, this._toggle_cinnamon_recorder),
                this.settings.getValue('kb-recorder-stop'));
              // We could try to listen for when recording is activated
@@ -1116,7 +1116,7 @@ MyApplet.prototype = {
                   soundSwitch.connect('toggled', Lang.bind(this, function(e1,v) {
                      this._recordSound = v;
                      this.setSettingValue('record-sound', v);
-                     
+
                      return false;
                   }));
                   this.menu.addMenuItem(soundSwitch);
@@ -1303,12 +1303,10 @@ MyApplet.prototype = {
 
          let image_file = Gio.file_new_for_path(screenshot.file);
          let image_uri = image_file.get_uri();
-         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
          let image_texture = St.TextureCache.get_default().load_uri_sync(
             St.TextureCachePolicy.NONE,
-            image_uri, 
-            this._notificationImageSize, this._notificationImageSize, 
-            scaleFactor);
+            image_uri,
+            this._notificationImageSize, this._notificationImageSize);
 
          //global.tex = image_texture;
 
@@ -1329,7 +1327,7 @@ MyApplet.prototype = {
             //notification.addButton('custom', this._customActionLabel);
          //}
 
-         notification.connect('action-invoked', Lang.bind(this, function(n, action_id) { 
+         notification.connect('action-invoked', Lang.bind(this, function(n, action_id) {
             // global.log('Action invoked from notification: ' + action_id);
             return this.handleNotificationResponse(screenshot, action_id, n);
          }));
@@ -1522,7 +1520,7 @@ MyApplet.prototype = {
 
       let fnCapture = Lang.bind(this, function() {
          new Screenshot.ScreenshotHelper(type, Lang.bind(this, this.cinnamon_camera_complete),
-         { 
+         {
             includeCursor: this._includeCursor,
             useFlash: this._useCameraFlash,
             includeFrame: this._includeWindowFrame,
@@ -1621,7 +1619,7 @@ MyApplet.prototype = {
       {
          return false;
       }
-      
+
       let file = Gio.file_new_for_path(folderPath + '/' + fileName + '.' + fileExtension);
       let desiredFilepath = file.get_path();
       try {
@@ -1645,7 +1643,7 @@ MyApplet.prototype = {
       if (this.cRecorder.is_recording()) {
          this.cRecorder.pause();
          Meta.enable_unredirect_for_screen(global.screen);
-      
+
          if (!this._useSymbolicIcon) {
             this.set_applet_icon_path(ICON_FILE);
          }
@@ -1927,7 +1925,7 @@ MyApplet.prototype = {
       else {
          options = this.get_recorder_options();
       }
-      
+
       let cmd = options['custom'][custom];
 
       if (!cmd) {
@@ -2124,7 +2122,7 @@ MyApplet.prototype = {
 
       let accessToken, refreshToken, albumId;
 
-      let cmd = [ AppletDir + "/imgur-setup.js", AppletDir, 
+      let cmd = [ AppletDir + "/imgur-setup.js", AppletDir,
          this._imgurAccessToken, this._imgurRefreshToken, this._imgurAlbumId
       ].join(' ');
 
@@ -2275,7 +2273,7 @@ function main(metadata, orientation, panelHeight, instanceId) {
    Screenshot = imports.screenshot;
    Services = imports.services;
    AppUtil = imports.apputil;
-   
+
    SUPPORT_FILE = AppletDir + '/support.json';
    ICON_FILE = AppletDir + '/icon.png';
    ICON_FILE_ACTIVE = AppletDir + '/icon-active.png';
