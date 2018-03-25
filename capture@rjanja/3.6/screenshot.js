@@ -31,7 +31,7 @@ function _(str) {
   return Gettext.dgettext(UUID, str);
 }
 
-const SelectionType = {
+var SelectionType = {
    ALL_WORKSPACES: 0,  /* @todo */
    SCREEN: 1,
    MONITOR: 2,
