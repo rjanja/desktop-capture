@@ -226,7 +226,7 @@ TimerSlider.prototype = {
   },
   _setLabelValue: function(value) {
     if (value == 0) {
-      this.valueLabel.set_text('Off');
+      this.valueLabel.set_text(_('Off'));
     } else if (value == 1) {
       this.valueLabel.set_text(value + ' ' + _('second'));
     } else {
@@ -524,8 +524,8 @@ MyApplet.prototype = {
       if (typeof msg == 'object') {
          global.log(msg);
       }
-      else if (this._uuid) {
-         global.log(this._uuid + ': ' + msg);
+      else {
+         global.log('capture@rjanja: ' + msg);
       }
 
    },

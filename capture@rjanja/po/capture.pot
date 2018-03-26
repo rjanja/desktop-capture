@@ -8,531 +8,510 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-03 18:36+0100\n"
+"POT-Creation-Date: 2018-03-26 01:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 
-#: 3.2/applet.js:309 2.6/applet.js:308
+#: 3.6/applet.js:178
+msgid "Duration"
+msgstr ""
+
+#. 3.6->settings-schema.json->copy-to-clipboard->options
+#. 3.2->settings-schema.json->copy-to-clipboard->options
+#. 2.6->settings-schema.json->copy-to-clipboard->options
+#: 3.6/applet.js:229
+msgid "Off"
+msgstr ""
+
+#: 3.6/applet.js:231
+msgid "second"
+msgstr ""
+
+#. 3.6->settings-schema.json->delay-seconds->units
+#. 3.2->settings-schema.json->delay-seconds->units
+#. 2.6->settings-schema.json->delay-seconds->units
+#: 3.6/applet.js:233
+msgid "seconds"
+msgstr ""
+
+#: 3.6/applet.js:403 3.2/applet.js:309 2.6/applet.js:308
 #, javascript-format
 msgid "Schema \"%s\" not found."
 msgstr ""
 
-#. Create our right-click menus first, they'll be modified once
-#. settings are loaded in the event one or both the save folders
-#. do not exist or are not writeable
-#: 3.2/applet.js:779 2.6/applet.js:752
+#: 3.6/applet.js:862 3.2/applet.js:764 2.6/applet.js:737
 msgid "Open screenshots folder"
 msgstr ""
 
-#: 3.2/applet.js:783 2.6/applet.js:756
+#: 3.6/applet.js:866 3.2/applet.js:768 2.6/applet.js:741
 msgid "Open recordings folder"
 msgstr ""
 
-#: 3.2/applet.js:819 2.6/applet.js:792
+#: 3.6/applet.js:902 3.2/applet.js:804 2.6/applet.js:777
 msgid "Screenshot and desktop video"
 msgstr ""
 
-#: 3.2/applet.js:829 2.6/applet.js:802
+#: 3.6/applet.js:912 3.2/applet.js:814 2.6/applet.js:787
 msgid "Capture settings"
 msgstr ""
 
-#: 3.2/applet.js:917 3.2/applet.js:927 2.6/applet.js:890 2.6/applet.js:900
+#: 3.6/applet.js:994 3.6/applet.js:1004 3.2/applet.js:902 3.2/applet.js:912
+#: 2.6/applet.js:875 2.6/applet.js:885
 msgid "Camera"
 msgstr ""
 
-#: 3.2/applet.js:935 3.2/applet.js:980 2.6/applet.js:908 2.6/applet.js:953
+#: 3.6/applet.js:1012 3.6/applet.js:1050 3.2/applet.js:920 3.2/applet.js:963
+#: 2.6/applet.js:893 2.6/applet.js:936
 msgid "Window"
 msgstr ""
 
-#: 3.2/applet.js:939 3.2/applet.js:1001 2.6/applet.js:912 2.6/applet.js:974
+#: 3.6/applet.js:1016 3.6/applet.js:1071 3.2/applet.js:924 3.2/applet.js:984
+#: 2.6/applet.js:897 2.6/applet.js:957
 msgid "Area"
 msgstr ""
 
-#: 3.2/applet.js:942 2.6/applet.js:915
+#: 3.6/applet.js:1019 3.2/applet.js:927 2.6/applet.js:900
 msgid "Cinnamon UI"
 msgstr ""
 
-#: 3.2/applet.js:945 2.6/applet.js:918
+#: 3.6/applet.js:1022 3.2/applet.js:930 2.6/applet.js:903
 msgid "Screen"
 msgstr ""
 
-#: 3.2/applet.js:951 2.6/applet.js:924
+#: 3.6/applet.js:1029 3.2/applet.js:937 2.6/applet.js:910
 #, javascript-format
 msgid "Monitor %d"
 msgstr ""
 
-#: 3.2/applet.js:963 2.6/applet.js:936
+#: 3.6/applet.js:1038 3.2/applet.js:946 2.6/applet.js:919
 msgid "Repeat last"
 msgstr ""
 
-#: 3.2/applet.js:987 2.6/applet.js:960
+#: 3.6/applet.js:1057 3.2/applet.js:970 2.6/applet.js:943
 msgid "Window section"
 msgstr ""
 
-#: 3.2/applet.js:994 2.6/applet.js:967
+#: 3.6/applet.js:1064 3.2/applet.js:977 2.6/applet.js:950
 msgid "Current window"
 msgstr ""
 
-#: 3.2/applet.js:1008 2.6/applet.js:981
+#: 3.6/applet.js:1078 3.2/applet.js:991 2.6/applet.js:964
 msgid "Entire screen"
 msgstr ""
 
-#: 3.2/applet.js:1015 2.6/applet.js:988
+#: 3.6/applet.js:1085 3.2/applet.js:998 2.6/applet.js:971
 msgid "Window menu"
 msgstr ""
 
-#: 3.2/applet.js:1022 2.6/applet.js:995
+#: 3.6/applet.js:1092 3.2/applet.js:1005 2.6/applet.js:978
 msgid "Tooltip"
 msgstr ""
 
-#. OPTION: Include Cursor (toggle switch)
-#: 3.2/applet.js:1039 2.6/applet.js:1012
+#: 3.6/applet.js:1109 3.2/applet.js:1022 2.6/applet.js:995
 msgid "Include cursor"
 msgstr ""
 
+#. 3.6->settings-schema.json->use-timer->description
 #. 3.2->settings-schema.json->use-timer->description
 #. 2.6->settings-schema.json->use-timer->description
-#: 3.2/applet.js:1054 2.6/applet.js:1027
+#: 3.6/applet.js:1124 3.2/applet.js:1037 2.6/applet.js:1010
 msgid "Use timer"
 msgstr ""
 
-#: 3.2/applet.js:1065 2.6/applet.js:1038
+#: 3.6/applet.js:1150 3.2/applet.js:1048 2.6/applet.js:1021
 msgid "Copy image"
 msgstr ""
 
+#. 3.6->settings-schema.json->recorder-general->title
 #. 3.2->settings-schema.json->recorder-general->title
-#: 3.2/applet.js:1096 3.2/applet.js:1106 2.6/applet.js:1069 2.6/applet.js:1079
+#: 3.6/applet.js:1180 3.6/applet.js:1190 3.2/applet.js:1079 3.2/applet.js:1089
+#: 2.6/applet.js:1052 2.6/applet.js:1062
 msgid "Recorder"
 msgstr ""
 
-#: 3.2/applet.js:1115 3.2/applet.js:1600 2.6/applet.js:1088 2.6/applet.js:1569
+#: 3.6/applet.js:1199 3.6/applet.js:1682 3.2/applet.js:1098 3.2/applet.js:1581
+#: 2.6/applet.js:1071 2.6/applet.js:1552
 msgid "Start recording"
 msgstr ""
 
+#. 3.6->settings-schema.json->record-sound->description
 #. 3.2->settings-schema.json->record-sound->description
 #. 2.6->settings-schema.json->record-sound->description
-#: 3.2/applet.js:1131 2.6/applet.js:1104
+#: 3.6/applet.js:1215 3.2/applet.js:1114 2.6/applet.js:1087
 msgid "Record sound"
 msgstr ""
 
-#: 3.2/applet.js:1146 3.2/applet.js:1597 2.6/applet.js:1119 2.6/applet.js:1566
+#: 3.6/applet.js:1230 3.6/applet.js:1679 3.2/applet.js:1129 3.2/applet.js:1578
+#: 2.6/applet.js:1102 2.6/applet.js:1549
 msgid "Stop recording"
 msgstr ""
 
-#: 3.2/applet.js:1289 2.6/applet.js:1262
+#: 3.6/applet.js:1373 3.2/applet.js:1272 2.6/applet.js:1245
 msgid "Path has been copied to clipboard."
 msgstr ""
 
-#: 3.2/applet.js:1293 2.6/applet.js:1266
+#: 3.6/applet.js:1377 3.2/applet.js:1276 2.6/applet.js:1249
 msgid "Filename has been copied to clipboard."
 msgstr ""
 
-#: 3.2/applet.js:1297 2.6/applet.js:1270
+#: 3.6/applet.js:1381 3.2/applet.js:1280 2.6/applet.js:1253
 msgid "Directory has been copied to clipboard."
 msgstr ""
 
-#: 3.2/applet.js:1302 2.6/applet.js:1275
+#: 3.6/applet.js:1386 3.2/applet.js:1285 2.6/applet.js:1258
 msgid "Image data has been copied to clipboard."
 msgstr ""
 
-#. global.tex = image_texture;
-#: 3.2/applet.js:1331 2.6/applet.js:1304
+#: 3.6/applet.js:1414 3.2/applet.js:1312 2.6/applet.js:1287
 msgid "Screenshot has been saved to:"
 msgstr ""
 
-#: 3.2/applet.js:1336 2.6/applet.js:1309
+#: 3.6/applet.js:1419 3.2/applet.js:1317 2.6/applet.js:1292
 msgid "Screenshot captured!"
 msgstr ""
 
-#: 3.2/applet.js:1395 2.6/applet.js:1368
+#: 3.6/applet.js:1477 3.2/applet.js:1376 2.6/applet.js:1351
 msgid "Delete"
 msgstr ""
 
-#: 3.2/applet.js:1399 2.6/applet.js:1372
+#: 3.6/applet.js:1481 3.2/applet.js:1380 2.6/applet.js:1355
 msgid "Copy Data"
 msgstr ""
 
-#: 3.2/applet.js:1403 2.6/applet.js:1376
+#: 3.6/applet.js:1485 3.2/applet.js:1384 2.6/applet.js:1359
 msgid "Copy Path"
 msgstr ""
 
-#: 3.2/applet.js:1407 2.6/applet.js:1380
+#: 3.6/applet.js:1489 3.2/applet.js:1388 2.6/applet.js:1363
 msgid "Copy URL"
 msgstr ""
 
-#: 3.2/applet.js:1410 2.6/applet.js:1383
+#: 3.6/applet.js:1492 3.2/applet.js:1391 2.6/applet.js:1366
 msgid "Upload"
 msgstr ""
 
-#: 3.2/applet.js:1465 2.6/applet.js:1438
+#: 3.6/applet.js:1547 3.2/applet.js:1446 2.6/applet.js:1421
 msgid "Screenshot deleted"
 msgstr ""
 
-#: 3.2/applet.js:1465 3.2/applet.js:1466 2.6/applet.js:1438 2.6/applet.js:1439
+#: 3.6/applet.js:1547 3.6/applet.js:1548 3.2/applet.js:1446 3.2/applet.js:1447
+#: 2.6/applet.js:1421 2.6/applet.js:1422
 #, javascript-format
 msgid "The screenshot at %s was removed from disk."
 msgstr ""
 
-#: 3.2/applet.js:1484 2.6/applet.js:1457
+#: 3.6/applet.js:1566 3.2/applet.js:1465 2.6/applet.js:1440
 msgid "Uploading screenshot to imgur..."
 msgstr ""
 
-#: 3.2/applet.js:1500 2.6/applet.js:1469
+#: 3.6/applet.js:1582 3.2/applet.js:1481 2.6/applet.js:1452
 msgid "Link has been copied to clipboard"
 msgstr ""
 
-#: 3.2/applet.js:1503 2.6/applet.js:1472
+#: 3.6/applet.js:1585 3.2/applet.js:1484 2.6/applet.js:1455
 #, javascript-format
 msgid "Screenshot has been uploaded as %s"
 msgstr ""
 
-#: 3.2/applet.js:1506 2.6/applet.js:1475
+#: 3.6/applet.js:1588 3.2/applet.js:1487 2.6/applet.js:1458
 msgid "Screenshot could not be uploaded due to an error."
 msgstr ""
 
-#. 30*3 + 50
-#: 3.2/screenshot.js:492 2.6/screenshot.js:490
+#: 3.6/screenshot.js:511 3.2/screenshot.js:511 2.6/screenshot.js:492
 msgid "Select an area by clicking and dragging"
 msgstr ""
 
-#: 3.2/screenshot.js:493 2.6/screenshot.js:491
+#: 3.6/screenshot.js:512 3.2/screenshot.js:512 2.6/screenshot.js:493
 msgid "Use arrow keys to move the selection"
 msgstr ""
 
-#: 3.2/screenshot.js:494 2.6/screenshot.js:492
+#: 3.6/screenshot.js:513 3.2/screenshot.js:513 2.6/screenshot.js:494
 msgid "Use SHIFT and arrow keys to resize the selection"
 msgstr ""
 
-#: 3.2/screenshot.js:495 2.6/screenshot.js:493
+#: 3.6/screenshot.js:514 3.2/screenshot.js:514 2.6/screenshot.js:495
 msgid "Press ENTER to confirm or ESC to cancel"
 msgstr ""
 
-#: 3.2/screenshot.js:499 2.6/screenshot.js:497
+#: 3.6/screenshot.js:518 3.2/screenshot.js:518 2.6/screenshot.js:499
 msgid "Select a UI element by moving the mouse"
 msgstr ""
 
-#: 3.2/screenshot.js:500 2.6/screenshot.js:498
+#: 3.6/screenshot.js:519 3.2/screenshot.js:519 2.6/screenshot.js:500
 msgid "Use mousewheel to traverse hierarchy"
 msgstr ""
 
-#: 3.2/screenshot.js:501 2.6/screenshot.js:499
+#: 3.6/screenshot.js:520 3.2/screenshot.js:520 2.6/screenshot.js:501
 msgid "Hold SHIFT to allow clicking UI element"
 msgstr ""
 
-#: 3.2/screenshot.js:502 2.6/screenshot.js:500
+#: 3.6/screenshot.js:521 3.2/screenshot.js:521 2.6/screenshot.js:502
 msgid "Click to complete the capture, or ESC to cancel"
 msgstr ""
 
-#: 3.2/screenshot.js:840 2.6/screenshot.js:838
+#: 3.6/screenshot.js:859 3.2/screenshot.js:859 2.6/screenshot.js:840
 msgid "Desktop"
 msgstr ""
 
-#: 3.2/imgur-setup.js:63 3.2/imgur-setup.js:257 2.6/imgur-setup.js:63
-#: 2.6/imgur-setup.js:257
+#: 3.6/imgur-setup.js:63 3.6/imgur-setup.js:257 3.2/imgur-setup.js:63
+#: 3.2/imgur-setup.js:257 2.6/imgur-setup.js:63 2.6/imgur-setup.js:257
 msgid "Log out"
 msgstr ""
 
-#: 3.2/imgur-setup.js:81 2.6/imgur-setup.js:81
+#: 3.6/imgur-setup.js:81 3.2/imgur-setup.js:81 2.6/imgur-setup.js:81
 msgid "Imgur Wizard"
 msgstr ""
 
-#. capture@rjanja->metadata.json->name
-#: 3.2/imgur-setup.js:93 2.6/imgur-setup.js:93
+#. metadata.json->name
+#: 3.6/imgur-setup.js:93 3.2/imgur-setup.js:93 2.6/imgur-setup.js:93
 msgid "Desktop Capture"
 msgstr ""
 
-#: 3.2/imgur-setup.js:94 2.6/imgur-setup.js:94
+#: 3.6/imgur-setup.js:94 3.2/imgur-setup.js:94 2.6/imgur-setup.js:94
 msgid "Connection Wizard - Imgur (Screenshots)"
 msgstr ""
 
-#: 3.2/imgur-setup.js:95 2.6/imgur-setup.js:95
+#: 3.6/imgur-setup.js:95 3.2/imgur-setup.js:95 2.6/imgur-setup.js:95
 msgid "Upload screenshots into an album of your choice!"
 msgstr ""
 
-#: 3.2/imgur-setup.js:102 2.6/imgur-setup.js:102
+#: 3.6/imgur-setup.js:102 3.2/imgur-setup.js:102 2.6/imgur-setup.js:102
 msgid ""
 "To upload screenshots to imgur, you need to authorize this applet to use "
 "your account."
 msgstr ""
 
-#: 3.2/imgur-setup.js:103 2.6/imgur-setup.js:103
+#: 3.6/imgur-setup.js:103 3.2/imgur-setup.js:103 2.6/imgur-setup.js:103
 msgid "This wizard will guide you through this process."
 msgstr ""
 
-#: 3.2/imgur-setup.js:105 2.6/imgur-setup.js:105
+#: 3.6/imgur-setup.js:105 3.2/imgur-setup.js:105 2.6/imgur-setup.js:105
 msgid "Requirements:"
 msgstr ""
 
-#: 3.2/imgur-setup.js:106 2.6/imgur-setup.js:106
+#: 3.6/imgur-setup.js:106 3.2/imgur-setup.js:106 2.6/imgur-setup.js:106
 msgid "internet derp derp"
 msgstr ""
 
-#: 3.2/imgur-setup.js:107 2.6/imgur-setup.js:107
+#: 3.6/imgur-setup.js:107 3.2/imgur-setup.js:107 2.6/imgur-setup.js:107
 #, javascript-format
 msgid "you must have an %s"
 msgstr ""
 
-#: 3.2/imgur-setup.js:107 3.2/imgur-setup.js:195 2.6/imgur-setup.js:107
-#: 2.6/imgur-setup.js:195
+#: 3.6/imgur-setup.js:107 3.6/imgur-setup.js:195 3.2/imgur-setup.js:107
+#: 3.2/imgur-setup.js:195 2.6/imgur-setup.js:107 2.6/imgur-setup.js:195
 msgid "imgur account"
 msgstr ""
 
-#: 3.2/imgur-setup.js:108 2.6/imgur-setup.js:108
+#: 3.6/imgur-setup.js:108 3.2/imgur-setup.js:108 2.6/imgur-setup.js:108
 msgid "you may already have an album for screenshots"
 msgstr ""
 
-#: 3.2/imgur-setup.js:124 2.6/imgur-setup.js:124
+#: 3.6/imgur-setup.js:124 3.2/imgur-setup.js:124 2.6/imgur-setup.js:124
 msgid "Permission Request"
 msgstr ""
 
-#: 3.2/imgur-setup.js:125 2.6/imgur-setup.js:125
+#: 3.6/imgur-setup.js:125 3.2/imgur-setup.js:125 2.6/imgur-setup.js:125
 msgid "Grant permission for Desktop Capture to access your imgur account."
 msgstr ""
 
-#: 3.2/imgur-setup.js:131 2.6/imgur-setup.js:131
+#: 3.6/imgur-setup.js:131 3.2/imgur-setup.js:131 2.6/imgur-setup.js:131
 msgid "Launch Browser"
 msgstr ""
 
-#: 3.2/imgur-setup.js:134 2.6/imgur-setup.js:134
+#: 3.6/imgur-setup.js:134 3.2/imgur-setup.js:134 2.6/imgur-setup.js:134
 msgid ""
 "Press Next when you have authorized Desktop Capture and received a PIN."
 msgstr ""
 
-#: 3.2/imgur-setup.js:142 2.6/imgur-setup.js:142
+#: 3.6/imgur-setup.js:142 3.2/imgur-setup.js:142 2.6/imgur-setup.js:142
 msgid "Validate PIN"
 msgstr ""
 
-#: 3.2/imgur-setup.js:143 2.6/imgur-setup.js:143
+#: 3.6/imgur-setup.js:143 3.2/imgur-setup.js:143 2.6/imgur-setup.js:143
 msgid "Enter PIN to validate access and get tokens."
 msgstr ""
 
-#: 3.2/imgur-setup.js:149 2.6/imgur-setup.js:149
+#: 3.6/imgur-setup.js:149 3.2/imgur-setup.js:149 2.6/imgur-setup.js:149
 msgid "Enter PIN"
 msgstr ""
 
-#: 3.2/imgur-setup.js:171 2.6/imgur-setup.js:171
+#: 3.6/imgur-setup.js:171 3.2/imgur-setup.js:171 2.6/imgur-setup.js:171
 msgid "Choose album"
 msgstr ""
 
-#: 3.2/imgur-setup.js:172 2.6/imgur-setup.js:172
+#: 3.6/imgur-setup.js:172 3.2/imgur-setup.js:172 2.6/imgur-setup.js:172
 msgid "Please choose the album for new screenshots."
 msgstr ""
 
-#: 3.2/imgur-setup.js:181 2.6/imgur-setup.js:181
+#: 3.6/imgur-setup.js:181 3.2/imgur-setup.js:181 2.6/imgur-setup.js:181
 msgid "(Loading..)"
 msgstr ""
 
-#: 3.2/imgur-setup.js:194 2.6/imgur-setup.js:194
+#: 3.6/imgur-setup.js:194 3.2/imgur-setup.js:194 2.6/imgur-setup.js:194
 #, javascript-format
 msgid "Manage your albums by visiting your %s."
 msgstr ""
 
-#: 3.2/imgur-setup.js:204 2.6/imgur-setup.js:204
+#: 3.6/imgur-setup.js:204 3.2/imgur-setup.js:204 2.6/imgur-setup.js:204
 msgid "Finished"
 msgstr ""
 
-#: 3.2/imgur-setup.js:205 2.6/imgur-setup.js:205
+#: 3.6/imgur-setup.js:205 3.2/imgur-setup.js:205 2.6/imgur-setup.js:205
 msgid "All done!"
 msgstr ""
 
-#: 3.2/imgur-setup.js:220 3.2/imgur-setup.js:349 2.6/imgur-setup.js:220
-#: 2.6/imgur-setup.js:349
+#: 3.6/imgur-setup.js:220 3.6/imgur-setup.js:349 3.2/imgur-setup.js:220
+#: 3.2/imgur-setup.js:349 2.6/imgur-setup.js:220 2.6/imgur-setup.js:349
 msgid "Quit"
 msgstr ""
 
-#: 3.2/imgur-setup.js:222 2.6/imgur-setup.js:222
+#: 3.6/imgur-setup.js:222 3.2/imgur-setup.js:222 2.6/imgur-setup.js:222
 msgid "Next"
 msgstr ""
 
-#: 3.2/imgur-setup.js:258 3.2/imgur-setup.js:337 2.6/imgur-setup.js:258
-#: 2.6/imgur-setup.js:337
+#: 3.6/imgur-setup.js:258 3.6/imgur-setup.js:337 3.2/imgur-setup.js:258
+#: 3.2/imgur-setup.js:337 2.6/imgur-setup.js:258 2.6/imgur-setup.js:337
 msgid "Back"
 msgstr ""
 
-#: 3.2/imgur-setup.js:273 2.6/imgur-setup.js:273
+#: 3.6/imgur-setup.js:273 3.2/imgur-setup.js:273 2.6/imgur-setup.js:273
 msgid "Pin Incorrect"
 msgstr ""
 
-#: 3.2/imgur-setup.js:322 2.6/imgur-setup.js:322
+#: 3.6/imgur-setup.js:322 3.2/imgur-setup.js:322 2.6/imgur-setup.js:322
 msgid "(Create a new \"Screenshots\" album)"
 msgstr ""
 
-#. 3.2->settings-schema.json->kb-cs-repeat->description
-#. 2.6->settings-schema.json->kb-cs-repeat->description
-msgid "Keybinding to repeat last capture: "
+#. metadata.json->description
+msgid "Screenshot and screencasting tools"
 msgstr ""
 
-#. 3.2->settings-schema.json->kb-cs-monitor-0->description
-#. 2.6->settings-schema.json->kb-cs-monitor-0->description
-msgid "Keybinding to capture monitor 1: "
+#. metadata.json->contributors
+msgid "Rob Adams"
 msgstr ""
 
-#. 3.2->settings-schema.json->kb-cs-monitor-1->description
-#. 2.6->settings-schema.json->kb-cs-monitor-1->description
-msgid "Keybinding to capture monitor 2: "
+#. metadata.json->contributors
+msgid "Per Ångström"
 msgstr ""
 
-#. 3.2->settings-schema.json->kb-cs-monitor-2->description
-#. 2.6->settings-schema.json->kb-cs-monitor-2->description
-msgid "Keybinding to capture monitor 3: "
+#. metadata.json->contributors
+msgid "Stephen Ostrow"
 msgstr ""
 
-#. 3.2->settings-schema.json->integration with imgur->description
-#. 2.6->settings-schema.json->integration with imgur->description
-msgid "Integrations: Imgur (Screenshots)"
+#. metadata.json->contributors
+msgid "Davide Cristini"
 msgstr ""
 
-#. 3.2->settings-schema.json->notification settings->description
-#. 2.6->settings-schema.json->notification settings->description
-msgid "Screenshots: Post-Capture Settings"
+#. metadata.json->contributors
+msgid "Robert Orzanna"
 msgstr ""
 
-#. 3.2->settings-schema.json->use-imgur->description
-#. 2.6->settings-schema.json->use-imgur->description
-msgid "Enable uploading from notifications"
+#. metadata.json->contributors
+msgid "Niko Krause"
 msgstr ""
 
-#. 3.2->settings-schema.json->use-imgur->tooltip
-#. 2.6->settings-schema.json->use-imgur->tooltip
-msgid "Whether to use imgur image hosting services"
+#. 3.6->settings-schema.json->general->title
+#. 3.2->settings-schema.json->general->title
+msgid "General"
 msgstr ""
 
-#. 3.2->settings-schema.json->label-internal-recorder-settings->description
-#. 2.6->settings-schema.json->label-internal-recorder-settings->description
-msgid "These settings only apply when using the Built-in Recorder tool."
-msgstr ""
-
-#. 3.2->settings-schema.json->kb-recorder-stop->description
-#. 2.6->settings-schema.json->kb-recorder-stop->description
-msgid "Keybinding to start/stop recording: "
-msgstr ""
-
-#. 3.2->settings-schema.json->kb-recorder-stop->tooltip
-#. 2.6->settings-schema.json->kb-recorder-stop->tooltip
-msgid ""
-"Will start only Cinnamon Recorder. Will stop any recorder using its stop-"
-"command."
-msgstr ""
-
-#. 3.2->settings-schema.json->use-timer->tooltip
-#. 2.6->settings-schema.json->use-timer->tooltip
-msgid "Whether to use a timer before capturing"
-msgstr ""
-
-#. 3.2->settings-schema.json->include-styles->description
-#. 2.6->settings-schema.json->include-styles->description
-msgid "Use highlighted style in UI capture"
-msgstr ""
-
-#. 3.2->settings-schema.json->include-styles->tooltip
-#. 2.6->settings-schema.json->include-styles->tooltip
-msgid ""
-"Turn on for a 'highlighted' effect, using CSS styles applied by .capture-"
-"outline-frame"
-msgstr ""
-
-#. 3.2->settings-schema.json->gen recorder settings->description
-#. 2.6->settings-schema.json->gen recorder settings->description
-msgid "Recorder: General Settings"
-msgstr ""
-
-#. 3.2->settings-schema.json->kb-cs-window->description
-#. 2.6->settings-schema.json->kb-cs-window->description
-msgid "Keybinding to capture a window: "
-msgstr ""
-
-#. 3.2->settings-schema.json->use-imgur-account->description
-msgid "Upload to your own account (instead of anonymously)"
-msgstr ""
-
-#. 3.2->settings-schema.json->use-imgur-account->tooltip
-msgid "If unchecked, uploads will be anonymous and not tied to your account."
-msgstr ""
-
-#. 3.2->settings-schema.json->imgur-refresh-token->description
-msgid "imgur oauth refresh token"
-msgstr ""
-
-#. 3.2->settings-schema.json->imgur-access-token->description
-msgid "imgur oauth access token"
-msgstr ""
-
-#. 3.2->settings-schema.json->last-selected-subpage->description
-#. 2.6->settings-schema.json->last-selected-subpage->description
-msgid "Last selected sub-page (tab index) of settings application"
-msgstr ""
-
-#. 3.2->settings-schema.json->screenshot-builtin-imgur->title
-msgid "Integration: Imgur"
-msgstr ""
-
-#. 3.2->settings-schema.json->screenshot-builtin->title
-msgid "Cinnamon Screenshot"
-msgstr ""
-
-#. 3.2->settings-schema.json->screenshot-builtin-kb->title
-#. 3.2->settings-schema.json->recorder-builtin-kb->title
-msgid "Keybindings"
-msgstr ""
-
-#. 3.2->settings-schema.json->recorder-builtin->title
-msgid "Cinnamon Recorder"
-msgstr ""
-
-#. 3.2->settings-schema.json->screenshot-builtin-fx->title
-msgid "Effects"
-msgstr ""
-
-#. 3.2->settings-schema.json->appearance->title
-msgid "Appearance"
-msgstr ""
-
-#. 3.2->settings-schema.json->screenshot-builtin-notif->title
-msgid "Notifications"
-msgstr ""
-
-#. 3.2->settings-schema.json->screenshot-builtin-misc->title
-msgid "Misc"
-msgstr ""
-
+#. 3.6->settings-schema.json->tool-selection->title
+#. 3.6->settings-schema.json->general settings->description
 #. 3.2->settings-schema.json->tool-selection->title
 #. 3.2->settings-schema.json->general settings->description
 #. 2.6->settings-schema.json->general stetings->description
 msgid "Capture Tool Selection"
 msgstr ""
 
+#. 3.6->settings-schema.json->screenshot-general->title
 #. 3.2->settings-schema.json->screenshot-general->title
 msgid "Screenshots"
 msgstr ""
 
-#. 3.2->settings-schema.json->general->title
-msgid "General"
+#. 3.6->settings-schema.json->appearance->title
+#. 3.2->settings-schema.json->appearance->title
+msgid "Appearance"
 msgstr ""
 
+#. 3.6->settings-schema.json->screenshot-builtin->title
+#. 3.2->settings-schema.json->screenshot-builtin->title
+msgid "Cinnamon Screenshot"
+msgstr ""
+
+#. 3.6->settings-schema.json->screenshot-builtin-notif->title
+#. 3.2->settings-schema.json->screenshot-builtin-notif->title
+msgid "Notifications"
+msgstr ""
+
+#. 3.6->settings-schema.json->screenshot-builtin-imgur->title
+#. 3.2->settings-schema.json->screenshot-builtin-imgur->title
+msgid "Integration: Imgur"
+msgstr ""
+
+#. 3.6->settings-schema.json->screenshot-builtin-kb->title
+#. 3.6->settings-schema.json->recorder-builtin-kb->title
+#. 3.2->settings-schema.json->screenshot-builtin-kb->title
+#. 3.2->settings-schema.json->recorder-builtin-kb->title
+msgid "Keybindings"
+msgstr ""
+
+#. 3.6->settings-schema.json->screenshot-builtin-fx->title
+#. 3.2->settings-schema.json->screenshot-builtin-fx->title
+msgid "Effects"
+msgstr ""
+
+#. 3.6->settings-schema.json->screenshot-builtin-copying->title
 #. 3.2->settings-schema.json->screenshot-builtin-copying->title
 msgid "Copying"
 msgstr ""
 
-#. 3.2->settings-schema.json->camera-program->description
-#. 2.6->settings-schema.json->camera-program->description
-msgid "Screenshot program"
+#. 3.6->settings-schema.json->screenshot-builtin-misc->title
+#. 3.2->settings-schema.json->screenshot-builtin-misc->title
+msgid "Misc"
 msgstr ""
 
-#. 3.2->settings-schema.json->camera-program->tooltip
-#. 2.6->settings-schema.json->camera-program->tooltip
-msgid "Preferred screen capture program"
+#. 3.6->settings-schema.json->recorder-builtin->title
+#. 3.2->settings-schema.json->recorder-builtin->title
+msgid "Cinnamon Recorder"
 msgstr ""
 
+#. 3.6->settings-schema.json->camera-program->options
+#. 3.2->settings-schema.json->camera-program->options
+msgid "Cinnamon Screenshot (built-in)"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-program->options
+#. 3.2->settings-schema.json->camera-program->options
+#. 2.6->settings-schema.json->camera-program->options
+msgid "GNOME Screenshot"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-program->options
+#. 3.2->settings-schema.json->camera-program->options
+#. 2.6->settings-schema.json->camera-program->options
+msgid "Shutter"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-program->options
+#. 3.2->settings-schema.json->camera-program->options
+#. 2.6->settings-schema.json->camera-program->options
+msgid "XWD"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-program->options
 #. 3.2->settings-schema.json->camera-program->options
 #. 2.6->settings-schema.json->camera-program->options
 msgid "ImageMagick"
 msgstr ""
 
+#. 3.6->settings-schema.json->camera-program->options
+#. 3.6->settings-schema.json->recorder-program->options
 #. 3.2->settings-schema.json->camera-program->options
 #. 3.2->settings-schema.json->recorder-program->options
 #. 2.6->settings-schema.json->camera-program->options
@@ -540,35 +519,206 @@ msgstr ""
 msgid "Kazam"
 msgstr ""
 
-#. 3.2->settings-schema.json->camera-program->options
-msgid "Cinnamon Screenshot (built-in)"
+#. 3.6->settings-schema.json->camera-program->description
+#. 3.2->settings-schema.json->camera-program->description
+#. 2.6->settings-schema.json->camera-program->description
+msgid "Screenshot program"
 msgstr ""
 
-#. 3.2->settings-schema.json->camera-program->options
-#. 2.6->settings-schema.json->camera-program->options
-msgid "Shutter"
+#. 3.6->settings-schema.json->camera-program->tooltip
+#. 3.2->settings-schema.json->camera-program->tooltip
+#. 2.6->settings-schema.json->camera-program->tooltip
+msgid "Preferred screen capture program"
 msgstr ""
 
-#. 3.2->settings-schema.json->camera-program->options
-#. 2.6->settings-schema.json->camera-program->options
-msgid "XWD"
+#. 3.6->settings-schema.json->recorder-program->options
+#. 3.2->settings-schema.json->recorder-program->options
+msgid "Cinnamon Recorder (built-in)"
 msgstr ""
 
-#. 3.2->settings-schema.json->camera-program->options
-#. 2.6->settings-schema.json->camera-program->options
-msgid "GNOME Screenshot"
+#. 3.6->settings-schema.json->recorder-program->options
+#. 3.2->settings-schema.json->recorder-program->options
+#. 2.6->settings-schema.json->recorder-program->options
+msgid "RecordMyDesktop"
 msgstr ""
 
+#. 3.6->settings-schema.json->recorder-program->options
+#. 3.2->settings-schema.json->recorder-program->options
+#. 2.6->settings-schema.json->recorder-program->options
+msgid "Byzanz"
+msgstr ""
+
+#. 3.6->settings-schema.json->recorder-program->options
+#. 3.2->settings-schema.json->recorder-program->options
+#. 2.6->settings-schema.json->recorder-program->options
+msgid "FFmpeg"
+msgstr ""
+
+#. 3.6->settings-schema.json->recorder-program->description
+#. 3.2->settings-schema.json->recorder-program->description
+#. 2.6->settings-schema.json->recorder-program->description
+msgid "Recorder program"
+msgstr ""
+
+#. 3.6->settings-schema.json->recorder-program->tooltip
+#. 3.2->settings-schema.json->recorder-program->tooltip
+#. 2.6->settings-schema.json->recorder-program->tooltip
+msgid "Preferred screen recorder program"
+msgstr ""
+
+#. 3.6->settings-schema.json->use-symbolic-icon->description
+#. 3.2->settings-schema.json->use-symbolic-icon->description
+#. 2.6->settings-schema.json->use-symbolic-icon->description
+msgid "Use symbolic (black and white) icon for applet"
+msgstr ""
+
+#. 3.6->settings-schema.json->use-symbolic-icon->tooltip
+#. 3.2->settings-schema.json->use-symbolic-icon->tooltip
+#. 2.6->settings-schema.json->use-symbolic-icon->tooltip
+msgid "Whether to use symbolic (black and white) icon for applet"
+msgstr ""
+
+#. 3.6->settings-schema.json->gen screenshot settings->description
+#. 3.2->settings-schema.json->gen screenshot settings->description
+#. 2.6->settings-schema.json->gen screenshot settings->description
+msgid "Screenshots: General Settings"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-save-dir->description
+#. 3.6->settings-schema.json->recorder-save-dir->description
+#. 3.2->settings-schema.json->camera-save-dir->description
+#. 3.2->settings-schema.json->recorder-save-dir->description
+#. 2.6->settings-schema.json->camera-save-dir->description
+#. 2.6->settings-schema.json->recorder-save-dir->description
+msgid "Save location"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-save-dir->tooltip
+#. 3.2->settings-schema.json->camera-save-dir->tooltip
+#. 2.6->settings-schema.json->camera-save-dir->tooltip
+msgid "Folder to save new screenshots"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-save-prefix->description
+#. 3.6->settings-schema.json->recorder-save-prefix->description
+#. 3.2->settings-schema.json->camera-save-prefix->description
+#. 3.2->settings-schema.json->recorder-save-prefix->description
+#. 2.6->settings-schema.json->camera-save-prefix->description
+#. 2.6->settings-schema.json->recorder-save-prefix->description
+msgid "Filename format"
+msgstr ""
+
+#. 3.6->settings-schema.json->camera-save-prefix->tooltip
+#. 3.2->settings-schema.json->camera-save-prefix->tooltip
+#. 2.6->settings-schema.json->camera-save-prefix->tooltip
+msgid ""
+"Don't include file extension. %TYPE is area, window, etc. E.g. %Y-%M-%D-%H%I"
+" = 2014-05-25-1848.png. Use %S for seconds, %m for milliseconds"
+msgstr ""
+
+#. 3.6->settings-schema.json->include-cursor->description
 #. 3.2->settings-schema.json->include-cursor->description
 #. 2.6->settings-schema.json->include-cursor->description
 msgid "Include mouse cursor"
 msgstr ""
 
+#. 3.6->settings-schema.json->include-cursor->tooltip
 #. 3.2->settings-schema.json->include-cursor->tooltip
 #. 2.6->settings-schema.json->include-cursor->tooltip
 msgid "Whether to include mouse cursor in screenshot"
 msgstr ""
 
+#. 3.6->settings-schema.json->use-timer->tooltip
+#. 3.2->settings-schema.json->use-timer->tooltip
+#. 2.6->settings-schema.json->use-timer->tooltip
+msgid "Whether to use a timer before capturing"
+msgstr ""
+
+#. 3.6->settings-schema.json->delay-seconds->description
+#. 3.2->settings-schema.json->delay-seconds->description
+#. 2.6->settings-schema.json->delay-seconds->description
+msgid "Capture delay"
+msgstr ""
+
+#. 3.6->settings-schema.json->delay-seconds->tooltip
+#. 3.2->settings-schema.json->delay-seconds->tooltip
+#. 2.6->settings-schema.json->delay-seconds->tooltip
+msgid "How many seconds to wait before taking a screenshot"
+msgstr ""
+
+#. 3.6->settings-schema.json->show-capture-timer->description
+#. 3.2->settings-schema.json->show-capture-timer->description
+#. 2.6->settings-schema.json->show-capture-timer->description
+msgid "Show capture timer"
+msgstr ""
+
+#. 3.6->settings-schema.json->show-capture-timer->tooltip
+#. 3.2->settings-schema.json->show-capture-timer->tooltip
+#. 2.6->settings-schema.json->show-capture-timer->tooltip
+msgid "Whether to show the timer on the screen"
+msgstr ""
+
+#. 3.6->settings-schema.json->cinn screenshot settings-window->description
+#. 3.2->settings-schema.json->cinn screenshot settings-window->description
+#. 2.6->settings-schema.json->cinn screenshot settings-window->description
+msgid "Screenshots: Built-in Capture Settings"
+msgstr ""
+
+#. 3.6->settings-schema.json->cinn screenshot note->description
+#. 3.2->settings-schema.json->cinn screenshot note->description
+#. 2.6->settings-schema.json->cinn screenshot note->description
+msgid "Note: changing keybindings may require restarting Cinnamon."
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-window->description
+#. 3.2->settings-schema.json->kb-cs-window->description
+#. 2.6->settings-schema.json->kb-cs-window->description
+msgid "Keybinding to capture a window: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-area->description
+#. 3.2->settings-schema.json->kb-cs-area->description
+#. 2.6->settings-schema.json->kb-cs-area->description
+msgid "Keybinding to capture an area: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-ui->description
+#. 3.2->settings-schema.json->kb-cs-ui->description
+#. 2.6->settings-schema.json->kb-cs-ui->description
+msgid "Keybinding to capture a UI element: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-screen->description
+#. 3.2->settings-schema.json->kb-cs-screen->description
+#. 2.6->settings-schema.json->kb-cs-screen->description
+msgid "Keybinding to capture the screen: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-repeat->description
+#. 3.2->settings-schema.json->kb-cs-repeat->description
+#. 2.6->settings-schema.json->kb-cs-repeat->description
+msgid "Keybinding to repeat last capture: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-monitor-0->description
+#. 3.2->settings-schema.json->kb-cs-monitor-0->description
+#. 2.6->settings-schema.json->kb-cs-monitor-0->description
+msgid "Keybinding to capture monitor 1: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-monitor-1->description
+#. 3.2->settings-schema.json->kb-cs-monitor-1->description
+#. 2.6->settings-schema.json->kb-cs-monitor-1->description
+msgid "Keybinding to capture monitor 2: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-cs-monitor-2->description
+#. 3.2->settings-schema.json->kb-cs-monitor-2->description
+#. 2.6->settings-schema.json->kb-cs-monitor-2->description
+msgid "Keybinding to capture monitor 3: "
+msgstr ""
+
+#. 3.6->settings-schema.json->capture-window-as-area->description
 #. 3.2->settings-schema.json->capture-window-as-area->description
 #. 2.6->settings-schema.json->capture-window-as-area->description
 msgid ""
@@ -576,6 +726,7 @@ msgid ""
 "distorted)"
 msgstr ""
 
+#. 3.6->settings-schema.json->capture-window-as-area->tooltip
 #. 3.2->settings-schema.json->capture-window-as-area->tooltip
 #. 2.6->settings-schema.json->capture-window-as-area->tooltip
 msgid ""
@@ -584,73 +735,111 @@ msgid ""
 "graphics drivers and Cinnamon version it may turn out black or distorted."
 msgstr ""
 
-#. 3.2->settings-schema.json->kb-cs-ui->description
-#. 2.6->settings-schema.json->kb-cs-ui->description
-msgid "Keybinding to capture a UI element: "
+#. 3.6->settings-schema.json->include-window-frame->description
+#. 3.2->settings-schema.json->include-window-frame->description
+#. 2.6->settings-schema.json->include-window-frame->description
+msgid "Include window frame"
 msgstr ""
 
-#. 3.2->settings-schema.json->label-recorder-settings->description
-#. 2.6->settings-schema.json->label-recorder-settings->description
-msgid "Please note not all recorder tools may respect these settings."
+#. 3.6->settings-schema.json->include-window-frame->tooltip
+#. 3.2->settings-schema.json->include-window-frame->tooltip
+#. 2.6->settings-schema.json->include-window-frame->tooltip
+msgid "Whether to include the window frame and titlebar in window captures"
 msgstr ""
 
-#. 3.2->settings-schema.json->imgur-wizard-button->description
-msgid "Wizard: Connect to your account.."
+#. 3.6->settings-schema.json->use-camera-flash->description
+#. 3.2->settings-schema.json->use-camera-flash->description
+msgid "Show camera flash"
 msgstr ""
 
-#. 3.2->settings-schema.json->imgur-wizard-button->tooltip
-msgid "Pressing this button will open a configuration utility"
+#. 3.6->settings-schema.json->use-camera-flash->tooltip
+#. 3.2->settings-schema.json->use-camera-flash->tooltip
+#. 2.6->settings-schema.json->use-camera-flash->tooltip
+msgid "Whether to show a bright flash over the capture area"
 msgstr ""
 
-#. 3.2->settings-schema.json->delay-seconds->description
-#. 2.6->settings-schema.json->delay-seconds->description
-msgid "Capture delay"
+#. 3.6->settings-schema.json->include-styles->description
+#. 3.2->settings-schema.json->include-styles->description
+#. 2.6->settings-schema.json->include-styles->description
+msgid "Use highlighted style in UI capture"
 msgstr ""
 
-#. 3.2->settings-schema.json->delay-seconds->tooltip
-#. 2.6->settings-schema.json->delay-seconds->tooltip
-msgid "How many seconds to wait before taking a screenshot"
+#. 3.6->settings-schema.json->include-styles->tooltip
+#. 3.2->settings-schema.json->include-styles->tooltip
+#. 2.6->settings-schema.json->include-styles->tooltip
+msgid ""
+"Turn on for a 'highlighted' effect, using CSS styles applied by .capture-"
+"outline-frame"
 msgstr ""
 
-#. 3.2->settings-schema.json->delay-seconds->units
-#. 2.6->settings-schema.json->delay-seconds->units
-msgid "seconds"
+#. 3.6->settings-schema.json->play-shutter-sound->description
+#. 3.2->settings-schema.json->play-shutter-sound->description
+#. 2.6->settings-schema.json->play-shutter-sound->description
+msgid "Play shutter sound"
 msgstr ""
 
-#. 3.2->settings-schema.json->recorder-program->description
-#. 2.6->settings-schema.json->recorder-program->description
-msgid "Recorder program"
+#. 3.6->settings-schema.json->play-shutter-sound->tooltip
+#. 3.2->settings-schema.json->play-shutter-sound->tooltip
+#. 2.6->settings-schema.json->play-shutter-sound->tooltip
+msgid "Whether to play the shutter sound as the capture is made"
 msgstr ""
 
-#. 3.2->settings-schema.json->recorder-program->tooltip
-#. 2.6->settings-schema.json->recorder-program->tooltip
-msgid "Preferred screen recorder program"
+#. 3.6->settings-schema.json->play-timer-interval-sound->description
+#. 3.2->settings-schema.json->play-timer-interval-sound->description
+#. 2.6->settings-schema.json->play-timer-interval-sound->description
+msgid "Play timer interval sound"
 msgstr ""
 
-#. 3.2->settings-schema.json->recorder-program->options
-#. 2.6->settings-schema.json->recorder-program->options
-msgid "Byzanz"
+#. 3.6->settings-schema.json->play-timer-interval-sound->tooltip
+#. 3.2->settings-schema.json->play-timer-interval-sound->tooltip
+#. 2.6->settings-schema.json->play-timer-interval-sound->tooltip
+msgid "Whether to play the timer interval sound as the timer counts down"
 msgstr ""
 
-#. 3.2->settings-schema.json->recorder-program->options
-#. 2.6->settings-schema.json->recorder-program->options
-msgid "RecordMyDesktop"
+#. 3.6->settings-schema.json->copy-to-clipboard->options
+#. 3.2->settings-schema.json->copy-to-clipboard->options
+#. 2.6->settings-schema.json->copy-to-clipboard->options
+msgid "Path and filename"
 msgstr ""
 
-#. 3.2->settings-schema.json->recorder-program->options
-#. 2.6->settings-schema.json->recorder-program->options
-msgid "FFmpeg"
+#. 3.6->settings-schema.json->copy-to-clipboard->options
+#. 3.2->settings-schema.json->copy-to-clipboard->options
+#. 2.6->settings-schema.json->copy-to-clipboard->options
+msgid "Only Directory"
 msgstr ""
 
-#. 3.2->settings-schema.json->recorder-program->options
-msgid "Cinnamon Recorder (built-in)"
+#. 3.6->settings-schema.json->copy-to-clipboard->options
+#. 3.2->settings-schema.json->copy-to-clipboard->options
+#. 2.6->settings-schema.json->copy-to-clipboard->options
+msgid "Only Filename"
 msgstr ""
 
+#. 3.6->settings-schema.json->copy-to-clipboard->options
+#. 3.2->settings-schema.json->copy-to-clipboard->options
+#. 2.6->settings-schema.json->copy-to-clipboard->options
+msgid "Image Data"
+msgstr ""
+
+#. 3.6->settings-schema.json->copy-to-clipboard->description
+#. 3.2->settings-schema.json->copy-to-clipboard->description
+#. 2.6->settings-schema.json->copy-to-clipboard->description
+msgid "Copy to clipboard"
+msgstr ""
+
+#. 3.6->settings-schema.json->copy-to-clipboard->tooltip
+#. 3.2->settings-schema.json->copy-to-clipboard->tooltip
+#. 2.6->settings-schema.json->copy-to-clipboard->tooltip
+msgid ""
+"Whether to copy path/filename of screenshots to clipboard after capture"
+msgstr ""
+
+#. 3.6->settings-schema.json->show-copy-toggle->description
 #. 3.2->settings-schema.json->show-copy-toggle->description
 #. 2.6->settings-schema.json->show-copy-toggle->description
 msgid "Show toggle button for copying image to clipboard"
 msgstr ""
 
+#. 3.6->settings-schema.json->show-copy-toggle->tooltip
 #. 3.2->settings-schema.json->show-copy-toggle->tooltip
 #. 2.6->settings-schema.json->show-copy-toggle->tooltip
 msgid ""
@@ -659,246 +848,13 @@ msgid ""
 "set."
 msgstr ""
 
-#. 3.2->settings-schema.json->last-selected-page->description
-#. 2.6->settings-schema.json->last-selected-page->description
-msgid "Last selected page (tab index) of settings application"
-msgstr ""
-
-#. 3.2->settings-schema.json->notif-image-left-click->description
-#. 2.6->settings-schema.json->notif-image-left-click->description
-msgid "When left-clicking preview image"
-msgstr ""
-
-#. 3.2->settings-schema.json->notif-image-left-click->options
-#. 3.2->settings-schema.json->notif-image-right-click->options
-#. 2.6->settings-schema.json->notif-image-left-click->options
-#. 2.6->settings-schema.json->notif-image-right-click->options
-msgid "Open the file"
-msgstr ""
-
-#. 3.2->settings-schema.json->notif-image-left-click->options
-#. 3.2->settings-schema.json->notif-image-right-click->options
-#. 2.6->settings-schema.json->notif-image-left-click->options
-#. 2.6->settings-schema.json->notif-image-right-click->options
-msgid "Open the directory"
-msgstr ""
-
-#. 3.2->settings-schema.json->notif-image-left-click->options
-#. 3.2->settings-schema.json->notif-image-right-click->options
-#. 2.6->settings-schema.json->notif-image-left-click->options
-#. 2.6->settings-schema.json->notif-image-right-click->options
-msgid "Do nothing"
-msgstr ""
-
-#. 3.2->settings-schema.json->open-after->description
-#. 2.6->settings-schema.json->open-after->description
-msgid "Open file manager after capture"
-msgstr ""
-
-#. 3.2->settings-schema.json->open-after->tooltip
-#. 2.6->settings-schema.json->open-after->tooltip
-msgid "Whether to open the screenshot in file manager"
-msgstr ""
-
-#. 3.2->settings-schema.json->demo-notification-button->description
-#. 2.6->settings-schema.json->demo-notification-button->description
-msgid "Click here to send an example notification"
-msgstr ""
-
-#. 3.2->settings-schema.json->demo-notification-button->tooltip
-#. 2.6->settings-schema.json->demo-notification-button->tooltip
-msgid ""
-"Pressing this button will send an example notification with all actions "
-"disabled."
-msgstr ""
-
-#. 3.2->settings-schema.json->cinn recorder settings->description
-#. 2.6->settings-schema.json->cinn recorder settings->description
-msgid "Recorder: Built-in Settings"
-msgstr ""
-
-#. 3.2->settings-schema.json->notif-image-right-click->description
-#. 2.6->settings-schema.json->notif-image-right-click->description
-msgid "When right-clicking preview image"
-msgstr ""
-
-#. 3.2->settings-schema.json->include-window-frame->description
-#. 2.6->settings-schema.json->include-window-frame->description
-msgid "Include window frame"
-msgstr ""
-
-#. 3.2->settings-schema.json->include-window-frame->tooltip
-#. 2.6->settings-schema.json->include-window-frame->tooltip
-msgid "Whether to include the window frame and titlebar in window captures"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-to-clipboard->options
-#. 2.6->settings-schema.json->copy-to-clipboard->options
-msgid "Path and filename"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-to-clipboard->options
-#. 2.6->settings-schema.json->copy-to-clipboard->options
-msgid "Image Data"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-to-clipboard->options
-#. 2.6->settings-schema.json->copy-to-clipboard->options
-msgid "Off"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-to-clipboard->options
-#. 2.6->settings-schema.json->copy-to-clipboard->options
-msgid "Only Filename"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-to-clipboard->options
-#. 2.6->settings-schema.json->copy-to-clipboard->options
-msgid "Only Directory"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-to-clipboard->tooltip
-#. 2.6->settings-schema.json->copy-to-clipboard->tooltip
-msgid ""
-"Whether to copy path/filename of screenshots to clipboard after capture"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-to-clipboard->description
-#. 2.6->settings-schema.json->copy-to-clipboard->description
-msgid "Copy to clipboard"
-msgstr ""
-
-#. 3.2->settings-schema.json->cinn screenshot note->description
-#. 2.6->settings-schema.json->cinn screenshot note->description
-msgid "Note: changing keybindings may require restarting Cinnamon."
-msgstr ""
-
-#. 3.2->settings-schema.json->kb-cs-area->description
-#. 2.6->settings-schema.json->kb-cs-area->description
-msgid "Keybinding to capture an area: "
-msgstr ""
-
-#. 3.2->settings-schema.json->camera-save-prefix->description
-#. 3.2->settings-schema.json->recorder-save-prefix->description
-#. 2.6->settings-schema.json->camera-save-prefix->description
-#. 2.6->settings-schema.json->recorder-save-prefix->description
-msgid "Filename format"
-msgstr ""
-
-#. 3.2->settings-schema.json->camera-save-prefix->tooltip
-#. 2.6->settings-schema.json->camera-save-prefix->tooltip
-msgid ""
-"Don't include file extension. %TYPE is area, window, etc. E.g. %Y-%M-%D-%H%I"
-" = 2014-05-25-1848.png. Use %S for seconds, %m for milliseconds"
-msgstr ""
-
-#. 3.2->settings-schema.json->camera-save-dir->description
-#. 3.2->settings-schema.json->recorder-save-dir->description
-#. 2.6->settings-schema.json->camera-save-dir->description
-#. 2.6->settings-schema.json->recorder-save-dir->description
-msgid "Save location"
-msgstr ""
-
-#. 3.2->settings-schema.json->camera-save-dir->tooltip
-#. 2.6->settings-schema.json->camera-save-dir->tooltip
-msgid "Folder to save new screenshots"
-msgstr ""
-
-#. 3.2->settings-schema.json->recorder-save-prefix->tooltip
-#. 2.6->settings-schema.json->recorder-save-prefix->tooltip
-msgid ""
-"Format for built-in recorder. E.g. %Y-%M-%D-%H%I = 2014-05-25-1848.webm. Use"
-" %S for seconds, %m for milliseconds"
-msgstr ""
-
-#. 3.2->settings-schema.json->use-symbolic-icon->description
-#. 2.6->settings-schema.json->use-symbolic-icon->description
-msgid "Use symbolic (black and white) icon for applet"
-msgstr ""
-
-#. 3.2->settings-schema.json->use-symbolic-icon->tooltip
-#. 2.6->settings-schema.json->use-symbolic-icon->tooltip
-msgid "Whether to use symbolic (black and white) icon for applet"
-msgstr ""
-
-#. 3.2->settings-schema.json->show-delete-action->description
-#. 2.6->settings-schema.json->show-delete-action->description
-msgid "Enable delete from notification"
-msgstr ""
-
-#. 3.2->settings-schema.json->show-delete-action->tooltip
-#. 2.6->settings-schema.json->show-delete-action->tooltip
-msgid ""
-"If checked, a delete button will be shown in the notification that allows "
-"you to remove the screenshot from disk."
-msgstr ""
-
-#. 3.2->settings-schema.json->show-capture-timer->description
-#. 2.6->settings-schema.json->show-capture-timer->description
-msgid "Show capture timer"
-msgstr ""
-
-#. 3.2->settings-schema.json->show-capture-timer->tooltip
-#. 2.6->settings-schema.json->show-capture-timer->tooltip
-msgid "Whether to show the timer on the screen"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-data->description
-#. 2.6->settings-schema.json->copy-data->description
-msgid "Copy image data to clipboard (toggle)"
-msgstr ""
-
-#. 3.2->settings-schema.json->copy-data->tooltip
-#. 2.6->settings-schema.json->copy-data->tooltip
-msgid "This overrides the 'Copy to clipboard' setting"
-msgstr ""
-
-#. 3.2->settings-schema.json->imgur-album-id->description
-msgid "imgur oauth album id"
-msgstr ""
-
-#. 3.2->settings-schema.json->send-notification->description
-#. 2.6->settings-schema.json->send-notification->description
-msgid "Use desktop notifications"
-msgstr ""
-
-#. 3.2->settings-schema.json->send-notification->tooltip
-#. 2.6->settings-schema.json->send-notification->tooltip
-msgid "Whether to send a notification to desktop after capture"
-msgstr ""
-
-#. 3.2->settings-schema.json->play-timer-interval-sound->description
-#. 2.6->settings-schema.json->play-timer-interval-sound->description
-msgid "Play timer interval sound"
-msgstr ""
-
-#. 3.2->settings-schema.json->play-timer-interval-sound->tooltip
-#. 2.6->settings-schema.json->play-timer-interval-sound->tooltip
-msgid "Whether to play the timer interval sound as the timer counts down"
-msgstr ""
-
-#. 3.2->settings-schema.json->gen screenshot settings->description
-#. 2.6->settings-schema.json->gen screenshot settings->description
-msgid "Screenshots: General Settings"
-msgstr ""
-
-#. 3.2->settings-schema.json->show-copy-path-action->description
-#. 2.6->settings-schema.json->show-copy-path-action->description
-msgid "Enable copying path from notification"
-msgstr ""
-
-#. 3.2->settings-schema.json->show-copy-path-action->tooltip
-#. 2.6->settings-schema.json->show-copy-path-action->tooltip
-msgid ""
-"If checked, a button will be shown in the notification that allows you to "
-"copy the screenshot path to clipboard"
-msgstr ""
-
+#. 3.6->settings-schema.json->copy-data-auto-off->description
 #. 3.2->settings-schema.json->copy-data-auto-off->description
 #. 2.6->settings-schema.json->copy-data-auto-off->description
 msgid "Turn off copy image toggle after capture"
 msgstr ""
 
+#. 3.6->settings-schema.json->copy-data-auto-off->tooltip
 #. 3.2->settings-schema.json->copy-data-auto-off->tooltip
 #. 2.6->settings-schema.json->copy-data-auto-off->tooltip
 msgid ""
@@ -906,40 +862,96 @@ msgid ""
 "off after a successful capture"
 msgstr ""
 
-#. 3.2->settings-schema.json->play-shutter-sound->description
-#. 2.6->settings-schema.json->play-shutter-sound->description
-msgid "Play shutter sound"
+#. 3.6->settings-schema.json->copy-data->description
+#. 3.2->settings-schema.json->copy-data->description
+#. 2.6->settings-schema.json->copy-data->description
+msgid "Copy image data to clipboard (toggle)"
 msgstr ""
 
-#. 3.2->settings-schema.json->play-shutter-sound->tooltip
-#. 2.6->settings-schema.json->play-shutter-sound->tooltip
-msgid "Whether to play the shutter sound as the capture is made"
+#. 3.6->settings-schema.json->copy-data->tooltip
+#. 3.2->settings-schema.json->copy-data->tooltip
+#. 2.6->settings-schema.json->copy-data->tooltip
+msgid "This overrides the 'Copy to clipboard' setting"
 msgstr ""
 
-#. 3.2->settings-schema.json->kb-cs-screen->description
-#. 2.6->settings-schema.json->kb-cs-screen->description
-msgid "Keybinding to capture the screen: "
+#. 3.6->settings-schema.json->notification settings->description
+#. 3.2->settings-schema.json->notification settings->description
+#. 2.6->settings-schema.json->notification settings->description
+msgid "Screenshots: Post-Capture Settings"
 msgstr ""
 
-#. 3.2->settings-schema.json->use-camera-flash->description
-msgid "Show camera flash"
+#. 3.6->settings-schema.json->send-notification->description
+#. 3.2->settings-schema.json->send-notification->description
+#. 2.6->settings-schema.json->send-notification->description
+msgid "Use desktop notifications"
 msgstr ""
 
-#. 3.2->settings-schema.json->use-camera-flash->tooltip
-#. 2.6->settings-schema.json->use-camera-flash->tooltip
-msgid "Whether to show a bright flash over the capture area"
+#. 3.6->settings-schema.json->send-notification->tooltip
+#. 3.2->settings-schema.json->send-notification->tooltip
+#. 2.6->settings-schema.json->send-notification->tooltip
+msgid "Whether to send a notification to desktop after capture"
 msgstr ""
 
-#. 3.2->settings-schema.json->cinn screenshot settings-window->description
-#. 2.6->settings-schema.json->cinn screenshot settings-window->description
-msgid "Screenshots: Built-in Capture Settings"
+#. 3.6->settings-schema.json->notif-image-left-click->options
+#. 3.6->settings-schema.json->notif-image-right-click->options
+#. 3.2->settings-schema.json->notif-image-left-click->options
+#. 3.2->settings-schema.json->notif-image-right-click->options
+#. 2.6->settings-schema.json->notif-image-left-click->options
+#. 2.6->settings-schema.json->notif-image-right-click->options
+msgid "Do nothing"
 msgstr ""
 
+#. 3.6->settings-schema.json->notif-image-left-click->options
+#. 3.6->settings-schema.json->notif-image-right-click->options
+#. 3.2->settings-schema.json->notif-image-left-click->options
+#. 3.2->settings-schema.json->notif-image-right-click->options
+#. 2.6->settings-schema.json->notif-image-left-click->options
+#. 2.6->settings-schema.json->notif-image-right-click->options
+msgid "Open the file"
+msgstr ""
+
+#. 3.6->settings-schema.json->notif-image-left-click->options
+#. 3.6->settings-schema.json->notif-image-right-click->options
+#. 3.2->settings-schema.json->notif-image-left-click->options
+#. 3.2->settings-schema.json->notif-image-right-click->options
+#. 2.6->settings-schema.json->notif-image-left-click->options
+#. 2.6->settings-schema.json->notif-image-right-click->options
+msgid "Open the directory"
+msgstr ""
+
+#. 3.6->settings-schema.json->notif-image-left-click->description
+#. 3.2->settings-schema.json->notif-image-left-click->description
+#. 2.6->settings-schema.json->notif-image-left-click->description
+msgid "When left-clicking preview image"
+msgstr ""
+
+#. 3.6->settings-schema.json->notif-image-right-click->description
+#. 3.2->settings-schema.json->notif-image-right-click->description
+#. 2.6->settings-schema.json->notif-image-right-click->description
+msgid "When right-clicking preview image"
+msgstr ""
+
+#. 3.6->settings-schema.json->show-copy-path-action->description
+#. 3.2->settings-schema.json->show-copy-path-action->description
+#. 2.6->settings-schema.json->show-copy-path-action->description
+msgid "Enable copying path from notification"
+msgstr ""
+
+#. 3.6->settings-schema.json->show-copy-path-action->tooltip
+#. 3.2->settings-schema.json->show-copy-path-action->tooltip
+#. 2.6->settings-schema.json->show-copy-path-action->tooltip
+msgid ""
+"If checked, a button will be shown in the notification that allows you to "
+"copy the screenshot path to clipboard"
+msgstr ""
+
+#. 3.6->settings-schema.json->show-copy-data-action->description
 #. 3.2->settings-schema.json->show-copy-data-action->description
 #. 2.6->settings-schema.json->show-copy-data-action->description
 msgid "Enable copying image data from notification"
 msgstr ""
 
+#. 3.6->settings-schema.json->show-copy-data-action->tooltip
 #. 3.2->settings-schema.json->show-copy-data-action->tooltip
 #. 2.6->settings-schema.json->show-copy-data-action->tooltip
 msgid ""
@@ -947,9 +959,161 @@ msgid ""
 "copy the screenshot data to clipboard"
 msgstr ""
 
+#. 3.6->settings-schema.json->show-delete-action->description
+#. 3.2->settings-schema.json->show-delete-action->description
+#. 2.6->settings-schema.json->show-delete-action->description
+msgid "Enable delete from notification"
+msgstr ""
+
+#. 3.6->settings-schema.json->show-delete-action->tooltip
+#. 3.2->settings-schema.json->show-delete-action->tooltip
+#. 2.6->settings-schema.json->show-delete-action->tooltip
+msgid ""
+"If checked, a delete button will be shown in the notification that allows "
+"you to remove the screenshot from disk."
+msgstr ""
+
+#. 3.6->settings-schema.json->demo-notification-button->description
+#. 3.2->settings-schema.json->demo-notification-button->description
+#. 2.6->settings-schema.json->demo-notification-button->description
+msgid "Click here to send an example notification"
+msgstr ""
+
+#. 3.6->settings-schema.json->demo-notification-button->tooltip
+#. 3.2->settings-schema.json->demo-notification-button->tooltip
+#. 2.6->settings-schema.json->demo-notification-button->tooltip
+msgid ""
+"Pressing this button will send an example notification with all actions "
+"disabled."
+msgstr ""
+
+#. 3.6->settings-schema.json->open-after->description
+#. 3.2->settings-schema.json->open-after->description
+#. 2.6->settings-schema.json->open-after->description
+msgid "Open file manager after capture"
+msgstr ""
+
+#. 3.6->settings-schema.json->open-after->tooltip
+#. 3.2->settings-schema.json->open-after->tooltip
+#. 2.6->settings-schema.json->open-after->tooltip
+msgid "Whether to open the screenshot in file manager"
+msgstr ""
+
+#. 3.6->settings-schema.json->integration with imgur->description
+#. 3.2->settings-schema.json->integration with imgur->description
+#. 2.6->settings-schema.json->integration with imgur->description
+msgid "Integrations: Imgur (Screenshots)"
+msgstr ""
+
+#. 3.6->settings-schema.json->use-imgur->description
+#. 3.2->settings-schema.json->use-imgur->description
+#. 2.6->settings-schema.json->use-imgur->description
+msgid "Enable uploading from notifications"
+msgstr ""
+
+#. 3.6->settings-schema.json->use-imgur->tooltip
+#. 3.2->settings-schema.json->use-imgur->tooltip
+#. 2.6->settings-schema.json->use-imgur->tooltip
+msgid "Whether to use imgur image hosting services"
+msgstr ""
+
+#. 3.6->settings-schema.json->use-imgur-account->description
+#. 3.2->settings-schema.json->use-imgur-account->description
+msgid "Upload to your own account (instead of anonymously)"
+msgstr ""
+
+#. 3.6->settings-schema.json->use-imgur-account->tooltip
+#. 3.2->settings-schema.json->use-imgur-account->tooltip
+msgid "If unchecked, uploads will be anonymous and not tied to your account."
+msgstr ""
+
+#. 3.6->settings-schema.json->imgur-wizard-button->description
+#. 3.2->settings-schema.json->imgur-wizard-button->description
+msgid "Wizard: Connect to your account.."
+msgstr ""
+
+#. 3.6->settings-schema.json->imgur-wizard-button->tooltip
+#. 3.2->settings-schema.json->imgur-wizard-button->tooltip
+msgid "Pressing this button will open a configuration utility"
+msgstr ""
+
+#. 3.6->settings-schema.json->imgur-access-token->description
+#. 3.2->settings-schema.json->imgur-access-token->description
+msgid "imgur oauth access token"
+msgstr ""
+
+#. 3.6->settings-schema.json->imgur-refresh-token->description
+#. 3.2->settings-schema.json->imgur-refresh-token->description
+msgid "imgur oauth refresh token"
+msgstr ""
+
+#. 3.6->settings-schema.json->imgur-album-id->description
+#. 3.2->settings-schema.json->imgur-album-id->description
+msgid "imgur oauth album id"
+msgstr ""
+
+#. 3.6->settings-schema.json->gen recorder settings->description
+#. 3.2->settings-schema.json->gen recorder settings->description
+#. 2.6->settings-schema.json->gen recorder settings->description
+msgid "Recorder: General Settings"
+msgstr ""
+
+#. 3.6->settings-schema.json->label-recorder-settings->description
+#. 3.2->settings-schema.json->label-recorder-settings->description
+#. 2.6->settings-schema.json->label-recorder-settings->description
+msgid "Please note not all recorder tools may respect these settings."
+msgstr ""
+
+#. 3.6->settings-schema.json->recorder-save-dir->tooltip
 #. 3.2->settings-schema.json->recorder-save-dir->tooltip
 #. 2.6->settings-schema.json->recorder-save-dir->tooltip
 msgid "Folder for new screen recordings"
+msgstr ""
+
+#. 3.6->settings-schema.json->recorder-save-prefix->tooltip
+#. 3.2->settings-schema.json->recorder-save-prefix->tooltip
+#. 2.6->settings-schema.json->recorder-save-prefix->tooltip
+msgid ""
+"Format for built-in recorder. E.g. %Y-%M-%D-%H%I = 2014-05-25-1848.webm. Use"
+" %S for seconds, %m for milliseconds"
+msgstr ""
+
+#. 3.6->settings-schema.json->cinn recorder settings->description
+#. 3.2->settings-schema.json->cinn recorder settings->description
+#. 2.6->settings-schema.json->cinn recorder settings->description
+msgid "Recorder: Built-in Settings"
+msgstr ""
+
+#. 3.6->settings-schema.json->label-internal-recorder-settings->description
+#. 3.2->settings-schema.json->label-internal-recorder-settings->description
+#. 2.6->settings-schema.json->label-internal-recorder-settings->description
+msgid "These settings only apply when using the Built-in Recorder tool."
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-recorder-stop->description
+#. 3.2->settings-schema.json->kb-recorder-stop->description
+#. 2.6->settings-schema.json->kb-recorder-stop->description
+msgid "Keybinding to start/stop recording: "
+msgstr ""
+
+#. 3.6->settings-schema.json->kb-recorder-stop->tooltip
+#. 3.2->settings-schema.json->kb-recorder-stop->tooltip
+#. 2.6->settings-schema.json->kb-recorder-stop->tooltip
+msgid ""
+"Will start only Cinnamon Recorder. Will stop any recorder using its stop-"
+"command."
+msgstr ""
+
+#. 3.6->settings-schema.json->last-selected-page->description
+#. 3.2->settings-schema.json->last-selected-page->description
+#. 2.6->settings-schema.json->last-selected-page->description
+msgid "Last selected page (tab index) of settings application"
+msgstr ""
+
+#. 3.6->settings-schema.json->last-selected-subpage->description
+#. 3.2->settings-schema.json->last-selected-subpage->description
+#. 2.6->settings-schema.json->last-selected-subpage->description
+msgid "Last selected sub-page (tab index) of settings application"
 msgstr ""
 
 #. 2.6->settings-schema.json->camera-program->options
@@ -959,28 +1123,4 @@ msgstr ""
 
 #. 2.6->settings-schema.json->use-camera-flash->description
 msgid "Use camera flash"
-msgstr ""
-
-#. capture@rjanja->metadata.json->contributors
-msgid "Rob Adams"
-msgstr ""
-
-#. capture@rjanja->metadata.json->contributors
-msgid "Stephen Ostrow"
-msgstr ""
-
-#. capture@rjanja->metadata.json->contributors
-msgid "Davide Cristini"
-msgstr ""
-
-#. capture@rjanja->metadata.json->contributors
-msgid "Robert Orzanna"
-msgstr ""
-
-#. capture@rjanja->metadata.json->contributors
-msgid "Niko Krause"
-msgstr ""
-
-#. capture@rjanja->metadata.json->description
-msgid "Screenshot and screencasting tools"
 msgstr ""
