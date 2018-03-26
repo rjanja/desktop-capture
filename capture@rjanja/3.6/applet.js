@@ -226,7 +226,7 @@ TimerSlider.prototype = {
   },
   _setLabelValue: function(value) {
     if (value == 0) {
-      this.valueLabel.set_text('Off');
+      this.valueLabel.set_text(_('Off'));
     } else if (value == 1) {
       this.valueLabel.set_text(value + ' ' + _('second'));
     } else {
