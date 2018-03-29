@@ -819,7 +819,7 @@ MyApplet.prototype = {
     },
 
    _init: function(metadata, orientation, panelHeight, instanceId) {
-      Applet.IconApplet.prototype._init.call(this, orientation);
+      Applet.IconApplet.prototype._init.call(this, orientation, panelHeight, instanceId);
 
       try {
          this._programs = {};
